@@ -28,24 +28,20 @@ public class HomeActivity extends AppCompatActivity {
         viewPager.setAdapter(pageAdapter);
         viewPager.setOffscreenPageLimit(3);
 
-//        final int[] selectedPosition = {0};
-//        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-//            @Override
-//            public void onTabSelected(TabLayout.Tab tab) {
-//                selectedPosition[0] = (tab != null) ? tab.getPosition() : 0; // Update selectedPosition to the newly selected tab's position
-//            }
-//
-//            @Override
-//            public void onTabUnselected(TabLayout.Tab tab) {}
-//
-//            @Override
-//            public void onTabReselected(TabLayout.Tab tab) {}
-//        });
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                viewPager.setCurrentItem(tab.getPosition());
+            }
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+            }
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+            }
+        });
+
 
         viewPager.setUserInputEnabled(false);
-
-
-
-
     }
 }

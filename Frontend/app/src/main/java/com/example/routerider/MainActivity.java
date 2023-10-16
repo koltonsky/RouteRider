@@ -27,12 +27,12 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        GoogleSignInOptions googleSignIn = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .build();
-
-        mGoogleSignInClient = GoogleSignIn.getClient(this, googleSignIn);
-        signIn();
+//        GoogleSignInOptions googleSignIn = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+//                .requestEmail()
+//                .build();
+//
+//        mGoogleSignInClient = GoogleSignIn.getClient(this, googleSignIn);
+//        signIn();
     }
 
     private void signIn() {

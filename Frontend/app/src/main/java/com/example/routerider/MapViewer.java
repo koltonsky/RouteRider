@@ -14,6 +14,7 @@ public class MapViewer {
 
     public int viewActivities(List<String> activityList) {
         return 1;
+
     }
 
 }

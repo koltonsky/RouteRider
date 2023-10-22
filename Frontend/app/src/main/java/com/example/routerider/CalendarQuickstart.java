@@ -41,7 +41,7 @@ public class CalendarQuickstart {
     /**
      * Directory to store authorization tokens for this application.
      */
-    public static final String TOKENS_DIRECTORY_PATH = "tokens";
+    public static final String TOKENS_DIRECTORY_PATH = "token";
 
     //public static final String TOKENS_DIRECTORY_PATH = Environment.getExternalStorageDirectory() + "/tokens";
 
@@ -51,7 +51,7 @@ public class CalendarQuickstart {
      * If modifying these scopes, delete your previously saved tokens/ folder.
      */
     public static final List<String> SCOPES =
-            Collections.singletonList(CalendarScopes.CALENDAR_READONLY);
+            Collections.singletonList(CalendarScopes.CALENDAR);
     public static final String CREDENTIALS_FILE_PATH = "/credentials.json";
 
     /**
@@ -71,18 +71,18 @@ public class CalendarQuickstart {
         GoogleClientSecrets clientSecrets =
                 GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
-//        File tokensDirectory = new File(TOKENS_DIRECTORY_PATH);
-//        if (!tokensDirectory.exists()) {
-//            if (tokensDirectory.mkdirs()) {
-//                Log.d("TEST", "SUCCESS");
-//            } else {
-//                // Directory creation failed
-//                Log.d("TEST", "FAILED");
-//            }
-//        } else {
-//            // Directory already exists
-//            Log.d("TEST", "EXISTS");
-//        }
+        File tokensDirectory = new File(TOKENS_DIRECTORY_PATH);
+        if (!tokensDirectory.exists()) {
+            if (tokensDirectory.mkdirs()) {
+                Log.d("TEST", "SUCCESS");
+            } else {
+                // Directory creation failed
+                Log.d("TEST", "FAILED");
+            }
+        } else {
+            // Directory already exists
+            Log.d("TEST", "EXISTS");
+        }
 
         // Build flow and trigger user authorization request.
         GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(

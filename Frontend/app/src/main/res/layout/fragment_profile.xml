@@ -5,10 +5,56 @@
     android:layout_height="match_parent"
     tools:context=".fragments.ProfileFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/logoutButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:text="Logout"/>
+
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Profile Fragment" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/name_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="40dp"
+            android:gravity="center"
+            android:text="Name: " />
+
+        <TextView
+            android:id="@+id/email"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="14dp"
+            android:gravity="center"
+            android:text="Email: " />
+
+        <TextView
+            android:id="@+id/friendList"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginTop="14dp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="Friends"
+            android:drawableEnd="@drawable/right_arrow"/>
+
+        <TextView
+            android:id="@+id/preferences"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginTop="14dp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="Preferences"
+            android:drawableEnd="@drawable/right_arrow"/>
+    </LinearLayout>
+
+
 
 </FrameLayout>

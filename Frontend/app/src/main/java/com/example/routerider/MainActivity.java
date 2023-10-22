@@ -2,7 +2,9 @@ package com.example.routerider;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.Toast;
@@ -19,6 +21,16 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        SharedPreferences pref = getSharedPreferences("routeRider", Context.MODE_PRIVATE);
+        if(pref.getBoolean("isLoggedIn", false)) {
+            GoogleSignInOptions googleSignIn = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestEmail()
+                    .build();
+
+            mGoogleSignInClient = GoogleSignIn.getClient(this, googleSignIn);
+            signIn();
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -54,10 +66,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void handleSignInSuccess(GoogleSignInAccount account) {
-        // You can access user information from the 'account' object if needed
-        String displayName = account.getDisplayName();
+        User.updateGoogleAccount(account);
 
-        // Start a different activity (replace NewActivity.class with your desired activity)
+        SharedPreferences preferences = getSharedPreferences("routeRider", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean("isLoggedIn", true);
+        editor.apply();
+
         Intent intent = new Intent(this, HomeActivity.class);
         startActivity(intent);
     }

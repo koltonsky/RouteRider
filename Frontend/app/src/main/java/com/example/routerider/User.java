@@ -1,8 +1,12 @@
 package com.example.routerider;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+
 public class User {
     int userId;
     int[] friendList;
+    static GoogleSignInAccount currentAccount = null;
 
     public int[] getFriendList(int userId) {
 
@@ -21,9 +25,11 @@ public class User {
         return 1;
     }
 
-    public int authenticateUser(String login, String password) {
-        return 1;
+    public static void updateGoogleAccount(GoogleSignInAccount account) {
+        currentAccount = account;
     }
 
-
+    public static GoogleSignInAccount getCurrentAccount() {
+        return currentAccount;
+    }
 }

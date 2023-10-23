@@ -38,43 +38,21 @@ public class MainActivity extends AppCompatActivity {
 
     private GoogleSignInClient mGoogleSignInClient;
     private final int RC_SIGN_IN = 1;
-    private Calendar service;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        SharedPreferences pref = getSharedPreferences("routeRider", Context.MODE_PRIVATE);
-        if(pref.getBoolean("isLoggedIn", false)) {
-            GoogleSignInOptions googleSignIn = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                    .requestScopes(new Scope(CalendarScopes.CALENDAR_READONLY))
-                    .requestEmail()
-                    .build();
-
-            mGoogleSignInClient = GoogleSignIn.getClient(this, googleSignIn);
-            signIn();
-        } else {
-            RelativeLayout mainLayout = findViewById(R.id.main_display);
-            mainLayout.setVisibility(View.VISIBLE);
-            ProgressBar loadingAnimation = findViewById(R.id.loadingBar);
-            loadingAnimation.setVisibility(View.GONE);
-
-            Button loginButton = findViewById(R.id.login_button);
-            loginButton.setOnClickListener(v -> {
-                GoogleSignInOptions googleSignIn = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        .requestScopes(new Scope(CalendarScopes.CALENDAR_READONLY))
-                        .requestEmail()
-                        .build();
-
-                mGoogleSignInClient = GoogleSignIn.getClient(this, googleSignIn);
-                signIn();
-            });
-        }
+        googleSignIn();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        googleSignIn();
+    }
+
+    private void googleSignIn() {
         SharedPreferences pref = getSharedPreferences("routeRider", Context.MODE_PRIVATE);
         if(pref.getBoolean("isLoggedIn", false)) {
             GoogleSignInOptions googleSignIn = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -125,7 +103,6 @@ public class MainActivity extends AppCompatActivity {
     private void handleSignInSuccess(GoogleSignInAccount account) {
         User.updateGoogleAccount(account);
 
-        // The rest of your code
         SharedPreferences preferences = getSharedPreferences("routeRider", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean("isLoggedIn", true);

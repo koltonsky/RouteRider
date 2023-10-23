@@ -26,7 +26,7 @@ public class FriendsActivity extends AppCompatActivity {
             builder.setPositiveButton("OK", (dialog, which) -> {
                 EditText editText = dialogView.findViewById(R.id.addFriendEmail);
                 String userInput = editText.getText().toString();
-                // Handle the user input here
+
             });
             builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 

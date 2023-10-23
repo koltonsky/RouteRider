@@ -4,5 +4,5 @@
 Backend/node_modules
 
 # frontend build files
-Frontend/.gradle
-Frontend/.idea
+Frontend/.gradle/
+Frontend/.idea/

@@ -7,7 +7,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -39,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
         SharedPreferences pref = getSharedPreferences("routeRider", Context.MODE_PRIVATE);
         if(pref.getBoolean("isLoggedIn", false)) {
             GoogleSignInOptions googleSignIn = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -48,14 +53,30 @@ public class MainActivity extends AppCompatActivity {
 
             mGoogleSignInClient = GoogleSignIn.getClient(this, googleSignIn);
             signIn();
+        } else {
+            RelativeLayout mainLayout = findViewById(R.id.main_display);
+            mainLayout.setVisibility(View.VISIBLE);
+            ProgressBar loadingAnimation = findViewById(R.id.loadingBar);
+            loadingAnimation.setVisibility(View.GONE);
+
+            Button loginButton = findViewById(R.id.login_button);
+            loginButton.setOnClickListener(v -> {
+                GoogleSignInOptions googleSignIn = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                        .requestScopes(new Scope(CalendarScopes.CALENDAR_READONLY))
+                        .requestEmail()
+                        .build();
+
+                mGoogleSignInClient = GoogleSignIn.getClient(this, googleSignIn);
+                signIn();
+            });
         }
+    }
 
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        Button loginButton = findViewById(R.id.login_button);
-
-        loginButton.setOnClickListener(v -> {
+    @Override
+    protected void onResume() {
+        super.onResume();
+        SharedPreferences pref = getSharedPreferences("routeRider", Context.MODE_PRIVATE);
+        if(pref.getBoolean("isLoggedIn", false)) {
             GoogleSignInOptions googleSignIn = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                     .requestScopes(new Scope(CalendarScopes.CALENDAR_READONLY))
                     .requestEmail()
@@ -63,7 +84,23 @@ public class MainActivity extends AppCompatActivity {
 
             mGoogleSignInClient = GoogleSignIn.getClient(this, googleSignIn);
             signIn();
-        });
+        } else {
+            RelativeLayout mainLayout = findViewById(R.id.main_display);
+            mainLayout.setVisibility(View.VISIBLE);
+            ProgressBar loadingAnimation = findViewById(R.id.loadingBar);
+            loadingAnimation.setVisibility(View.GONE);
+
+            Button loginButton = findViewById(R.id.login_button);
+            loginButton.setOnClickListener(v -> {
+                GoogleSignInOptions googleSignIn = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                        .requestScopes(new Scope(CalendarScopes.CALENDAR_READONLY))
+                        .requestEmail()
+                        .build();
+
+                mGoogleSignInClient = GoogleSignIn.getClient(this, googleSignIn);
+                signIn();
+            });
+        }
     }
 
     private void signIn() {
@@ -85,63 +122,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-//    private void handleSignInSuccess(GoogleSignInAccount account) {
-//        User.updateGoogleAccount(account);
-//        GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(
-//                this, Collections.singleton(CalendarScopes.CALENDAR_READONLY));
-//        credential.setSelectedAccount(account.getAccount());
-//
-//        Calendar service = null;
-//        try {
-//            service = new Calendar.Builder(
-//                    GoogleNetHttpTransport.newTrustedTransport(), GsonFactory.getDefaultInstance(), credential)
-//                    .setApplicationName("RouteRider")
-//                    .build();
-//
-//            // Attempt to access Google Calendar API
-//            try {
-//                CalendarList calendarList = service.calendarList().list().execute();
-//                List<CalendarListEntry> items = calendarList.getItems();
-//
-//                if (items.isEmpty()) {
-//                    System.out.println("No calendars found.");
-//                } else {
-//                    System.out.println("Calendars:");
-//
-//                    for (CalendarListEntry calendarEntry : items) {
-//                        String calendarId = calendarEntry.getId();
-//                        String summary = calendarEntry.getSummary();
-//
-//                        System.out.println("Calendar ID: " + calendarId);
-//                        System.out.println("Summary: " + summary);
-//                        System.out.println();
-//                    }
-//                }
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//                // Handle the network-related exception
-//                runOnUiThread(() -> {
-//                    Toast.makeText(getApplicationContext(), "Failed to retrieve calendar data. Please try again.", Toast.LENGTH_SHORT).show();
-//                });
-//            }
-//        } catch (GeneralSecurityException | IOException e) {
-//            e.printStackTrace();
-//            // Handle the security exception
-//            runOnUiThread(() -> {
-//                Toast.makeText(getApplicationContext(), "Security exception. Please try again.", Toast.LENGTH_SHORT).show();
-//            });
-//        }
-//
-//        // The rest of your code
-//        SharedPreferences preferences = getSharedPreferences("routeRider", Context.MODE_PRIVATE);
-//        SharedPreferences.Editor editor = preferences.edit();
-//        editor.putBoolean("isLoggedIn", true);
-//        editor.apply();
-//
-//        Intent intent = new Intent(this, HomeActivity.class);
-//        startActivity(intent);
-//    }
-
     private void handleSignInSuccess(GoogleSignInAccount account) {
         User.updateGoogleAccount(account);
 
@@ -154,7 +134,4 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, HomeActivity.class);
         startActivity(intent);
     }
-
-
-
 }

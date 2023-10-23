@@ -78,7 +78,7 @@ const sslServer = https.createServer({
  * Function outputs an array of 7 entries, with each entry corresponding to when the user should be reminded to leave for class on that day.
  * Instead of array, could also directly modify the schedule.
  * Translink Open API Key: crj9j8Kj97pbPkkc61dX
- * Geocoding API key: AAPK3c726265cc41485bb57c5512e98cf912OLoJQtidjOlcqjdpa0Pl773UqNoOYfwApr6ORYd8Lina8_K0sEbdcyXsNfHFqLKE if error 498 invalid token, create new key
+ * Geocoding API key: AAPK3c726265cc41485bb57c5512e98cf912OLoJQtidjOlcqjdpa0Pl773UqNoOYfwApr6ORYd8Lina8_K0sEbdcyXsNfHFqLKE if error 498 invalid token, create a new key
  * 
  * Function takes in an home/starting address and a schedule (includes location/address of classes eventually, but temporarily assume UBC for simplicity) 
  * @param {*} schedule 

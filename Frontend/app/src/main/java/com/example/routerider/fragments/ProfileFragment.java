@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.example.routerider.APICaller;
 import com.example.routerider.FriendsActivity;
 import com.example.routerider.HomeActivity;
 import com.example.routerider.PreferencesActivity;
@@ -37,12 +38,25 @@ public class ProfileFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
         GoogleSignInAccount account = User.getCurrentAccount();
+        APICaller apiCall = new APICaller();
 
 
         TextView friends = view.findViewById(R.id.friendList);
         friends.setOnClickListener(v -> {
-            Intent intent = new Intent(requireContext(), FriendsActivity.class);
-            startActivity(intent);
+            apiCall.APICall("/api/userlist", "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
+
+                @Override
+                public void onResponse(String responseBody) {
+                    System.out.println("BODY: " + responseBody);
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    System.out.println("Error " + errorMessage);
+                }
+            });
+//            Intent intent = new Intent(requireContext(), FriendsActivity.class);
+//            startActivity(intent);
         });
 
         TextView userPreferences = view.findViewById(R.id.preferences);

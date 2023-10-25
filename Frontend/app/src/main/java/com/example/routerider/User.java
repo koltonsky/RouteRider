@@ -5,6 +5,9 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 
 public class User {
     int userId;
+    String name;
+    String email;
+    String address;
     int[] friendList;
     static GoogleSignInAccount currentAccount = null;
 

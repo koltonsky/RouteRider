@@ -4,8 +4,10 @@ const path = require('path')
 const fs = require('fs')
 const port = 8081
 const { MongoClient} = require('mongodb');
-
 const app = express()
+
+const user = require('./routes/user.js')
+
 app.use(express.json());
 
 
@@ -24,6 +26,17 @@ async function connectToDatabase() {
     }
 }
 
+// =========== REST API CALL ENDPOINTS ==============
+
+// User TODO
+app.post('/api/userlist', user.createNewUser);
+app.get('/api/user/email/:email', user.getUserByEmail);
+app.get('/api/userlist/:id/friends', user.getFriendList);
+app.put('/api/userlist/:id/friends', user.updateFriendList);
+//app.put('/api/userlist/:id/preferences', updatePreferences);
+
+
+
 // Get all documents from a collection
 app.get('/api/userlist', async (req, res) => {
     const collection = client.db('UserDB').collection('userlist');
@@ -32,33 +45,52 @@ app.get('/api/userlist', async (req, res) => {
   });
   
   // Get a single document by ID
-  app.get('/api/userlist/:id', async (req, res) => {
+app.get('/api/userlist/:id', async (req, res) => {
     const collection = client.db('UserDB').collection('userlist');
-    const document = await collection.findOne({ _id: ObjectID(req.params.id) });
+    const document = await collection.findOne({ _id: req.params.id });
     res.json(document);
   });
   
   // Create a new document
-  app.post('/api/userlist', async (req, res) => {
+app.post('/api/userlist', async (req, res) => {
     const collection = client.db('UserDB').collection('userlist');
     const result = await collection.insertOne(req.body);
     res.json(result);
   });
   
   // Update a document by ID
-  app.put('/api/userlist/:id', async (req, res) => {
+app.put('/api/userlist/:id', async (req, res) => {
     const collection = client.db('UserDB').collection('userlist');
     const updatedDocument = { $set: req.body };
-    const result = await collection.updateOne({ _id: ObjectID(req.params.id) }, updatedDocument);
+    const result = await collection.updateOne({ _id: req.params.id }, updatedDocument);
     res.json(result);
   });
-  
-  // Delete a document by ID
-  app.delete('/api/userlist/:id', async (req, res) => {
-    const collection = client.db('UserDB').collection('userlist');
-    const result = await collection.deleteOne({ _id: ObjectID(req.params.id) });
-    res.json(result);
-  });
+
+// Get a person's schedule by ID
+app.get('/api/schedulelist/:id', async (req, res) => {
+  const collection = client.db('ScheduleDB').collection('schedulelist');
+  const schedule = await collection.findOne({ _id: req.params.id });
+  res.json(schedule);
+});
+
+// Create a person's schedule
+app.post('/api/schedulelist', async (req, res) => {
+  const collection = client.db('ScheduleDB').collection('schedulelist');
+  const result = await collection.insertOne(req.body);
+  res.json(result);
+});
+
+// Update a person's schedule by ID
+app.put('/api/schedulelist/:id', async (req, res) => {
+  const collection = client.db('ScheduleDB').collection('schedulelist');
+  const updatedSchedule = { $set: req.body };
+  const result = await collection.updateOne({ _id: ObjectID(req.params.id) }, updatedSchedule);
+  res.json(result);
+});
+
+
+
+
   
 
 app.use('/', (req, res, next) => {

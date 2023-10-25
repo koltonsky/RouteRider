@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.example.routerider.APICaller;
 import com.example.routerider.R;
 import com.example.routerider.ScheduleItem;
 import com.example.routerider.User;
@@ -24,6 +25,9 @@ import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
+import com.google.gson.Gson;
+
+import org.json.JSONArray;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -68,6 +72,7 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
     protected Void doInBackground(Calendar... calendars) {
         Calendar service = calendars[0];
         List<ScheduleItem> eventList = new ArrayList<>();
+        APICaller apiCall = new APICaller();
 
         try {
             CalendarList calendarList = service.calendarList().list().execute();
@@ -110,6 +115,9 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
                         System.out.println("Start Time: " + startTimeString);
                         System.out.println("End Time: " + endTimeString);
                         System.out.println();
+                        if(eventLocation != null && eventLocation.contains("Room")) {
+                            eventLocation = "UBC " + eventLocation;
+                        }
 
                         ScheduleItem newEvent = new ScheduleItem(
                                 eventSummary,
@@ -117,10 +125,28 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
                                 startTimeString,
                                 endTimeString);
 
-                        eventList.add(newEvent);
+                        if(!startTimeString.equals("N/A")) {
+                            eventList.add(newEvent);
+                        }
                     }
                 }
             }
+
+            String jsonStr = new Gson().toJson(eventList);
+            System.out.println("STRING " + jsonStr);
+
+//            apiCall.APICall("", jsonStr, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
+//                @Override
+//                public void onResponse(String responseBody) {
+//                    System.out.println("BODY: " + responseBody);
+//                }
+//
+//                @Override
+//                public void onError(String errorMessage) {
+//                    System.out.println("Error " + errorMessage);
+//                }
+//            });
+
         } catch (IOException e) {
             e.printStackTrace();
             // Handle the network-related exception

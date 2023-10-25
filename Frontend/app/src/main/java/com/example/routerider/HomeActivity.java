@@ -42,7 +42,6 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
-
         viewPager.setUserInputEnabled(false);
     }
 

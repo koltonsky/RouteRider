@@ -24,7 +24,6 @@ public class ViewPagerAdapter extends FragmentStateAdapter {
     @NonNull
     @Override
     public Fragment createFragment(int position) {
-        // Hardcoded in this order, you'll want to use lists and make sure the titles match
         if (position == 0) {
             return new ScheduleFragment();
         } else if(position == 1) {

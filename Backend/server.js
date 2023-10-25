@@ -35,34 +35,49 @@ app.get('/api/userlist', async (req, res) => {
     res.json(documents);
   });
   
-  // Get a single document by ID
-  app.get('/api/userlist/:id', async (req, res) => {
+// Get a single document by ID
+app.get('/api/userlist/:id', async (req, res) => {
     const collection = client.db('UserDB').collection('userlist');
     const document = await collection.findOne({ _id: ObjectID(req.params.id) });
     res.json(document);
   });
   
-  // Create a new document
-  app.post('/api/userlist', async (req, res) => {
+// Create a new document
+app.post('/api/userlist', async (req, res) => {
     const collection = client.db('UserDB').collection('userlist');
     const result = await collection.insertOne(req.body);
     res.json(result);
   });
   
   // Update a document by ID
-  app.put('/api/userlist/:id', async (req, res) => {
+app.put('/api/userlist/:id', async (req, res) => {
     const collection = client.db('UserDB').collection('userlist');
     const updatedDocument = { $set: req.body };
     const result = await collection.updateOne({ _id: ObjectID(req.params.id) }, updatedDocument);
     res.json(result);
   });
   
-  // Delete a document by ID
-  app.delete('/api/userlist/:id', async (req, res) => {
-    const collection = client.db('UserDB').collection('userlist');
-    const result = await collection.deleteOne({ _id: ObjectID(req.params.id) });
-    res.json(result);
-  });
+// Get a person's schedule by ID
+app.get('/api/schedulelist/:id', async (req, res) => {
+  const collection = client.db('ScheduleDB').collection('schedulelist');
+  const schedule = await collection.findOne({ _id: ObjectID(req.params.id) });
+  res.json(schedule);
+});
+
+// Create a person's schedule
+app.post('/api/schedulelist', async (req, res) => {
+  const collection = client.db('ScheduleDB').collection('schedulelist');
+  const result = await collection.insertOne(req.body);
+  res.json(result);
+});
+
+// Update a person's schedule by ID
+app.put('/api/schedulelist/:id', async (req, res) => {
+  const collection = client.db('ScheduleDB').collection('schedulelist');
+  const updatedSchedule = { $set: req.body };
+  const result = await collection.updateOne({ _id: ObjectID(req.params.id) }, updatedSchedule);
+  res.json(result);
+});
   
 
 app.use('/', (req, res, next) => {

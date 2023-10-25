@@ -1,5 +1,6 @@
 package com.example.routerider.fragments;
 
+import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
@@ -71,19 +72,47 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
 
         try {
             CalendarList calendarList = service.calendarList().list().execute();
+
             List<CalendarListEntry> items = calendarList.getItems();
 
             if (items.isEmpty()) {
                 System.out.println("No calendars found.");
             } else {
                 System.out.println("Calendars:");
+                DateTime now = new DateTime(System.currentTimeMillis());
 
                 for (CalendarListEntry calendarEntry : items) {
                     String calendarId = calendarEntry.getId();
                     String summary = calendarEntry.getSummary();
 
+                    Events events = service.events().list(calendarId)
+                            .setTimeMin(now)
+                            .setOrderBy("startTime")
+                            .setSingleEvents(true)
+                            .execute();
+                    List<Event> eventItems = events.getItems();;
+
                     System.out.println("Calendar ID: " + calendarId);
                     System.out.println("Summary: " + summary);
+                    if (eventItems.isEmpty()) {
+                        System.out.println("No upcoming events found.");
+                    } else {
+                        System.out.println("Upcoming events");
+                        for (Event event : eventItems) {
+                            DateTime start = event.getStart().getDateTime();
+                            if (start == null) {
+                                start = event.getStart().getDate();
+                            }
+                            System.out.printf("%s (%s)\n", event.getSummary(), start);
+                            String eventLocation = event.getLocation();
+                            System.out.printf("Location:", eventLocation);
+                            System.out.println();
+                            System.out.printf("Description:", event.getDescription());
+                            System.out.println();
+
+
+                        }
+                    }
                     System.out.println();
 
                     // List events for the calendar

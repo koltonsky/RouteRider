@@ -7,6 +7,7 @@ const { MongoClient} = require('mongodb');
 const app = express()
 
 const user = require('./routes/user.js')
+const schedule = require('./routes/schedule.js')
 
 app.use(express.json());
 
@@ -34,6 +35,10 @@ app.get('/api/user/email/:email', user.getUserByEmail);
 app.get('/api/userlist/:id/friends', user.getFriendList);
 app.put('/api/userlist/:id/friends', user.updateFriendList);
 //app.put('/api/userlist/:id/preferences', updatePreferences);
+
+// Schedule DB
+app.post('/api/schedulelist', schedule.createNewSchedule);
+app.get('/api/schedulelist/:email', schedule.getScheduleByEmail);
 
 
 

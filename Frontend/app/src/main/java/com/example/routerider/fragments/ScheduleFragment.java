@@ -89,7 +89,7 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
                     // List events for the calendar
                     Events events = service.events().list(calendarId)
                             .setTimeMin(new DateTime(System.currentTimeMillis()))
-                            .setTimeMax(new DateTime(System.currentTimeMillis() + 86400000)) // Set the time range as needed
+                            //.setTimeMax(new DateTime(System.currentTimeMillis() + 86400000)) // Set the time range as needed
                             .execute();
 
                     List<Event> itemsEvents = events.getItems();

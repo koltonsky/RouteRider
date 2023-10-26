@@ -1,5 +1,6 @@
 package com.example.routerider.fragments;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
@@ -9,6 +10,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.example.routerider.APICaller;
 import com.example.routerider.R;
@@ -36,7 +39,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class ScheduleFragment extends Fragment {
-
+    private LinearLayout scheduleView;
+    private Button connectButton;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -59,7 +63,9 @@ public class ScheduleFragment extends Fragment {
             } catch (GeneralSecurityException | IOException e) {
                 throw new RuntimeException(e);
             }
-            new CalendarAsyncTask().execute(service);
+            scheduleView = view.findViewById(R.id.scheduleView);
+            connectButton = view.findViewById(R.id.connectCalendar);
+            new CalendarAsyncTask(this.getContext(),scheduleView,connectButton).execute(service);
         });
 
 
@@ -68,10 +74,19 @@ public class ScheduleFragment extends Fragment {
 }
 
 class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
+    private List<ScheduleItem> eventList;
+    private Context scheduleContext;
+    private LinearLayout scheduleView;
+    private Button connectButton;
+    CalendarAsyncTask(Context context, LinearLayout view, Button button){
+        this.scheduleContext = context;
+        this.scheduleView = view;
+        this.connectButton = button;
+    }
     @Override
     protected Void doInBackground(Calendar... calendars) {
         Calendar service = calendars[0];
-        List<ScheduleItem> eventList = new ArrayList<>();
+        eventList = new ArrayList<>();
         APICaller apiCall = new APICaller();
 
         try {
@@ -162,5 +177,22 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
     protected void onPostExecute(Void result) {
         // This method runs on the UI thread and can be used to update the UI with results
         // For example, you can show a toast message or update UI components here
+
+        LayoutInflater inflater = LayoutInflater.from(scheduleContext);
+        for (ScheduleItem item: eventList) {
+            View view  = inflater.inflate(R.layout.view_event, scheduleView, false);
+            // set item content in view
+            TextView eventName = view.findViewById(R.id.eventName);
+            eventName.setText(item.getTitle());
+            TextView eventLocation = view.findViewById(R.id.eventLocation);
+            eventLocation.setText(item.getLocation());
+            TextView startTime = view.findViewById(R.id.startTime);
+            startTime.setText(item.getStartTime());
+            TextView endTime = view.findViewById(R.id.endTime);
+            endTime.setText(item.getEndTime());
+            System.out.println(item);
+            scheduleView.addView(view);
+        }
+        connectButton.setVisibility(View.GONE);
     }
 }

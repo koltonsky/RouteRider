@@ -51,6 +51,55 @@ const getUserByEmail = async (req, res) => {
     }
   };
 
+  const getUserName = async (req, res) => {
+    try {
+      // Extract the user's email from the request parameters
+      const userEmail = req.params.email;
+  
+      // Assuming you have already connected to the MongoDB client
+      const collection = client.db('UserDB').collection('userlist');
+  
+      // Find the user by their email
+      const user = await collection.findOne({ email: userEmail });
+  
+      if (user) {
+        // User found, send the user's name as a response
+        res.status(200).json({ name: user.name });
+      } else {
+        // User not found
+        res.status(404).json({ error: 'User not found' });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  };
+
+  const getUserAddress = async (req, res) => {
+    try {
+      // Extract the user's email from the request parameters
+      const userEmail = req.params.email;
+  
+      // Assuming you have already connected to the MongoDB client
+      const collection = client.db('UserDB').collection('userlist');
+  
+      // Find the user by their email
+      const user = await collection.findOne({ email: userEmail });
+  
+      if (user) {
+        // User found, send the user's name as a response
+        res.status(200).json({ name: user.address });
+      } else {
+        // User not found
+        res.status(404).json({ error: 'User not found' });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  };
+
+
 // Function to get a user's friend list from MongoDB
 const getFriendList = async (req, res) => {
     try {
@@ -73,7 +122,97 @@ const getFriendList = async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   };
-  
+
+  // Function to add a friend using the friend's email
+const addFriend = async (req, res) => {
+  try {
+    const userEmail = req.params.email; // User's email for whom the friend list needs to be updated
+    const friendEmail = req.body; // Friend's email to be added
+
+    // Assuming you have already connected to the MongoDB client
+    const collection = client.db('UserDB').collection('userlist');
+
+    // Find the user by their email
+    const user = await collection.findOne({ email: userEmail });
+
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    // Check if the friend's email exists in the user's friend list
+    const friendIndex = user.friends.findIndex((friend) => friend.email === friendEmail);
+
+    if (friendIndex === -1) {
+      // Friend not found, add the friend
+      user.friends.push({ email: friendEmail });
+
+      // Update the document in the collection
+      const updateResult = await collection.updateOne(
+        { _id: user._id },
+        { $set: { friends: user.friends } }
+      );
+
+      if (updateResult.modifiedCount > 0) {
+        res.status(200).json({ message: 'Friend added successfully' });
+      } else {
+        res.status(500).json({ error: 'Failed to add friend' });
+      }
+    } else {
+      res.status(400).json({ error: 'Friend already exists' });
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// Function to delete a friend using the friend's email
+const deleteFriend = async (req, res) => {
+  try {
+    const userEmail = req.params.email; // User's email for whom the friend list needs to be updated
+    const friendEmail = req.body; // Friend's email to be deleted
+
+    // Assuming you have already connected to the MongoDB client
+    const collection = client.db('UserDB').collection('userlist');
+
+    // Find the user by their email
+    const user = await collection.findOne({ email: userEmail });
+
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    // Check if the friend's email exists in the user's friend list
+    const friendIndex = user.friends.findIndex((friend) => friend.email === friendEmail);
+
+    if (friendIndex !== -1) {
+      // Friend found, delete the friend
+      user.friends.splice(friendIndex, 1);
+
+      // Update the document in the collection
+      const updateResult = await collection.updateOne(
+        { _id: user._id },
+        { $set: { friends: user.friends } }
+      );
+
+      if (updateResult.modifiedCount > 0) {
+        res.status(200).json({ message: 'Friend deleted successfully' });
+      } else {
+        res.status(500).json({ error: 'Failed to delete friend' });
+      }
+    } else {
+      res.status(400).json({ error: 'Friend not found in the list' });
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
+/*
   // Function to update a user's list of friends in MongoDB
 const updateFriendList = async (req, res) => {
     try {
@@ -109,6 +248,7 @@ const updateFriendList = async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   };
+*/
 
   // Function to update a user's information in MongoDB
 const updateUser = async (req, res) => {
@@ -202,8 +342,11 @@ const updateFriendList = async (req, res) => {
   module.exports = {
     createNewUser,
     getUserByEmail,
+    getUserName,
+    getUserAddress,
     getFriendList,
-    updateFriendList,
+    addFriend,
+    deleteFriend,
     updateUser,
   };
   

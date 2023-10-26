@@ -31,18 +31,36 @@ async function connectToDatabase() {
 
 // User TODO
 app.post('/api/userlist', user.createNewUser);
-app.get('/api/userlist/:email/user', user.getUserByEmail);
+
+app.get('/api/userlist/:email', user.getUserByEmail);
+app.get('/api/userlist/:email/name', user.getUserName);
+app.get('/api/userlist/:email/address', user.getUserAddress);
 app.get('/api/userlist/:email/friends', user.getFriendList);
-app.put('/api/userlist/:email/friends', user.updateFriendList);
+
+app.post('/api/userlist/:email/friends', user.addFriend);
+app.delete('/api/userlist/:email/friends', user.deleteFriend);
+
 app.put('/api/userlist/:email', user.updateUser);
-//app.put('/api/userlist/:id/preferences', updatePreferences);
+
 //get user address
-//get user email
+//get user name
 
 
 // Schedule DB
 app.post('/api/schedulelist', schedule.createNewSchedule);
 app.get('/api/schedulelist/:email', schedule.getScheduleByEmail);
+
+app.post('api/schedulelist/:email/:index', schedule.insertEventAtIndex);
+
+app.put('/api/schedulelist/:email/:index/:name', schedule.editEventName);
+app.put('/api/schedulelist/:email/:index/:address', schedule.editEventAddress);
+app.put('/api/schedulelist/:email/:index/:geolocation', schedule.editEventGeolocation);
+app.put('/api/schedulelist/:email/:index/:date', schedule.editEventDate);
+app.put('/api/schedulelist/:email/:index/:startTime', schedule.editEventStartTime);
+app.put('/api/schedulelist/:email/:index/:endTime', schedule.editEventEndTime);
+
+app.delete('/api/schedulelist/:email/:index', schedule.deleteEventAtIndex);
+
 //get event list
 //update singular event (covers add?):
 //update event name

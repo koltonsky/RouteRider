@@ -54,13 +54,13 @@ const getUserByEmail = async (req, res) => {
 // Function to get a user's friend list from MongoDB
 const getFriendList = async (req, res) => {
     try {
-      const userEmail = req.params.email; // User ID whose friend list needs to be retrieved
-      //console.log(userId)
+      const userId = req.params.id; // User ID whose friend list needs to be retrieved
+      console.log(userId)
       // Assuming you have already connected to the MongoDB client
       const collection = client.db('UserDB').collection('userlist');
   
       // Find the user by their ID (assuming user ID is stored as a string)
-      const user = await collection.findOne({ email: userEmail });
+      const user = await collection.findOne({ _id: new ObjectId(userId) });
   
       if (!user) {
         res.status(404).json({ error: 'User not found' });
@@ -77,14 +77,14 @@ const getFriendList = async (req, res) => {
   // Function to update a user's list of friends in MongoDB
 const updateFriendList = async (req, res) => {
     try {
-      const userEmail = req.params.email; // User ID whose friend list needs to be updated
+      const userId = req.params.id; // User ID whose friend list needs to be updated
       const newFriend = req.body; // Data for the new friend to be added
-
+      console.log(userId)
       // Assuming you have already connected to the MongoDB client
       const collection = client.db('UserDB').collection('userlist');
   
       // Find the user by their ID (assuming user ID is stored as a string)
-      const user = await collection.findOne({ email: userEmail });
+      const user = await collection.findOne({ _id: new ObjectId(userId)});
   
       if (!user) {
         res.status(404).json({ error: 'User not found' });
@@ -103,32 +103,6 @@ const updateFriendList = async (req, res) => {
         } else {
           res.status(500).json({ error: 'Failed to update friend list' });
         }
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      res.status(500).json({ error: 'Internal server error' });
-    }
-  };
-
-  // Function to update a user's information in MongoDB
-const updateUser = async (req, res) => {
-    try {
-      const userEmail = req.params.email; // User email whose information needs to be updated
-      const updatedUserData = req.body; // Updated user data
-  
-      // Assuming you have already connected to the MongoDB client
-      const collection = client.db('UserDB').collection('userlist');
-  
-      // Update the user's information in MongoDB
-      const updateResult = await collection.updateOne(
-        { email: userEmail },
-        { $set: updatedUserData }
-      );
-  
-      if (updateResult.modifiedCount > 0) {
-        res.status(200).json({ message: 'User information updated successfully' });
-      } else {
-        res.status(404).json({ error: 'User not found' });
       }
     } catch (error) {
       console.error('Error:', error);
@@ -204,6 +178,5 @@ const updateFriendList = async (req, res) => {
     getUserByEmail,
     getFriendList,
     updateFriendList,
-    updateUser,
   };
   

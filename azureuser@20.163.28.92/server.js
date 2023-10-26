@@ -31,26 +31,14 @@ async function connectToDatabase() {
 
 // User TODO
 app.post('/api/userlist', user.createNewUser);
-app.get('/api/userlist/:email/user', user.getUserByEmail);
-app.get('/api/userlist/:email/friends', user.getFriendList);
-app.put('/api/userlist/:email/friends', user.updateFriendList);
-app.put('/api/userlist/:email', user.updateUser);
+app.get('/api/user/email/:email', user.getUserByEmail);
+app.get('/api/userlist/:id/friends', user.getFriendList);
+app.put('/api/userlist/:id/friends', user.updateFriendList);
 //app.put('/api/userlist/:id/preferences', updatePreferences);
-//get user address
-//get user email
-
 
 // Schedule DB
 app.post('/api/schedulelist', schedule.createNewSchedule);
 app.get('/api/schedulelist/:email', schedule.getScheduleByEmail);
-//get event list
-//update singular event (covers add?):
-//update event name
-//update event times
-//update event location
-//update event geolocation
-//update event date
-//delete singular event
 
 
 // IGNORE THIS //

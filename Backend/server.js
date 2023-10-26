@@ -135,7 +135,7 @@ app.use('/', (req, res, next) => {
 })
 
 const sslServer = https.createServer({
-    key:fs.readFileSync(path.join(__dirname, 'certification', 'private-key.pem')),
+    key:fs.readFileSync(path.join(__dirname, 'certification', 'test_key.key')),
     cert:fs.readFileSync(path.join(__dirname, 'certification', 'certificate.pem'))
 }, app)
 

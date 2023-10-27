@@ -29,7 +29,7 @@ async function connectToDatabase() {
 
 // =========== REST API CALL ENDPOINTS ==============
 
-// User TODO
+// User DB
 app.post('/api/userlist', user.createNewUser);
 
 app.get('/api/userlist/:email', user.getUserByEmail);
@@ -41,10 +41,6 @@ app.post('/api/userlist/:email/friends', user.addFriend);
 app.delete('/api/userlist/:email/friends', user.deleteFriend);
 
 app.put('/api/userlist/:email', user.updateUser);
-
-//get user address
-//get user name
-
 
 // Schedule DB
 app.post('/api/schedulelist', schedule.createNewSchedule);
@@ -61,18 +57,6 @@ app.put('/api/schedulelist/:email/:index/end', schedule.editEventEndTime);
 
 app.delete('/api/schedulelist/:email/:index', schedule.deleteEventAtIndex);
 
-//get event list
-//update singular event (covers add?):
-//update event name
-//update event times
-//update event location
-//update event geolocation
-//update event date
-//delete singular event
-
-
-// IGNORE THIS //
-// Get all documents from a collection
 /*
 app.get('/api/userlist', async (req, res) => {
     const collection = client.db('UserDB').collection('userlist');
@@ -124,10 +108,6 @@ app.put('/api/schedulelist/:id', async (req, res) => {
   res.json(result);
 });
 */
-
-
-
-
   
 
 app.use('/', (req, res, next) => {

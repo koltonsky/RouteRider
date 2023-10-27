@@ -12,4 +12,20 @@ public class ScheduleItem {
         startTime = startTimeString;
         endTime = endTimeString;
     }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public String getStartTime() {
+        return startTime;
+    }
+
+    public String getEndTime() {
+        return endTime;
+    }
 }

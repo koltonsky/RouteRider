@@ -116,7 +116,7 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
                     for (Event event : itemsEvents) {
                         String eventId = event.getId();
                         String eventSummary = event.getSummary();
-                        String eventLocation = event.getLocation();
+                        String eventLocation = (event.getLocation() != null) ? event.getLocation(): "N/A";
                         DateTime startTime = event.getStart().getDateTime();
                         DateTime endTime = event.getEnd().getDateTime();
 
@@ -130,7 +130,7 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
                         System.out.println("Start Time: " + startTimeString);
                         System.out.println("End Time: " + endTimeString);
                         System.out.println();
-                        if(eventLocation != null && eventLocation.contains("Room")) {
+                        if(eventLocation.contains("Room")) {
                             eventLocation = "UBC " + eventLocation;
                         }
 
@@ -150,7 +150,7 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
             String jsonStr = new Gson().toJson(eventList);
             System.out.println("STRING " + jsonStr);
 
-//            apiCall.APICall("", jsonStr, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
+//            apiCall.APICall("api/schedulelist", jsonStr, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
 //                @Override
 //                public void onResponse(String responseBody) {
 //                    System.out.println("BODY: " + responseBody);

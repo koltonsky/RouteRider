@@ -52,12 +52,12 @@ app.get('/api/schedulelist/:email', schedule.getScheduleByEmail);
 
 app.post('api/schedulelist/:email/:index', schedule.insertEventAtIndex);
 
-app.put('/api/schedulelist/:email/:index/:name', schedule.editEventName);
-app.put('/api/schedulelist/:email/:index/:address', schedule.editEventAddress);
-app.put('/api/schedulelist/:email/:index/:geolocation', schedule.editEventGeolocation);
-app.put('/api/schedulelist/:email/:index/:date', schedule.editEventDate);
-app.put('/api/schedulelist/:email/:index/:startTime', schedule.editEventStartTime);
-app.put('/api/schedulelist/:email/:index/:endTime', schedule.editEventEndTime);
+app.put('/api/schedulelist/:email/:index/eventName', schedule.editEventName); // '{"eventName": "event name"}'
+app.put('/api/schedulelist/:email/:index/address', schedule.editEventAddress);
+app.put('/api/schedulelist/:email/:index/geolocation', schedule.editEventGeolocation);
+app.put('/api/schedulelist/:email/:index/date', schedule.editEventDate);
+app.put('/api/schedulelist/:email/:index/start', schedule.editEventStartTime);
+app.put('/api/schedulelist/:email/:index/end', schedule.editEventEndTime);
 
 app.delete('/api/schedulelist/:email/:index', schedule.deleteEventAtIndex);
 

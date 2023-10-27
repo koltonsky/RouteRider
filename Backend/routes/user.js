@@ -123,93 +123,93 @@ const getFriendList = async (req, res) => {
     }
   };
 
-  // Function to add a friend using the friend's email
-const addFriend = async (req, res) => {
-  try {
-    const userEmail = req.params.email; // User's email for whom the friend list needs to be updated
-    const friendEmail = req.body; // Friend's email to be added
-
-    // Assuming you have already connected to the MongoDB client
-    const collection = client.db('UserDB').collection('userlist');
-
-    // Find the user by their email
-    const user = await collection.findOne({ email: userEmail });
-
-    if (!user) {
-      res.status(404).json({ error: 'User not found' });
-      return;
-    }
-
-    // Check if the friend's email exists in the user's friend list
-    const friendIndex = user.friends.findIndex((friend) => friend.email === friendEmail);
-
-    if (friendIndex === -1) {
-      // Friend not found, add the friend
-      user.friends.push({ email: friendEmail });
-
-      // Update the document in the collection
-      const updateResult = await collection.updateOne(
-        { _id: user._id },
-        { $set: { friends: user.friends } }
-      );
-
-      if (updateResult.modifiedCount > 0) {
-        res.status(200).json({ message: 'Friend added successfully' });
-      } else {
-        res.status(500).json({ error: 'Failed to add friend' });
+  const addFriend = async (req, res) => {
+    try {
+      const userEmail = req.params.email; // User's email for whom the friend list needs to be updated
+      const friendEmail = req.body.email; // Friend's email to be added
+  
+      // Assuming you have already connected to the MongoDB client
+      const collection = client.db('UserDB').collection('userlist');
+  
+      // Find the user by their email
+      const user = await collection.findOne({ email: userEmail });
+  
+      if (!user) {
+        res.status(404).json({ error: 'User not found' });
+        return;
       }
-    } else {
-      res.status(400).json({ error: 'Friend already exists' });
-    }
-  } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-};
-
-// Function to delete a friend using the friend's email
-const deleteFriend = async (req, res) => {
-  try {
-    const userEmail = req.params.email; // User's email for whom the friend list needs to be updated
-    const friendEmail = req.body; // Friend's email to be deleted
-
-    // Assuming you have already connected to the MongoDB client
-    const collection = client.db('UserDB').collection('userlist');
-
-    // Find the user by their email
-    const user = await collection.findOne({ email: userEmail });
-
-    if (!user) {
-      res.status(404).json({ error: 'User not found' });
-      return;
-    }
-
-    // Check if the friend's email exists in the user's friend list
-    const friendIndex = user.friends.findIndex((friend) => friend.email === friendEmail);
-
-    if (friendIndex !== -1) {
-      // Friend found, delete the friend
-      user.friends.splice(friendIndex, 1);
-
-      // Update the document in the collection
-      const updateResult = await collection.updateOne(
-        { _id: user._id },
-        { $set: { friends: user.friends } }
-      );
-
-      if (updateResult.modifiedCount > 0) {
-        res.status(200).json({ message: 'Friend deleted successfully' });
+  
+      // Check if the friend's email exists in the user's friend list
+      const friendExists = user.friends.includes(friendEmail);
+  
+      if (!friendExists) {
+        // Friend not found, add the friend
+        user.friends.push(friendEmail);
+  
+        // Update the document in the collection
+        const updateResult = await collection.updateOne(
+          { _id: user._id },
+          { $set: { friends: user.friends } }
+        );
+  
+        if (updateResult.modifiedCount > 0) {
+          res.status(200).json({ message: 'Friend added successfully' });
+        } else {
+          res.status(500).json({ error: 'Failed to add friend' });
+        }
       } else {
-        res.status(500).json({ error: 'Failed to delete friend' });
+        res.status(400).json({ error: 'Friend already exists' });
       }
-    } else {
-      res.status(400).json({ error: 'Friend not found in the list' });
+    } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
-  } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-};
+  };
+  
+
+  const deleteFriend = async (req, res) => {
+    try {
+      const userEmail = req.params.email; // User's email for whom the friend list needs to be updated
+      const friendEmail = req.body.email; // Friend's email to be deleted
+  
+      // Assuming you have already connected to the MongoDB client
+      const collection = client.db('UserDB').collection('userlist');
+  
+      // Find the user by their email
+      const user = await collection.findOne({ email: userEmail });
+  
+      if (!user) {
+        res.status(404).json({ error: 'User not found' });
+        return;
+      }
+  
+      // Check if the friend's email exists in the user's friend list
+      const friendIndex = user.friends.indexOf(friendEmail);
+  
+      if (friendIndex !== -1) {
+        // Friend found, delete the friend
+        user.friends.splice(friendIndex, 1);
+  
+        // Update the document in the collection
+        const updateResult = await collection.updateOne(
+          { _id: user._id },
+          { $set: { friends: user.friends } }
+        );
+  
+        if (updateResult.modifiedCount > 0) {
+          res.status(200).json({ message: 'Friend deleted successfully' });
+        } else {
+          res.status(500).json({ error: 'Failed to delete friend' });
+        }
+      } else {
+        res.status(400).json({ error: 'Friend not found in the list' });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  };
+  
 
 
 /*

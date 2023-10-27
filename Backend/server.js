@@ -50,7 +50,7 @@ app.put('/api/userlist/:email', user.updateUser);
 app.post('/api/schedulelist', schedule.createNewSchedule);
 app.get('/api/schedulelist/:email', schedule.getScheduleByEmail);
 
-app.post('api/schedulelist/:email/:index', schedule.insertEventAtIndex);
+app.post('/api/schedulelist/:email/:index', schedule.insertEventAtIndex);
 
 app.put('/api/schedulelist/:email/:index/eventName', schedule.editEventName); // '{"eventName": "event name"}'
 app.put('/api/schedulelist/:email/:index/address', schedule.editEventAddress);

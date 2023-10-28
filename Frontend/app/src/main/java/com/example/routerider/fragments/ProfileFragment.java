@@ -1,5 +1,9 @@
 package com.example.routerider.fragments;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -7,60 +11,75 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
 
+import com.example.routerider.APICaller;
+import com.example.routerider.FriendsActivity;
+import com.example.routerider.HomeActivity;
+import com.example.routerider.PreferencesActivity;
 import com.example.routerider.R;
+import com.example.routerider.User;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link ProfileFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import java.util.Objects;
+
 public class ProfileFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
     public ProfileFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment ProfileFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static ProfileFragment newInstance(String param1, String param2) {
-        ProfileFragment fragment = new ProfileFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
-
+    @SuppressLint("SetTextI18n")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_profile, container, false);
+        View view = inflater.inflate(R.layout.fragment_profile, container, false);
+        GoogleSignInAccount account = User.getCurrentAccount();
+        APICaller apiCall = new APICaller();
+
+
+        TextView friends = view.findViewById(R.id.friendList);
+        friends.setOnClickListener(v -> {
+            apiCall.APICall("/api/userlist", "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
+
+                @Override
+                public void onResponse(String responseBody) {
+                    System.out.println("BODY: " + responseBody);
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    System.out.println("Error " + errorMessage);
+                }
+            });
+//            Intent intent = new Intent(requireContext(), FriendsActivity.class);
+//            startActivity(intent);
+        });
+
+        TextView userPreferences = view.findViewById(R.id.preferences);
+        userPreferences.setOnClickListener(v -> {
+            Intent intent = new Intent(requireContext(), PreferencesActivity.class);
+            startActivity(intent);
+        });
+
+        TextView name = view.findViewById(R.id.name_text);
+        name.setText("Name: " + account.getDisplayName());
+        TextView email = view.findViewById(R.id.email);
+        email.setText("Email: " + account.getEmail());
+
+        Button logoutButton = view.findViewById(R.id.logoutButton);
+        logoutButton.setOnClickListener(v -> {
+            SharedPreferences preferences = requireActivity().getSharedPreferences("routeRider", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putBoolean("isLoggedIn", false);
+            editor.apply();
+
+            requireActivity().finish();
+        });
+
+        return view;
     }
 }

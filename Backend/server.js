@@ -122,3 +122,5 @@ const sslServer = https.createServer({
 
 connectToDatabase();
 sslServer.listen(port, () => console.log('Secure server :) on port ' + port))
+
+

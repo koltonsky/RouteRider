@@ -1,0 +1,9 @@
+{
+  "email": "newuser@example.com",
+  "name": "John Doe",
+  "address": "123 Main St",
+  "friends": [
+    "friend1@example.com",
+    "friend2@example.com"
+  ]
+}

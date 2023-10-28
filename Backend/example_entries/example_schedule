@@ -1,0 +1,31 @@
+{
+  "email": "johndoe@email.com",
+  "events": [
+    {
+      "eventName": "Meeting with Client",
+      "date": "2023-10-23",
+      "timeFrame": {
+        "start": "08:00 AM",
+        "end": "10:00 AM"
+      },
+      "address": "123 Main St, City, Country",
+      "geolocation": {
+        "latitude": 123.456789,
+        "longitude": 987.654321
+      }
+    },
+    {
+      "eventName": "Lunch with Colleague",
+      "date": "2023-10-24",
+      "timeFrame": {
+        "start": "02:30 PM",
+        "end": "04:30 PM"
+      },
+      "address": "456 Elm St, City, Country",
+      "geolocation": {
+        "latitude": 45.678901,
+        "longitude": -67.890123
+      }
+    }
+  ]
+}

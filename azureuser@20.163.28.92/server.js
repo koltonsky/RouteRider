@@ -29,34 +29,20 @@ async function connectToDatabase() {
 
 // =========== REST API CALL ENDPOINTS ==============
 
-// User DB
+// User TODO
 app.post('/api/userlist', user.createNewUser);
-
-app.get('/api/userlist/:email', user.getUserByEmail);
-app.get('/api/userlist/:email/name', user.getUserName);
-app.get('/api/userlist/:email/address', user.getUserAddress);
-app.get('/api/userlist/:email/friends', user.getFriendList);
-
-app.post('/api/userlist/:email/friends', user.addFriend);
-app.delete('/api/userlist/:email/friends', user.deleteFriend);
-
-app.put('/api/userlist/:email', user.updateUser);
+app.get('/api/user/email/:email', user.getUserByEmail);
+app.get('/api/userlist/:id/friends', user.getFriendList);
+app.put('/api/userlist/:id/friends', user.updateFriendList);
+//app.put('/api/userlist/:id/preferences', updatePreferences);
 
 // Schedule DB
 app.post('/api/schedulelist', schedule.createNewSchedule);
 app.get('/api/schedulelist/:email', schedule.getScheduleByEmail);
 
-app.post('/api/schedulelist/:email/:index', schedule.insertEventAtIndex);
 
-app.put('/api/schedulelist/:email/:index/eventName', schedule.editEventName); // '{"eventName": "event name"}'
-app.put('/api/schedulelist/:email/:index/address', schedule.editEventAddress);
-app.put('/api/schedulelist/:email/:index/geolocation', schedule.editEventGeolocation);
-app.put('/api/schedulelist/:email/:index/date', schedule.editEventDate);
-app.put('/api/schedulelist/:email/:index/start', schedule.editEventStartTime);
-app.put('/api/schedulelist/:email/:index/end', schedule.editEventEndTime);
-
-app.delete('/api/schedulelist/:email/:index', schedule.deleteEventAtIndex);
-
+// IGNORE THIS //
+// Get all documents from a collection
 /*
 app.get('/api/userlist', async (req, res) => {
     const collection = client.db('UserDB').collection('userlist');
@@ -108,6 +94,10 @@ app.put('/api/schedulelist/:id', async (req, res) => {
   res.json(result);
 });
 */
+
+
+
+
   
 
 app.use('/', (req, res, next) => {
@@ -115,12 +105,10 @@ app.use('/', (req, res, next) => {
 })
 
 const sslServer = https.createServer({
-    key:fs.readFileSync(path.join(__dirname, 'certification', 'test_key.key')),
+    key:fs.readFileSync(path.join(__dirname, 'certification', 'private-key.pem')),
     cert:fs.readFileSync(path.join(__dirname, 'certification', 'certificate.pem'))
 }, app)
 
 
 connectToDatabase();
 sslServer.listen(port, () => console.log('Secure server :) on port ' + port))
-
-

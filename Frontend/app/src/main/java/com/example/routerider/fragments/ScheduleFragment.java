@@ -1,16 +1,20 @@
 package com.example.routerider.fragments;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.example.routerider.APICaller;
@@ -18,6 +22,7 @@ import com.example.routerider.R;
 import com.example.routerider.ScheduleItem;
 import com.example.routerider.User;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
@@ -37,10 +42,12 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.Map;
 
 public class ScheduleFragment extends Fragment {
     private LinearLayout scheduleView;
@@ -51,13 +58,15 @@ public class ScheduleFragment extends Fragment {
     private DateFormat formatter;
     private Button getPreviousDay;
     private Button getNextDay;
+    private Button transitFriend;
+    private FloatingActionButton addEvent;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_schedule, container, false);
-        Button getCalendar = view.findViewById(R.id.connectCalendar);
+        connectButton = view.findViewById(R.id.connectCalendar);
         getPreviousDay = view.findViewById(R.id.previousDay);
         getPreviousDay.setEnabled(false);
         getNextDay = view.findViewById(R.id.nextDay);
@@ -67,25 +76,47 @@ public class ScheduleFragment extends Fragment {
         formatter = new SimpleDateFormat("E, dd MMM");
         currentDayText = view.findViewById(R.id.currentDayText);
         currentDayText.setText(formatter.format(currentDay));
+        scheduleView = view.findViewById(R.id.scheduleView);
+        addEvent = view.findViewById(R.id.floatingActionButton);
+        transitFriend = view.findViewById(R.id.transitFriendButton);
 
-        getCalendar.setOnClickListener(v -> {
-            GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(
-                    requireContext(), Collections.singleton(CalendarScopes.CALENDAR_READONLY));
-            credential.setSelectedAccount(account.getAccount());
+        APICaller apiCall = new APICaller();
+//        apiCall.APICall("api/schedulelist/" + account.getEmail(), "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
+//            @Override
+//            public void onResponse(String responseBody) {
+//                System.out.println("BODY: " + responseBody);
+//                connectButton.setVisibility(View.GONE);
+//                addEvent.setVisibility(View.VISIBLE);
+//            }
+//
+//            @Override
+//            public void onError(String errorMessage) {
+//                System.out.println("Error " + errorMessage);
+//                connectButton.setVisibility(View.VISIBLE);
+//                addEvent.setVisibility(View.GONE);
+//            }
+//        });
 
-            Calendar service = null;
-            try {
-                service = new Calendar.Builder(
-                        GoogleNetHttpTransport.newTrustedTransport(), GsonFactory.getDefaultInstance(), credential)
-                        .setApplicationName("RouteRider")
-                        .build();
-            } catch (GeneralSecurityException | IOException e) {
-                throw new RuntimeException(e);
-            }
-            scheduleView = view.findViewById(R.id.scheduleView);
-            connectButton = view.findViewById(R.id.connectCalendar);
-            calendarAsyncTask = (CalendarAsyncTask) new CalendarAsyncTask(this.getContext(),view,connectButton).execute(service);
-        });
+        if(connectButton.getVisibility() != View.GONE) {
+            connectButton.setOnClickListener(v -> {
+                GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(
+                        requireContext(), Collections.singleton(CalendarScopes.CALENDAR_READONLY));
+                credential.setSelectedAccount(account.getAccount());
+
+                Calendar service;
+                try {
+                    service = new Calendar.Builder(
+                            GoogleNetHttpTransport.newTrustedTransport(), GsonFactory.getDefaultInstance(), credential)
+                            .setApplicationName("RouteRider")
+                            .build();
+                } catch (GeneralSecurityException | IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+                calendarAsyncTask = (CalendarAsyncTask) new CalendarAsyncTask(this.getContext(),view,connectButton).execute(service);
+            });
+        }
+
 
         getPreviousDay.setOnClickListener(v -> {
             java.util.Calendar calendar =  java.util.Calendar.getInstance();
@@ -104,6 +135,51 @@ public class ScheduleFragment extends Fragment {
             currentDayText.setText(formatter.format(nextDay));
             calendarAsyncTask.updateDisplay(nextDay);
             changeDay(nextDay);
+        });
+
+        addEvent.setOnClickListener(v -> {
+//            apiCall.APICall("api/schedulelist/", "", APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
+//                @Override
+//                public void onResponse(String responseBody) {
+//                    System.out.println("BODY: " + responseBody);
+//                }
+//
+//                @Override
+//                public void onError(String errorMessage) {
+//                    System.out.println("Error " + errorMessage);
+//                }
+//            });
+        });
+
+        transitFriend.setOnClickListener(v -> {
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(requireContext());
+            alertDialogBuilder.setTitle("Friend List");
+
+            // Define an array of items to display in the list
+            String[] friendNames = {"Friend 1", "Friend 2", "Friend 3", "Friend 4", "Friend 5", "Friend 6", "Friend 7", "Friend 8", "Friend 9", "Friend 10"};
+
+            // Set the item list and a click listener
+            alertDialogBuilder.setItems(friendNames, (dialog, which) -> {
+                // Handle item click here (which is the position of the clicked item)
+                String selectedFriend = friendNames[which];
+                // Perform actions with the selected friend
+//                apiCall.APICall("api/schedulelist/", "", APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
+//                    @Override
+//                    public void onResponse(String responseBody) {
+//                        System.out.println("BODY: " + responseBody);
+//                    }
+//
+//                    @Override
+//                    public void onError(String errorMessage) {
+//                        System.out.println("Error " + errorMessage);
+//                    }
+//                });
+            });
+
+            // Create and show the AlertDialog
+            AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.show();
+
         });
 
         return view;
@@ -159,9 +235,11 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
                         System.out.println();
 
                         // List events for the calendar
+                        //long sevenDaysInMillis = 7 * 24 * 60 * 60 * 1000;
                         Events events = service.events().list(calendarId)
+                                .setSingleEvents(true)
                                 .setTimeMin(new DateTime(System.currentTimeMillis()))
-                                //.setTimeMax(new DateTime(System.currentTimeMillis() + 86400000)) // Set the time range as needed
+                                //.setTimeMax(new DateTime(System.currentTimeMillis() + sevenDaysInMillis)) // Set the time range as needed
                                 .execute();
 
                         List<Event> itemsEvents = events.getItems();
@@ -172,16 +250,17 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
                             DateTime startTime = event.getStart().getDateTime();
                             DateTime endTime = event.getEnd().getDateTime();
 
+
                             // Format the start and end times as strings (you can customize the format)
                             String startTimeString = (startTime != null) ? startTime.toString() : "N/A";
                             String endTimeString = (endTime != null) ? endTime.toString() : "N/A";
 
-                            System.out.println("Event ID: " + eventId);
-                            System.out.println("Event Summary: " + eventSummary);
-                            System.out.println("Event Location: " + eventLocation);
-                            System.out.println("Start Time: " + startTimeString);
-                            System.out.println("End Time: " + endTimeString);
-                            System.out.println();
+//                            System.out.println("Event ID: " + eventId);
+//                            System.out.println("Event Summary: " + eventSummary);
+//                            System.out.println("Event Location: " + eventLocation);
+//                            System.out.println("Start Time: " + startTimeString);
+//                            System.out.println("End Time: " + endTimeString);
+//                            System.out.println();
                             if (eventLocation.contains("Room")) {
                                 eventLocation = "UBC " + eventLocation;
                             }
@@ -200,8 +279,13 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
                     }
                 }
 
-                String jsonStr = new Gson().toJson(eventList);
-                System.out.println("STRING " + jsonStr);
+//                String jsonStr = new Gson().toJson(eventList);
+//                System.out.println("STRING " + jsonStr);
+                Map<String, Object> test = new HashMap<>();//{"email"  "koltonluu@gmail.com", }
+                test.put("email", User.getCurrentAccount().getEmail());
+                test.put("schedule", eventList);
+                String json = new Gson().toJson(test);
+                System.out.println("STRING " + json);
 
 //            apiCall.APICall("api/schedulelist", jsonStr, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
 //                @Override
@@ -225,6 +309,22 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
         return null;
     }
 
+
+    @Override
+    protected void onPostExecute(Void result) {
+
+        // This method runs on the UI thread and can be used to update the UI with results
+        // For example, you can show a toast message or update UI components here
+        System.out.println(eventList.size());
+        connectButton.setVisibility(View.GONE);
+        Button getNextDay = scheduleView.findViewById(R.id.nextDay);
+        getNextDay.setEnabled(true);
+        Date today = new Date();
+        updateDisplay(today);
+    }
+
+
+
     public void updateDisplay(Date day) {
         dayList = new ArrayList<>();
         LinearLayout eventListView = scheduleView.findViewById(R.id.scheduleView);
@@ -233,10 +333,16 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
         String dateString = dateFormat.format(day);
         for (ScheduleItem item: eventList){
             String itemDay = item.getStartTime().substring(0,10);
+            System.out.println(itemDay);
+            //System.out.println(dateString);
             if (dateString.equals(itemDay)){
                 dayList.add(item);
             }
+
         }
+        System.out.println("DAY LIST");
+        System.out.println(dayList);
+
         LayoutInflater inflater = LayoutInflater.from(scheduleContext);
         for (ScheduleItem item: dayList) {
             eventListView = scheduleView.findViewById(R.id.scheduleView);
@@ -253,19 +359,5 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
             System.out.println(item);
             eventListView.addView(view);
         }
-    }
-
-
-    @Override
-    protected void onPostExecute(Void result) {
-
-        // This method runs on the UI thread and can be used to update the UI with results
-        // For example, you can show a toast message or update UI components here
-        System.out.println(eventList.size());
-        connectButton.setVisibility(View.GONE);
-        Button getNextDay = scheduleView.findViewById(R.id.nextDay);
-        getNextDay.setEnabled(true);
-        Date today = new Date();
-        updateDisplay(today);
     }
 }

@@ -4,23 +4,30 @@ const uri = 'mongodb://0.0.0.0:27017'; // Replace with your MongoDB connection s
 const client = new MongoClient(uri);
 
 const createNewSchedule = async (req, res) => {
-    try {
-      // Extract schedule data from the request body
-      const schedule = req.body;
+  try {
+    // Extract schedule data from the request body
+    const schedule = req.body;
 
-      // Assuming you have already connected to the MongoDB client
-      const collection = client.db('ScheduleDB').collection('schedulelist');
-  
-      // Insert the new user document into the collection
+    // Assuming you have already connected to the MongoDB client
+    const collection = client.db('ScheduleDB').collection('schedulelist');
+
+    // Check if a user with a specific identifier (e.g., email) already exists
+    const existingUser = await collection.findOne({ email: schedule.email });
+    
+    if (existingUser) {
+      // If a user with the same email exists, return an error message
+      res.status(100).json({ message: 'User with this email already exists'});
+    } else {
+      // If the user doesn't exist, insert the new schedule document into the collection
       const insertResult = await collection.insertOne(schedule);
-  
       res.status(201).json({ message: 'Schedule created successfully' });
-
-    } catch (error) {
-      console.error('Error:', error);
-      res.status(500).json({ error: 'Internal server error' });
     }
-  };
+
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
 
   const getScheduleByEmail = async (req, res) => {
     try {
@@ -48,6 +55,10 @@ const createNewSchedule = async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   };
+
+  
+
+
 
   const insertEventAtIndex = async (req, res) => {
     try {

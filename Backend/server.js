@@ -37,6 +37,8 @@ app.get('/api/userlist/:email/name', user.getUserName);
 app.get('/api/userlist/:email/address', user.getUserAddress);
 app.get('/api/userlist/:email/friends', user.getFriendList);
 
+app.put('/api/userlist/:email/', user.updateAddress);
+
 app.post('/api/userlist/:email/friends', user.addFriend);
 app.delete('/api/userlist/:email/friends', user.deleteFriend);
 
@@ -108,7 +110,6 @@ app.put('/api/schedulelist/:id', async (req, res) => {
   res.json(result);
 });
 */
-  
 
 app.use('/', (req, res, next) => {
     res.send("Hello from SSL server")

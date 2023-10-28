@@ -104,10 +104,10 @@ public class MainActivity extends AppCompatActivity {
         APICaller apiCall = new APICaller();
         User.updateGoogleAccount(account);
 
-//        apiCall.APICall("/api/userlist", "", APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
-//            @Override
-//            public void onResponse(String responseBody) {
-//                System.out.println("BODY: " + responseBody);
+        apiCall.APICall("/api/userlist", "", APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
+            @Override
+            public void onResponse(String responseBody) {
+                System.out.println("BODY: " + responseBody);
 //                apiCall.APICall("/api/userlist/id", "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
 //                    @Override
 //                    public void onResponse(String responseBody) {
@@ -119,13 +119,13 @@ public class MainActivity extends AppCompatActivity {
 //                        System.out.println("Error " + errorMessage);
 //                    }
 //                });
-//            }
-//
-//            @Override
-//            public void onError(String errorMessage) {
-//                System.out.println("Error " + errorMessage);
-//            }
-//        });
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                System.out.println("Error " + errorMessage);
+            }
+        });
 
 
         SharedPreferences preferences = getSharedPreferences("routeRider", Context.MODE_PRIVATE);

@@ -43,20 +43,20 @@ public class ProfileFragment extends Fragment {
 
         TextView friends = view.findViewById(R.id.friendList);
         friends.setOnClickListener(v -> {
-            apiCall.APICall("/api/userlist", "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
-
-                @Override
-                public void onResponse(String responseBody) {
-                    System.out.println("BODY: " + responseBody);
-                }
-
-                @Override
-                public void onError(String errorMessage) {
-                    System.out.println("Error " + errorMessage);
-                }
-            });
-//            Intent intent = new Intent(requireContext(), FriendsActivity.class);
-//            startActivity(intent);
+//            apiCall.APICall("/api/userlist", "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
+//
+//                @Override
+//                public void onResponse(String responseBody) {
+//                    System.out.println("BODY: " + responseBody);
+//                }
+//
+//                @Override
+//                public void onError(String errorMessage) {
+//                    System.out.println("Error " + errorMessage);
+//                }
+//            });
+            Intent intent = new Intent(requireContext(), FriendsActivity.class);
+            startActivity(intent);
         });
 
         TextView userPreferences = view.findViewById(R.id.preferences);

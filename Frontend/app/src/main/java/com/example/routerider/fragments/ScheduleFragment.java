@@ -55,7 +55,6 @@ import java.util.Map;
 
 public class ScheduleFragment extends Fragment {
     private LinearLayout scheduleView;
-    private Button connectButton;
     private Date currentDay;
     private TextView currentDayText;
     private CalendarAsyncTask calendarAsyncTask;
@@ -70,7 +69,6 @@ public class ScheduleFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_schedule, container, false);
-        connectButton = view.findViewById(R.id.connectCalendar);
         getPreviousDay = view.findViewById(R.id.previousDay);
         getPreviousDay.setEnabled(false);
         getNextDay = view.findViewById(R.id.nextDay);
@@ -85,41 +83,21 @@ public class ScheduleFragment extends Fragment {
         transitFriend = view.findViewById(R.id.transitFriendButton);
 
         APICaller apiCall = new APICaller();
-//        apiCall.APICall("api/schedulelist/" + account.getEmail(), "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
-//            @Override
-//            public void onResponse(String responseBody) {
-//                System.out.println("BODY: " + responseBody);
-//                connectButton.setVisibility(View.GONE);
-//                addEvent.setVisibility(View.VISIBLE);
-//            }
-//
-//            @Override
-//            public void onError(String errorMessage) {
-//                System.out.println("Error " + errorMessage);
-//                connectButton.setVisibility(View.VISIBLE);
-//                addEvent.setVisibility(View.GONE);
-//            }
-//        });
+        GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(
+                requireContext(), Collections.singleton(CalendarScopes.CALENDAR_READONLY));
+        credential.setSelectedAccount(account.getAccount());
 
-        if(connectButton.getVisibility() != View.GONE) {
-            connectButton.setOnClickListener(v -> {
-                GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(
-                        requireContext(), Collections.singleton(CalendarScopes.CALENDAR_READONLY));
-                credential.setSelectedAccount(account.getAccount());
-
-                Calendar service;
-                try {
-                    service = new Calendar.Builder(
-                            GoogleNetHttpTransport.newTrustedTransport(), GsonFactory.getDefaultInstance(), credential)
-                            .setApplicationName("RouteRider")
-                            .build();
-                } catch (GeneralSecurityException | IOException e) {
-                    throw new RuntimeException(e);
-                }
-
-                calendarAsyncTask = (CalendarAsyncTask) new CalendarAsyncTask(this.getContext(),view,connectButton).execute(service);
-            });
+        Calendar service;
+        try {
+            service = new Calendar.Builder(
+                    GoogleNetHttpTransport.newTrustedTransport(), GsonFactory.getDefaultInstance(), credential)
+                    .setApplicationName("RouteRider")
+                    .build();
+        } catch (GeneralSecurityException | IOException e) {
+            throw new RuntimeException(e);
         }
+
+        calendarAsyncTask = (CalendarAsyncTask) new CalendarAsyncTask(this.getContext(),view).execute(service);
 
 
         getPreviousDay.setOnClickListener(v -> {
@@ -319,11 +297,9 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
 
     private Context scheduleContext;
     private View scheduleView;
-    private Button connectButton;
-    CalendarAsyncTask(Context context, View view, Button button){
+    CalendarAsyncTask(Context context, View view){
         this.scheduleContext = context;
         this.scheduleView = view;
-        this.connectButton = button;
     }
     @Override
     protected Void doInBackground(Calendar... calendars) {
@@ -431,7 +407,6 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
         // This method runs on the UI thread and can be used to update the UI with results
         // For example, you can show a toast message or update UI components here
         System.out.println(eventList.size());
-        connectButton.setVisibility(View.GONE);
         Button getNextDay = scheduleView.findViewById(R.id.nextDay);
         getNextDay.setEnabled(true);
         Date today = new Date();

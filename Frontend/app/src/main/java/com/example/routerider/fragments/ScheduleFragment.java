@@ -1,7 +1,9 @@
 package com.example.routerider.fragments;
 
+import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.net.ParseException;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
@@ -12,10 +14,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.routerider.APICaller;
 import com.example.routerider.R;
@@ -138,17 +142,60 @@ public class ScheduleFragment extends Fragment {
         });
 
         addEvent.setOnClickListener(v -> {
-//            apiCall.APICall("api/schedulelist/", "", APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
-//                @Override
-//                public void onResponse(String responseBody) {
-//                    System.out.println("BODY: " + responseBody);
-//                }
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(requireContext());
+            alertDialogBuilder.setTitle("Add Event");
+
+// Inflate the custom view for the dialog
+            LayoutInflater dialogInflater = LayoutInflater.from(requireContext());
+            View dialogView = dialogInflater.inflate(R.layout.add_event_dialog, null);
+            alertDialogBuilder.setView(dialogView);
+
+            final EditText eventNameEditText = dialogView.findViewById(R.id.eventName);
+            final EditText eventAddressEditText = dialogView.findViewById(R.id.eventAddress);
+            final EditText eventStartTimeEditText = dialogView.findViewById(R.id.eventStartTime);
+            final EditText eventEndTimeEditText = dialogView.findViewById(R.id.eventEndTime);
+
+            final EditText eventDateMonthEditText = dialogView.findViewById(R.id.eventDateMonth);
+            final EditText eventDateDayEditText = dialogView.findViewById(R.id.eventDateDay);
+            final EditText eventDateYearEditText = dialogView.findViewById(R.id.eventDateYear);
+
+
+            alertDialogBuilder.setPositiveButton("OK", null);
+
+            alertDialogBuilder.setNegativeButton("Cancel", (dialog, which) -> {
+                dialog.dismiss();
+            });
+
+            final AlertDialog dialog = alertDialogBuilder.create();
+            dialog.setOnShowListener(dialogInterface -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view1 -> {
+                String eventName = eventNameEditText.getText().toString();
+                String eventAddress = eventAddressEditText.getText().toString();
+                String eventDate = eventDateYearEditText.getText().toString() + "-"
+                        + eventDateMonthEditText.getText().toString() + "-"
+                        + eventDateDayEditText.getText().toString();
+                String eventStartTime = eventStartTimeEditText.getText().toString();
+                String eventEndTime = eventEndTimeEditText.getText().toString();
+
+                if (EventInputListener.onEventInput(eventName, eventAddress, eventDate, eventStartTime, eventEndTime)) {
+//                    apiCall.APICall("api/schedulelist/", "", APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
+//                        @Override
+//                        public void onResponse(String responseBody) {
+//                            System.out.println("BODY: " + responseBody);
+//                        }
 //
-//                @Override
-//                public void onError(String errorMessage) {
-//                    System.out.println("Error " + errorMessage);
-//                }
-//            });
+//                        @Override
+//                        public void onError(String errorMessage) {
+//                            System.out.println("Error " + errorMessage);
+//                        }
+//                    });
+                    dialog.dismiss();
+                } else {
+                    Toast.makeText(requireContext(), "Invalid inputs, please try again", Toast.LENGTH_SHORT).show();
+                }
+            }));
+
+            dialog.show();
+
         });
 
         transitFriend.setOnClickListener(v -> {
@@ -160,7 +207,6 @@ public class ScheduleFragment extends Fragment {
 
             // Set the item list and a click listener
             alertDialogBuilder.setItems(friendNames, (dialog, which) -> {
-                // Handle item click here (which is the position of the clicked item)
                 String selectedFriend = friendNames[which];
                 // Perform actions with the selected friend
 //                apiCall.APICall("api/schedulelist/", "", APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
@@ -184,6 +230,7 @@ public class ScheduleFragment extends Fragment {
 
         return view;
     }
+
     private void changeDay(Date day){
         Date today = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -196,7 +243,75 @@ public class ScheduleFragment extends Fragment {
         currentDayText.setText(formatter.format(day));
         calendarAsyncTask.updateDisplay(day);
     }
+
+    private interface EventInputListener {
+        static boolean onEventInput(String eventName, String eventAddress, String eventDate, String eventStartTime, String eventEndTime) {
+            if(validateInputs(eventName, eventAddress, eventDate, eventStartTime, eventEndTime)) {
+                return true;
+            }
+
+            return false;
+        }
+    }
+
+    private static boolean validateInputs(String eventName, String eventAddress, String eventDate, String eventStartTime, String eventEndTime) {
+        if (eventName.isEmpty() || eventAddress.isEmpty() || eventDate.isEmpty() || eventStartTime.isEmpty() || eventEndTime.isEmpty()) {
+            // Check if any field is empty
+            return false;
+        }
+
+        if (!isDateValid(eventDate) || !isTimeValid(eventStartTime) || !isTimeValid(eventEndTime)) {
+            // Check if date and time formats are valid
+            return false;
+        }
+
+        if (!isStartTimeBeforeEndTime(eventStartTime, eventEndTime)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private static boolean isDateValid(String date) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        dateFormat.setLenient(false); // Set lenient to false to enforce strict date validation
+
+        try {
+            Date parsedDate = dateFormat.parse(date);
+            Date currentDate = new Date(); // Get the current date
+
+            assert parsedDate != null;
+            return parsedDate.after(currentDate); // Date is valid and ahead of the current date
+        } catch (ParseException | java.text.ParseException e) {
+            // Parsing failed, the date is not valid
+            return false;
+        }
+    }
+
+    private static boolean isTimeValid(String time) {
+        String timePattern = "([01]\\d|2[0-3]):[0-5]\\d";
+        return time.matches(timePattern);
+    }
+
+    private static boolean isStartTimeBeforeEndTime(String startTime, String endTime) {
+        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
+        timeFormat.setLenient(false);
+
+        try {
+            Date start = timeFormat.parse(startTime);
+            Date end = timeFormat.parse(endTime);
+
+            assert start != null;
+            return start.before(end);
+        } catch (ParseException | java.text.ParseException e) {
+            // Parsing failed, the times are not valid
+            return false;
+        }
+    }
+
 }
+
+
 
 class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
     private List<ScheduleItem> eventList;
@@ -235,11 +350,11 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
                         System.out.println();
 
                         // List events for the calendar
-                        //long sevenDaysInMillis = 7 * 24 * 60 * 60 * 1000;
+                        long sevenDaysInMillis = 365L * 24 * 60 * 60 * 1000;
                         Events events = service.events().list(calendarId)
                                 .setSingleEvents(true)
                                 .setTimeMin(new DateTime(System.currentTimeMillis()))
-                                //.setTimeMax(new DateTime(System.currentTimeMillis() + sevenDaysInMillis)) // Set the time range as needed
+                                .setTimeMax(new DateTime(System.currentTimeMillis() + sevenDaysInMillis)) // Set the time range as needed
                                 .execute();
 
                         List<Event> itemsEvents = events.getItems();
@@ -255,12 +370,12 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
                             String startTimeString = (startTime != null) ? startTime.toString() : "N/A";
                             String endTimeString = (endTime != null) ? endTime.toString() : "N/A";
 
-//                            System.out.println("Event ID: " + eventId);
-//                            System.out.println("Event Summary: " + eventSummary);
-//                            System.out.println("Event Location: " + eventLocation);
-//                            System.out.println("Start Time: " + startTimeString);
-//                            System.out.println("End Time: " + endTimeString);
-//                            System.out.println();
+                            System.out.println("Event ID: " + eventId);
+                            System.out.println("Event Summary: " + eventSummary);
+                            System.out.println("Event Location: " + eventLocation);
+                            System.out.println("Start Time: " + startTimeString);
+                            System.out.println("End Time: " + endTimeString);
+                            System.out.println();
                             if (eventLocation.contains("Room")) {
                                 eventLocation = "UBC " + eventLocation;
                             }

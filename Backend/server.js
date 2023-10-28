@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const queryString = require('querystring');
 const port = 8081;
+// const fetch = require('node-fetch');
 const { MongoClient} = require('mongodb');
 // const ApiKeyManager = require('@esri/arcgis-rest-request');
 const {ApiKeyManager} = require('@esri/arcgis-rest-request');
@@ -94,7 +95,9 @@ const sslServer = https.createServer({
  * Instead of array, could also directly modify the schedule.
  * Translink Open API Key: crj9j8Kj97pbPkkc61dX
  * Geocoding API key: AAPK3c726265cc41485bb57c5512e98cf912OLoJQtidjOlcqjdpa0Pl773UqNoOYfwApr6ORYd8Lina8_K0sEbdcyXsNfHFqLKE if error 498 invalid token, create a new key
- * 
+ * HERE Location services API key: S3186X1u-4DFckek542dcP9gxZeLI3uHQl_IkwZnJb4
+ *                        App ID:  cOIE7nteY1IGtsu8BGpr
+ * Google Direction API ($200 credit): AIzaSyBVsUyKxBvRjE0XdooMuoDrpAfu1KO_2mM 
  * Function takes in an home/starting address and a schedule (includes location/address of classes eventually, but temporarily assume UBC for simplicity) 
  * @param {*} schedule 
  * @param {*} address 
@@ -105,9 +108,12 @@ async function initReminders(schedule, address) {
     // get closest bus stop to home address
     console.log("calling translink api");
     buses = await getNearestBuses(address);
-    console.log("initReminders(): returned buses: " + buses[1].StopNo);
+    console.log("initReminders(): returned buses: " + buses[1].StopNo + " " + buses.length);
+
+     
 }
-initReminders("xxx", "xxx");
+// initReminders("xxx", "xxx");
+planTransitTrip('5870 Rumble Street, Burnaby, BC', "UBC Exchange Bus Loop", new Date("2023-10-28T18:00:00.000Z"));
 
 function getLatLong(address) {
   return new Promise((resolve, reject) => {
@@ -145,7 +151,7 @@ async function getNearestBuses(address) {
   
     console.log("--------------------");
     console.log("getBuses: calling getlatlong");
-    var address = "7746 Berkley Street, Burnaby, British Columbia, Canada";
+    var address = "Student Union Boulevard, Vancouver, British Columbia, Canada";
     getLatLong(address).then((coords) => {
       console.log("initReminders(): returned coords: " + coords);
       console.log("--------------------");
@@ -190,6 +196,78 @@ async function getNearestBuses(address) {
     });
   });
 }
+
+async function planTransitTrip(origin, destination, arriveTime) {
+  return new Promise((resolve, reject) => {
+    const apiUrl = 'https://maps.googleapis.com/maps/api/directions/json';
+    const apiKey = 'AIzaSyBVsUyKxBvRjE0XdooMuoDrpAfu1KO_2mM';
+    // var origin = '7746 Berkley Street, Burnaby, BC'; // joyce collingwood
+    // var destination = 'UBC Exchange Bus Loop'; // ubc exhcange r4
+  
+    // determine whether to take 99 B-Line or R4 based on address
+    var addressCoords = getLatLong(origin);
+    var distToCommercial = calcDist(addressCoords[0], addressCoords[1], 49.2624, -123.0698);
+    var distToJoyce = calcDist(addressCoords[0], addressCoords[1], 49.2412, -123.0298);
+
+    const params = new URLSearchParams({
+      origin: origin,
+      destination: destination,
+      mode: 'transit',
+      arrival_time: Math.floor(arriveTime.getTime() / 1000),
+      key: apiKey,
+    });
+  
+    const url = `${apiUrl}?${params.toString()}`;
+    // const url = 'https://transit.router.hereapi.com/v8/routes?origin=49.1331,-123.0011&destination=49.2668,-123.2456&apiKey=S3186X1u-4DFckek542dcP9gxZeLI3uHQl_IkwZnJb4'
+    const request = https.get(url, (response) => {
+      let data = '';
+      console.log("planTransitTrip(): request sent");
+  
+      response.on('data', (chunk) => {
+        data += chunk;
+      });
+  
+      response.on('end', () => {
+        console.log("planTransitTrip() return");
+        console.log("--------------------------------------------------------");
+        var routes = JSON.parse(data).routes;
+        if (routes.length > 0) {
+          // Process each route
+          routes.forEach((route, index) => {
+            // Access route information such as summary, distance, duration, steps, etc.
+            console.log(`Route ${index + 1}:`);
+            console.log(`Summary: ${route.summary}`);
+            console.log(`Distance: ${route.legs[0].distance.text}`);
+            console.log(`Duration: ${route.legs[0].duration.text}`);
+            console.log('Steps:');
+            route.legs[0].steps.forEach((step, stepIndex) => {
+              console.log(`Step ${stepIndex + 1}: ${step.html_instructions}`);
+            });
+            console.log('-----------------------');
+          });
+        } else {
+          console.log('No routes found.');
+        }
+        console.log("--------------------------------------------------------");
+        console.log(data);
+        console.log(JSON.parse(data));
+        console.log("--------------------------------------------------------");
+        resolve(JSON.parse(data));
+      });
+    })
+    request.on("error", (err) => {
+        console.log("Error: " + err.message);
+    });
+  });
+}
+
+function calcDist(x1, y1, x2, y2) {
+  var a = x1 - x2;
+  var b = y1 - y2;
+
+  return Math.sqrt( a*a + b*b );
+}
+
 
 connectToDatabase();
 sslServer.listen(port, () => console.log('Secure server :) on port ' + port))

@@ -5,6 +5,7 @@ const fs = require('fs')
 const port = 8081
 const { MongoClient} = require('mongodb');
 const app = express()
+//const axios = require('axios')
 
 const user = require('./routes/user.js')
 const schedule = require('./routes/schedule.js')
@@ -146,4 +147,28 @@ const sslServer = https.createServer({
 connectToDatabase();
 sslServer.listen(port, () => console.log('Secure server :) on port ' + port))
 
+/*
+const baseURL = 'https://localhost:8081'; // Replace with your server's URL
+const createUserURL = '/api/userlist';
 
+const httpsAgent = new https.Agent({ rejectUnauthorized: false });
+
+const userData = {
+  email: 'test@example.com',
+  // Other user properties...
+};
+
+// Axios instance with the custom agent
+const axiosWithSelfSignedCert = axios.create({
+  httpsAgent,
+});
+
+// Use the custom Axios instance to make requests
+axiosWithSelfSignedCert.post(`${baseURL}${createUserURL}`, userData)
+  .then(response => {
+    console.log('Response:', response.data);
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });
+  */

@@ -249,8 +249,7 @@ async function initReminders(userEmail, date) {
         returnList[i]._leaveTimeNum = timestampToTime(returnList[returnList.length - 1].departure_time);
       }
       else if ((i == returnList.length - 2) && returnList[i]._type == "Walk") { 
-        returnList[i]._leaveTime = returnList[returnList.length - 1].arrival_time;
-        returnList[i]._leaveTimeNum = timestampToTime(returnList[returnList.length - 1].arrival_time);
+        returnList[i]._leaveTime = timeToTimestamp(returnList[returnList.length - 1].arrival_time);
       }
       else if (returnList[i]._type == "Walk") { // assumes 'type' for next array entry is either "Bus" or "SkyTrain"
         returnList[i]._leaveTime = timestampToTime(returnList[i + 1]._leaveTimeNum - returnList[i]._leaveTimeNum);
@@ -386,7 +385,7 @@ async function planTransitTrip(origin, destination, arriveTime) {
     // var origin = '7746 Berkley Street, Burnaby, BC'; // joyce collingwood
     // var destination = 'UBC Exchange Bus Loop'; // ubc exhcange r4
   
-    // determine whether to take 99 B-Line or R4 based on address
+    // determine whether to take 99 B-Line or R4 based on address. unused for now
     var addressCoords = getLatLong(origin);
     var distToCommercial = calcDist(addressCoords[0], addressCoords[1], 49.2624, -123.0698);
     var distToJoyce = calcDist(addressCoords[0], addressCoords[1], 49.2412, -123.0298);

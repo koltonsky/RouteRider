@@ -96,7 +96,7 @@ const createNewSchedule = async (req, res) => {
     }
   };
   
-
+/*
   const editEventByID = async (req, res) => {
     try {
       const userEmail = req.params.email;
@@ -136,7 +136,176 @@ const createNewSchedule = async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   };
+*/
 
+/*
+const editEventByID = async (req, res) => {
+  try {
+    const userEmail = req.params.email;
+    const eventId = req.params.id;
+    const updatedEvent = req.body;
+
+    const collection = client.db('ScheduleDB').collection('schedulelist');
+    const schedule = await collection.findOne({ email: userEmail });
+
+    if (!schedule) {
+      res.status(404).json({ error: 'Schedule not found' });
+      return;
+    }
+
+    const eventToUpdateIndex = schedule.events.findIndex(event => event.id === eventId);
+
+    if (eventToUpdateIndex === -1) {
+      res.status(400).json({ error: 'Event not found in the schedule' });
+      return;
+    }
+
+    // Remove the event to be updated from the array
+    const [eventToUpdate] = schedule.events.splice(eventToUpdateIndex, 1);
+
+    // Update the event based on its _id
+    Object.assign(eventToUpdate, updatedEvent);
+
+    // Find the index to insert the updated event based on startTime
+    const insertIndex = schedule.events.findIndex(event => new Date(eventToUpdate.startTime) < new Date(event.startTime));
+
+    // Insert the updated event at the calculated index
+    schedule.events.splice(insertIndex, 0, eventToUpdate);
+
+    const updateResult = await collection.updateOne(
+      { _id: schedule._id },
+      { $set: { events: schedule.events } }
+    );
+
+    if (updateResult.modifiedCount > 0) {
+      res.status(200).json({ message: 'Event updated successfully' });
+    } else {
+      res.status(500).json({ error: 'Failed to update event' });
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+*/
+/*
+const editEventByID = async (req, res) => {
+  try {
+    const userEmail = req.params.email;
+    const eventId = req.params.id;
+    const newEvent = req.body; // Assuming the new event data is sent in the request body
+
+    const collection = client.db('ScheduleDB').collection('schedulelist');
+    const schedule = await collection.findOne({ email: userEmail });
+
+    if (!schedule) {
+      res.status(404).json({ error: 'Schedule not found' });
+      return;
+    }
+
+    if (eventId) {
+      // Editing an existing event
+      const eventToUpdateIndex = schedule.events.findIndex(event => event.id === eventId);
+
+      if (eventToUpdateIndex === -1) {
+        res.status(400).json({ error: 'Event not found in the schedule' });
+        return;
+      }
+
+      // Remove the event to be updated from the array
+      const [eventToUpdate] = schedule.events.splice(eventToUpdateIndex, 1);
+
+      // Update the event based on its _id
+      Object.assign(eventToUpdate, newEvent);
+
+      // Find the index to insert the updated event based on both startTime and endTime
+      const insertIndex = schedule.events.findIndex(event => {
+        return (
+          new Date(eventToUpdate.startTime) <= new Date(newEvent.startTime) &&
+          new Date(eventToUpdate.endTime) <= new Date(newEvent.endTime)
+        );
+      });
+
+      // Insert the updated event at the calculated index
+      schedule.events.splice(insertIndex, 0, eventToUpdate);
+    } else {
+      // Adding a new event
+      // Function to compare events based on both startTime and endTime
+      function compareEvents(event1, event2) {
+        if (new Date(event1.startTime) < new Date(event2.startTime)) return -1;
+        if (new Date(event1.startTime) > new Date(event2.startTime)) return 1;
+        if (new Date(event1.endTime) < new Date(event2.endTime)) return -1;
+        if (new Date(event1.endTime) > new Date(event2.endTime)) return 1;
+        return 0;
+      }
+
+      // Add the new event to the events array and sort by both startTime and endTime
+      schedule.events.push(newEvent);
+      schedule.events.sort(compareEvents);
+    }
+
+    const updateResult = await collection.updateOne(
+      { _id: schedule._id },
+      { $set: { events: schedule.events } }
+    );
+
+    if (updateResult.modifiedCount > 0) {
+      res.status(200).json({ message: 'Event updated successfully' });
+    } else {
+      res.status(500).json({ error: 'Failed to update event' });
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+*/
+
+
+
+
+
+
+  const addEvent = async (req, res) => {
+    try {
+      const userEmail = req.params.email;
+      const newEvent = req.body; // Assuming the new event data is sent in the request body
+  
+      const collection = client.db('ScheduleDB').collection('schedulelist');
+      const schedule = await collection.findOne({ email: userEmail });
+  
+      if (!schedule) {
+        res.status(404).json({ error: 'Schedule not found' });
+        return;
+      }
+  
+      // Function to compare events based on their start times
+      function compareEvents(event1, event2) {
+        return new Date(event1.startTime) - new Date(event2.startTime);
+      }
+  
+      // Add the new event to the events array and sort by start time
+      schedule.events.push(newEvent);
+      schedule.events.sort(compareEvents);
+  
+      const updateResult = await collection.updateOne(
+        { _id: schedule._id },
+        { $set: { events: schedule.events } }
+      );
+  
+      if (updateResult.modifiedCount > 0) {
+        res.status(200).json({ message: 'Event added successfully' });
+      } else {
+        res.status(500).json({ error: 'Failed to add event' });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  };
+  
+  
+/*
   const addEvent = async (req, res) => {
     try {
       const userEmail = req.params.email;
@@ -168,8 +337,9 @@ const createNewSchedule = async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   };
+  */
   
-  
+  /*
   const insertEventAtIndex = async (req, res) => {
     try {
       const userEmail = req.params.email;
@@ -245,7 +415,7 @@ const createNewSchedule = async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   };
-  
+  */
   
   
 
@@ -295,6 +465,7 @@ const createNewSchedule = async (req, res) => {
   };
   */
 
+  /*
   const editEventName = async (req, res) => {
     try {
       const userEmail = req.params.email;
@@ -408,6 +579,7 @@ const createNewSchedule = async (req, res) => {
   };
   */
 
+
   const editEventGeolocation = async (req, res) => {
     try {
       const userEmail = req.params.email;
@@ -484,7 +656,7 @@ const createNewSchedule = async (req, res) => {
     }
   };
   
-
+/*
   const editEventStartTime = async (req, res) => {
     try {
       const userEmail = req.params.email;
@@ -522,6 +694,7 @@ const createNewSchedule = async (req, res) => {
     }
   };
 
+  
   const editEventEndTime = async (req, res) => {
     try {
       const userEmail = req.params.email;
@@ -558,6 +731,7 @@ const createNewSchedule = async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   };
+  */
 
   const deleteEventByID = async (req, res) => {
     try {
@@ -623,19 +797,19 @@ const createNewSchedule = async (req, res) => {
   module.exports = {
     createNewSchedule,
     getScheduleByEmail,
-    insertEventAtIndex,
-    editEventName,
-    editEventAddress,
+    //insertEventAtIndex,
+    //editEventName,
+    //editEventAddress,
     //editEventDate,
     editEventGeolocation,
-    editEventStartTime,
-    editEventEndTime,
+    //editEventStartTime,
+    //editEventEndTime,
     //deleteEventAtIndex,
     deleteSchedule,
-    editEventAtIndex,
+    //editEventAtIndex,
     updateSchedule,
     deleteEventByID,
-    editEventByID,
+    //editEventByID,
     addEvent,
     getCalendarID
 

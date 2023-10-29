@@ -536,8 +536,8 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
                         ScheduleItem newEvent = new ScheduleItem(
                                 updateEventName,
                                 eventAddress,
-                                eventDate + "T" + eventStartTime + ":00",
-                                eventDate + "T" + eventEndTime + ":00",
+                                eventDate + "T" + eventStartTime + ":00.000-07:00",
+                                eventDate + "T" + eventEndTime + ":00.000-07:00",
                                 item.getId(),
                                 item.getCalendarId());
 
@@ -639,8 +639,8 @@ class UpdateEventTask extends AsyncTask<Void, Void, Event> {
             Event event = service.events().get(newEvent.getCalendarId(), newEvent.getId()).execute();
             event.setSummary(newEvent.getTitle());
 
-            DateTime updatedStartDateTime = new DateTime(newEvent.getStartTime() + ".000-07:00");
-            DateTime updatedEndDateTime = new DateTime(newEvent.getEndTime() + ".000-07:00");
+            DateTime updatedStartDateTime = new DateTime(newEvent.getStartTime());
+            DateTime updatedEndDateTime = new DateTime(newEvent.getEndTime());
 
             EventDateTime updatedStart = new EventDateTime()
                     .setDateTime(updatedStartDateTime)

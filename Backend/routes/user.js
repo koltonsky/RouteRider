@@ -21,7 +21,7 @@ const createNewUser = async (req, res) => {
       const errorMessage = 'User with this email already exists';
       const errorMessageLength = Buffer.byteLength(errorMessage, 'utf8');
       res.set('Content-Length', errorMessageLength);
-      res.status(409).json({ message: errorMessage });
+      res.status(109).json({ message: errorMessage });
     } else {
       // If the user doesn't exist, insert the new user document into the collection
       const insertResult = await collection.insertOne(userData);

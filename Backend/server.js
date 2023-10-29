@@ -5,7 +5,7 @@ const fs = require('fs')
 const port = 8081
 const { MongoClient} = require('mongodb');
 const app = express()
-//const axios = require('axios')
+const axios = require('axios')
 
 const user = require('./routes/user.js')
 const schedule = require('./routes/schedule.js')
@@ -54,9 +54,9 @@ app.get('/api/schedulelist/:email', schedule.getScheduleByEmail);
 
 app.put('/api/schedulelist/:email', schedule.updateSchedule);
 
-app.post('/api/schedulelist/:email/:index', schedule.insertEventAtIndex);
-app.put('/api/schedulelist/:email/:index', schedule.editEventAtIndex);
-app.delete('/api/schedulelist/:email/:index', schedule.deleteEventAtIndex);
+app.post('/api/schedulelist/:email', schedule.addEvent);
+app.put('/api/schedulelist/:email/:id', schedule.editEventByID);
+app.delete('/api/schedulelist/:email/:id', schedule.deleteEventByID);
 
 app.put('/api/schedulelist/:email/:index/geolocation', schedule.editEventGeolocation);
 
@@ -134,6 +134,29 @@ app.put('/api/schedulelist/:id', async (req, res) => {
 });
 */
 
+/*
+function getSchedule(email) {
+  const baseURL = 'https://localhost:8081'; // Replace with your server's URL
+  const getScheduleURL = '/api/schedulelist/' + email;
+
+  const httpsAgent = new https.Agent({ rejectUnauthorized: false });
+
+  // Axios instance with the custom agent
+  const axiosWithSelfSignedCert = axios.create({
+    httpsAgent,
+  });
+
+  // Use the custom Axios instance to make the GET request
+  axiosWithSelfSignedCert.get(`${baseURL}${getScheduleURL}`)
+    .then(response => {
+      console.log('Response:', response.data);
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
+}
+*/
+
 app.use('/', (req, res, next) => {
     res.send("Hello from SSL server")
 })
@@ -146,6 +169,8 @@ const sslServer = https.createServer({
 
 connectToDatabase();
 sslServer.listen(port, () => console.log('Secure server :) on port ' + port))
+
+//console.log(getSchedule("test@example.com"))
 
 /*
 const baseURL = 'https://localhost:8081'; // Replace with your server's URL

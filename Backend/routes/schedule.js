@@ -5,24 +5,24 @@ const client = new MongoClient(uri);
 
 const createNewSchedule = async (req, res) => {
   try {
-    // Extract schedule data from the request body
-    const schedule = req.body;
+    // Extract user data from the request body
+    const scheduleData = req.body;
 
     // Assuming you have already connected to the MongoDB client
     const collection = client.db('ScheduleDB').collection('schedulelist');
 
-    // Check if a schedule with a specific identifier (e.g., email) already exists
-    const existingSchedule = await collection.findOne({ email: schedule.email });
-    
+    // Check if a user with a specific identifier (e.g., email) already exists
+    const existingSchedule = await collection.findOne({ email: scheduleData.email });
+
     if (existingSchedule) {
-      // If a schedule with the same email exists, return an error message
+      // If a user with the same email exists, return an error message
       const errorMessage = 'Schedule with this email already exists';
       const errorMessageLength = Buffer.byteLength(errorMessage, 'utf8');
       res.set('Content-Length', errorMessageLength);
-      res.status(100).json({ message: errorMessage });
+      res.status(109).json({ message: errorMessage });
     } else {
-      // If the schedule doesn't exist, insert the new schedule document into the collection
-      const insertResult = await collection.insertOne(schedule);
+      // If the user doesn't exist, insert the new user document into the collection
+      const insertResult = await collection.insertOne(scheduleData);
       const successMessage = 'Schedule created successfully';
       const successMessageLength = Buffer.byteLength(successMessage, 'utf8');
       res.set('Content-Length', successMessageLength);
@@ -55,7 +55,7 @@ const createNewSchedule = async (req, res) => {
         
       } else {
         // User not found
-        res.status(404).json({ error: 'User not found' });
+        res.status(404).json({ error: 'Schedule not found' });
       }
     } catch (error) {
       console.error('Error:', error);
@@ -97,10 +97,79 @@ const createNewSchedule = async (req, res) => {
   };
   
 
+  const editEventByID = async (req, res) => {
+    try {
+      const userEmail = req.params.email;
+      const eventId = req.params.id; // Add 'id' parameter
+      const updatedEvent = req.body; // New event data to replace the existing event
   
+      const collection = client.db('ScheduleDB').collection('schedulelist');
+      const schedule = await collection.findOne({ email: userEmail });
+  
+      if (!schedule) {
+        res.status(404).json({ error: 'Schedule not found' });
+        return;
+      }
+  
+      const eventToUpdate = schedule.events.find(event => event.id === eventId);
+  
+      if (!eventToUpdate) {
+        res.status(400).json({ error: 'Event not found in the schedule' });
+        return;
+      }
+  
+      // Update the event based on its _id
+      Object.assign(eventToUpdate, updatedEvent);
+  
+      const updateResult = await collection.updateOne(
+        { _id: schedule._id },
+        { $set: { events: schedule.events } }
+      );
+  
+      if (updateResult.modifiedCount > 0) {
+        res.status(200).json({ message: 'Event updated successfully' });
+      } else {
+        res.status(500).json({ error: 'Failed to update event' });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  };
 
-
-
+  const addEvent = async (req, res) => {
+    try {
+      const userEmail = req.params.email;
+      const newEvent = req.body; // Assuming the new event data is sent in the request body
+  
+      const collection = client.db('ScheduleDB').collection('schedulelist');
+      const schedule = await collection.findOne({ email: userEmail });
+  
+      if (!schedule) {
+        res.status(404).json({ error: 'Schedule not found' });
+        return;
+      }
+  
+      // Add the new event to the end of the events array
+      schedule.events.push(newEvent);
+  
+      const updateResult = await collection.updateOne(
+        { _id: schedule._id },
+        { $set: { events: schedule.events } }
+      );
+  
+      if (updateResult.modifiedCount > 0) {
+        res.status(200).json({ message: 'Event added successfully' });
+      } else {
+        res.status(500).json({ error: 'Failed to add event' });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  };
+  
+  
   const insertEventAtIndex = async (req, res) => {
     try {
       const userEmail = req.params.email;
@@ -454,21 +523,22 @@ const createNewSchedule = async (req, res) => {
     }
   };
 
-  const deleteEventAtIndex = async (req, res) => {
+  const deleteEventByID = async (req, res) => {
     try {
-      const userEmail = req.params.email;
-      const eventIndex = parseInt(req.params.index);
+      const eventId = req.params.id; // Change 'email' to 'id'
   
       const collection = client.db('ScheduleDB').collection('schedulelist');
-      const schedule = await collection.findOne({ email: userEmail });
+      const schedule = await collection.findOne({ events: { $elemMatch: { id: eventId } } });
   
       if (!schedule) {
-        res.status(404).json({ error: 'User not found' });
+        res.status(404).json({ error: 'Event not found' });
         return;
       }
   
-      if (eventIndex < 0 || eventIndex >= schedule.events.length) {
-        res.status(400).json({ error: 'Invalid event index' });
+      const eventIndex = schedule.events.findIndex(event => event.id === eventId);
+  
+      if (eventIndex === -1) {
+        res.status(400).json({ error: 'Event not found in user schedule' });
         return;
       }
   
@@ -490,6 +560,8 @@ const createNewSchedule = async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   };
+  
+
 
   const deleteSchedule = async (req, res) => {
     try {
@@ -522,10 +594,14 @@ const createNewSchedule = async (req, res) => {
     editEventGeolocation,
     editEventStartTime,
     editEventEndTime,
-    deleteEventAtIndex,
+    //deleteEventAtIndex,
     deleteSchedule,
     editEventAtIndex,
-    updateSchedule
+    updateSchedule,
+    deleteEventByID,
+    editEventByID,
+    addEvent
+
 
 
 

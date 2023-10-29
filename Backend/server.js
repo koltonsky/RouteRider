@@ -198,8 +198,11 @@ async function initReminders(userEmail, date) {
     
     var curStep = {}; // maybe properly define this object later
     var returnList = [];
+    var firstEventTime = "default";
     more.distance = trip.routes[0].legs[0].distance.text;
     more.duration = trip.routes[0].legs[0].duration.text;
+    more.arrival_time = trip.routes[0].legs[0].arrival_time.text;
+    more.departure_time = trip.routes[0].legs[0].departure_time.text;
     more.steps = [];
   
     trip.routes[0].legs[0].steps.forEach((step, stepIndex) => {
@@ -228,16 +231,33 @@ async function initReminders(userEmail, date) {
       else {
         type = "Walk";
         id = "Walk";
-        leaveTime = "walk"; // have to modify 
-        leaveTimeNum = "walk";
+        leaveTime = step.duration.text; // have to modify 
+        leaveTimeNum = step.duration.value;
       }
       
       more.steps.push(step.html_instructions);
       console.log("initReminders(): adding curStep to returnList " + id + " | " + leaveTime + " | " + type);
-      curStep = {_id: id, _leaveTime: leaveTime, _type: type};
+      curStep = {_id: id, _leaveTime: leaveTime, _leaveTimeNum: leaveTimeNum, _type: type};
       returnList.push(curStep);
     });
     returnList.push(more);
+
+    // calculate leave time for walking to each bus stop
+    for (var i = 0; i < returnList.length - 1; i++) {
+      if (i == 0 && returnList[i]._type == "Walk") { 
+        returnList[i]._leaveTime = returnList[returnList.length - 1].departure_time;
+        returnList[i]._leaveTimeNum = timestampToTime(returnList[returnList.length - 1].departure_time);
+      }
+      else if ((i == returnList.length - 2) && returnList[i]._type == "Walk") { 
+        returnList[i]._leaveTime = returnList[returnList.length - 1].arrival_time;
+        returnList[i]._leaveTimeNum = timestampToTime(returnList[returnList.length - 1].arrival_time);
+      }
+      else if (returnList[i]._type == "Walk") { // assumes 'type' for next array entry is either "Bus" or "SkyTrain"
+        returnList[i]._leaveTime = timestampToTime(returnList[i + 1]._leaveTimeNum - returnList[i]._leaveTimeNum);
+        returnList[i]._leaveTimeNum = returnList[i + 1]._leaveTimeNum - returnList[i]._leaveTimeNum;
+      }
+      console.log("updated leavetime: " + returnList[i]._leaveTime);
+    }
   
     return returnList;
   });
@@ -428,6 +448,16 @@ function calcDist(x1, y1, x2, y2) {
   var b = y1 - y2;
 
   return Math.sqrt( a*a + b*b );
+}
+
+function timeToTimestamp(timeString) {
+  const date = new Date(timeString);
+  return Math.floor(date.getTime() / 1000);
+}
+
+function timestampToTime(timestamp) {
+  const date = new Date(timestamp * 1000);
+  return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 }
 
 

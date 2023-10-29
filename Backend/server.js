@@ -129,72 +129,113 @@ const sslServer = https.createServer({
 connectToDatabase();
 sslServer.listen(port, () => console.log('Secure server :) on port ' + port))
 
+
 /**
- * Bus number (r4, 99, expo line etc.)
- * time user needs to start walking to the bus
- * type of transit (walking, bus, skytrain, etc.)
+ * TODO: display route map on frontend
  * 
- * More: display route summary
+ * time to arrive 
  * 
- * api call from routes page only provides userEmail and date
- * 
- * {route: [{id: 123, leaveTime: 8:00, type: Bus}, 
- *          {id: Expo Line, leaveTime: 9:00, type: SkyTrain}, 
- *          {id: 99, leaveTime: 10:00, type: Bus}],
- *  more: {distance: 26.7 km, duration: 1 hour 30 mins, steps: ["walk...", "take bus number..."]}
- *  }
+ * origin
+ * destination
  */
 
-// initReminders("koltonluu@gmail.com", "2023-09-06T15:00:00.000-07:00");
 
+var dummy_schedule = {
+  email: 'koltonluu@gmail.com',
+  events: [
+    {
+      address: 'UBC MacLeod, Room 4006',
+      calendarID: 'koltonluu@gmail.com',
+      endTime: '2023-11-01T15:00:00.000-07:00',
+      eventName: 'CPEN 321 L1B',
+      geolocation: { latitude: 0, longitude: 0 },
+      id: '_64p36d1h6osjgchm6cp3gchk68r62oj3cgp3ge9h6krg_20231101T200000Z',
+      startTime: '2023-11-01T13:00:00.000-07:00'
+    },
+    {
+      address: 'UBC MacMillan, Room 360',
+      calendarID: 'koltonluu@gmail.com',
+      endTime: '2023-11-01T17:00:00.000-07:00',
+      eventName: 'CPEN 321 101',
+      geolocation: { latitude: 0, longitude: 0 },
+      id: '_64p36d1h6osjgchm6cp3gchk68r62oj3cgpj4d1m64rg_20231101T223000Z',
+      startTime: '2023-11-01T15:30:00.000-07:00'
+    }
+  ]
+}
+var dummy_user = {
+  email: "koltonluu@gmail.com",
+  name: "John Doe",
+  address: "5870 Rumble Street, Burnaby, BC",
+  friends: [
+    "friend1@example.com",
+    "friend2@example.com"
+  ]
+}
+
+// client.db('ScheduleDB').collection('schedulelist').insertOne(dummy_schedule).then((result) => {
+//   console.log("inserted schedule");
+// });
+// client.db('UserDB').collection('userlist').insertOne(dummy_user).then((result) => {
+//   console.log("inserted user");
+// });
+
+var dummy = initReminders("koltonluu@gmail.com", "2023-11-01");
 /**
- * Function outputs an array of 7 entries, with each entry corresponding to when the user should be reminded to leave for class on that day.
- * Instead of array, could also directly modify the schedule.
+ * Function returns an array of objects containing the following fields:
+ * _id: bus number/Skytrain line name (e.g. 99, R4, Expo Line, etc.)
+ * _leaveTime: time to leave
+ * _leaveTimeNum: time to leave in number format
+ * _type: type of transportation (Bus, SkyTrain, Walk)
+ * 
+ * For local testing, connect to a mongoDB instance and run commented client.db commands above. They should initialize the database with dummy data.
+ *  
  * Translink Open API Key: crj9j8Kj97pbPkkc61dX
  * Geocoding API key: AAPK3c726265cc41485bb57c5512e98cf912OLoJQtidjOlcqjdpa0Pl773UqNoOYfwApr6ORYd8Lina8_K0sEbdcyXsNfHFqLKE if error 498 invalid token, create a new key
- * HERE Location services API key: S3186X1u-4DFckek542dcP9gxZeLI3uHQl_IkwZnJb4
- *                        App ID:  cOIE7nteY1IGtsu8BGpr
+ * HERE Location services API key (unused): S3186X1u-4DFckek542dcP9gxZeLI3uHQl_IkwZnJb4
+ *                        App ID  (unused):  cOIE7nteY1IGtsu8BGpr
  * Google Direction API ($200 credit): AIzaSyBVsUyKxBvRjE0XdooMuoDrpAfu1KO_2mM 
- * Function takes in an home/starting address and a schedule (includes location/address of classes eventually, but temporarily assume UBC for simplicity) 
- * @param {*} schedule 
- * @param {*} address 
+ * 
+ * @param {*} userEmail 
+ * @param {*} date
  */
 async function initReminders(userEmail, date) {
   /* Get static schedule of closest bus stop to home address */
-  // var buses = [];
-  // get closest bus stop to home address
   console.log("called initReminders");
-  // buses = await getNearestBuses(address);
-  // console.log("initReminders(): returned buses: " + buses[1].StopNo + " " + buses.length);
-
-  // client.db('ScheduleDB').collection('schedulelist').findOne({id: "johndoe@example.com"}).then((result) => {
-  //   console.log("retrieved schedule: " + result.schedule);
-  // });
-  var schedule = await client.db('ScheduleDB').collection('schedulelist').findOne({id: userEmail});
+  
+  var schedule = await client.db('ScheduleDB').collection('schedulelist').findOne({email: userEmail});
+  var user = await client.db('UserDB').collection('userlist').findOne({email: userEmail})
   console.log("initReminders(): returned schedule: " + schedule);
-  console.log(schedule.schedule.events[0].eventName);
+  console.log(schedule.events[0].eventName);
 
+  /* Initialize fields that are need for Directions API call */
   var timeOfFirstEvent = "";
-  for (var i = 0; i < schedule.schedule.events.length; i++) {
-    console.log("initReminders(): " + schedule.schedule.events[i].date + " " + date);
-    if (schedule.schedule.events[i].date == date) { 
-      console.log("initReminders(): startTime " + schedule.schedule.events[i].timeFrame.start);
-      timeOfFirstEvent = combineDateAndTime(schedule.schedule.events[i].date, schedule.schedule.events[i].timeFrame.start);
+  var locationOfFirstEvent = "";
+  var locationOfOrigin = user.address;
+  for (var i = 0; i < schedule.events.length; i++) { // assumes events are sorted by date
+    // console.log("initReminders(): " + schedule.events[i].startTime + " " + date);
+    if (schedule.events[i].startTime.split('T')[0] == date) { 
+      // console.log("initReminders(): startTime " + schedule.events[i].startTime);
+      timeOfFirstEvent = schedule.events[i].startTime;
+      locationOfFirstEvent = schedule.events[i].address;
+      locationOfFirstEvent = locationOfFirstEvent.split(',')[0];
       break;
     }
   }
-  console.log("initReminders(): returned startTime: " + timeOfFirstEvent);
+  console.log("initReminders(): returned timeOfFirstEvent: " + timeOfFirstEvent);
+  console.log("initReminders(): returned locationOfFirstEvent: " + locationOfFirstEvent);
+  console.log("initReminders(): returned locationOfOrigin: " + locationOfOrigin);
 
-  planTransitTrip('5870 Rumble Street, Burnaby, BC', "UBC Exchange Bus Loop", new Date(timeOfFirstEvent)).then((trip) => {
+  planTransitTrip(locationOfOrigin, locationOfFirstEvent, new Date(timeOfFirstEvent)).then((trip) => {
     console.log("initReminders(): returned trip: " + trip + " " + trip.routes[0].legs[0].steps[0].travel_mode);
-    // fields for object to be returned to frontend
+    /* fields for object to be returned to frontend */
     var id = '';
     var leaveTime = '';
     var type = '';
     var more = {};
-    
     var curStep = {}; // maybe properly define this object later
     var returnList = [];
+
     more.distance = trip.routes[0].legs[0].distance.text;
     more.duration = trip.routes[0].legs[0].duration.text;
     more.arrival_time = trip.routes[0].legs[0].arrival_time.text;
@@ -209,13 +250,13 @@ async function initReminders(userEmail, date) {
           case("Bus"):
             type = "Bus";
             id = step.transit_details.line.short_name;
-            leaveTime = step.transit_details.departure_time.text; // have to modify 
+            leaveTime = step.transit_details.departure_time.text;  
             leaveTimeNum = step.transit_details.departure_time.value;
             break;
           case("Subway"):
             type = "SkyTrain";
             id = step.transit_details.line.name;
-            leaveTime = step.transit_details.departure_time.text; // have to modify 
+            leaveTime = step.transit_details.departure_time.text; 
             leaveTimeNum = step.transit_details.departure_time.value;
             break;
           default:
@@ -227,7 +268,7 @@ async function initReminders(userEmail, date) {
       else {
         type = "Walk";
         id = "Walk";
-        leaveTime = step.duration.text; // have to modify 
+        leaveTime = step.duration.text; 
         leaveTimeNum = step.duration.value;
       }
       
@@ -238,7 +279,7 @@ async function initReminders(userEmail, date) {
     });
     returnList.push(more);
 
-    // calculate leave time for walking to each bus stop
+    /* Directions API doesn't include leaveTime in "WALKING" steps, so we need to calculate ourselves */
     for (var i = 0; i < returnList.length - 1; i++) {
       if (i == 0 && returnList[i]._type == "Walk") { 
         returnList[i]._leaveTime = returnList[returnList.length - 1].departure_time;
@@ -258,72 +299,10 @@ async function initReminders(userEmail, date) {
     return returnList;
   });
 }
-// getSchedule("johnjoe@example.com", "POST").then((my_schedule) => {
-//   console.log("returned schedule: " + my_schedule);
-// });
-var dummy_schedule = {
-  "email": "johndoe@email.com",
-  "events": [
-    {
-      "eventName": "Meeting with Client",
-      "date": "2023-10-23",
-      "timeFrame": {
-        "start": "08:00 AM",
-        "end": "10:00 AM"
-      },
-      "address": "123 Main St, City, Country",
-      "geolocation": {
-        "latitude": 123.456789,
-        "longitude": 987.654321
-      }
-    },
-    {
-      "eventName": "Lunch with Colleague",
-      "date": "2023-10-24",
-      "timeFrame": {
-        "start": "02:30 PM",
-        "end": "04:30 PM"
-      },
-      "address": "456 Elm St, City, Country",
-      "geolocation": {
-        "latitude": 45.678901,
-        "longitude": -67.890123
-      }
-    }
-  ]
-};
-// client.db('ScheduleDB').collection('schedulelist').insertOne({id: 'dummy@gmail.com', schedule: dummy_schedule}).then((result) => {
-//   console.log("inserted schedule");
-// });
-// client.db('ScheduleDB').collection('schedulelist').findOne({id: "johndoe@example.com"}).then((result) => {
-//   console.log("retrieved schedule: " + result.schedule);
-// });
 
-var dummy = initReminders("dummy@gmail.com", "2023-10-30");
-// planTransitTrip('5870 Rumble Street, Burnaby, BC', "UBC Exchange Bus Loop", new Date("2023-10-28T18:00:00.000Z"));
 // getNearestBuses("EB Rumble St @ Gilley Ave").then((buses) => {
 //   console.log(buses[0].StopNo + " " + buses.length);
 // });
-function parseRoute(response) {
-  var route = JSON.parse(response);
-  var routeReturn = new Route();
-  var legs = route.routes[0].legs;
-  for (var j = 0; j < legs.length; j++) {
-      var leg = legs[j];
-      var leg1 = new Leg();
-      var distance = leg.distance.value;
-      leg1.setDistance(distance);
-      routeReturn.addLeg(leg1);
-      var steps = route.routes[0].legs[j].steps;
-      for (var k = 0; k < steps.length; k++) {
-          var step = steps[k];
-          var polyline = step.polyline.points;
-          var latLngs = PolylineDecoder.decodePoly(polyline);
-          leg1.addAllPoints(latLngs);
-      }
-  }
-  return routeReturn;
-}
 
 function getLatLong(address) {
   return new Promise((resolve, reject) => {
@@ -428,7 +407,7 @@ async function planTransitTrip(origin, destination, arriveTime) {
     });
   
     const url = `${apiUrl}?${params.toString()}`;
-    // const url = 'https://transit.router.hereapi.com/v8/routes?origin=49.1331,-123.0011&destination=49.2668,-123.2456&apiKey=S3186X1u-4DFckek542dcP9gxZeLI3uHQl_IkwZnJb4'
+
     const request = https.get(url, (response) => {
       let data = '';
       console.log("planTransitTrip(): request sent");

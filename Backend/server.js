@@ -128,6 +128,25 @@ const sslServer = https.createServer({
 connectToDatabase();
 sslServer.listen(port, () => console.log('Secure server :) on port ' + port))
 
+// function findCommuteBuddy (userEmail, )
+// returns list of users
+async function findCommuteBuddies(userEmail) {
+  var user_list = [];
+  var schedule = await client.db('ScheduleDB').collection('schedulelist').findOne({email: userEmail});
+  console.log(schedule);
+  /*
+  var friends = user.friends;
+  var buddies = [];
+  for (var i = 0; i < friends.length; i++) {
+    var friend = await client.db('UserDB').collection('userlist').findOne({email: friends[i]});
+    if (friend.commute == user.commute) {
+      buddies.push(friend);
+    }
+  }
+  return buddies;
+  */
+}
+
 /**
  * Bus number (r4, 99, expo line etc.)
  * time user needs to start walking to the bus
@@ -176,6 +195,8 @@ async function initReminders(userEmail, date) {
   //     break;
   //   }
   // }
+
+  
   planTransitTrip('5870 Rumble Street, Burnaby, BC', "UBC Exchange Bus Loop", new Date("2023-10-30T18:00:00.000Z")).then((trip) => {
     console.log("initReminders(): returned trip: " + trip + " " + trip.routes[0].legs[0].steps[0].travel_mode);
     // fields for object to be returned to frontend
@@ -258,6 +279,8 @@ async function initReminders(userEmail, date) {
       }
       console.log("updated leavetime: " + returnList[i]._leaveTime);
     }
+
+    findCommuteBuddies("johndoe@email.com");
   
     return returnList;
   });
@@ -459,5 +482,7 @@ function timestampToTime(timestamp) {
   const date = new Date(timestamp * 1000);
   return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 }
+
+
 
 

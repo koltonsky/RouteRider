@@ -10,6 +10,8 @@ import android.os.Bundle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,6 +52,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -323,7 +326,7 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
 //                        System.out.println();
 
                     // List events for the calendar
-                    long sevenDaysInMillis = 5L * 24 * 60 * 60 * 1000;
+                    long sevenDaysInMillis = 3L * 24 * 60 * 60 * 1000;
                     Events events = service.events().list(calendarId)
                             .setSingleEvents(true)
                             .setTimeMin(new DateTime(System.currentTimeMillis()))
@@ -331,6 +334,24 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
                             .execute();
 
                     List<Event> itemsEvents = events.getItems();
+                    Comparator<Event> eventComparator = new Comparator<Event>() {
+                        @Override
+                        public int compare(Event event1, Event event2) {
+                            // Assuming the start time is in ISO8601 format
+                            String startTime1 = String.valueOf(event1.getStart().getDateTime());
+                            String startTime2 = String.valueOf(event2.getStart().getDateTime());
+
+                            if (startTime1 == null || startTime2 == null) {
+                                return 0; // Handle null values if needed
+                            }
+
+                            // Compare events by start time (in ISO8601 format)
+                            return startTime1.compareTo(startTime2);
+                        }
+                    };
+
+// Sort the list of events using the custom comparator
+                    itemsEvents.sort(eventComparator);
                     for (Event event : itemsEvents) {
                         String eventId = event.getId();
                         String eventSummary = event.getSummary();
@@ -514,6 +535,7 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
                     // 2023-11-01T15:00:00.000-07:00
                     System.out.println(eventDate + "T" + eventStartTime + ":00");
                     if (ScheduleFragment.EventInputListener.onEventInput(updateEventName, eventAddress, eventDate, eventStartTime, eventEndTime)) {
+                        APICaller apiCall = new APICaller();
                         ScheduleItem newEvent = new ScheduleItem(
                                 updateEventName,
                                 eventAddress,
@@ -523,16 +545,29 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
                                 item.getCalendarId());
 
                         String jsonUpdateEvent = new Gson().toJson(newEvent);
-                        APICaller apiCall = new APICaller();
-
-                        apiCall.APICall("api/schedulelist/" + account.getEmail() + "/" + item.getId(), jsonUpdateEvent, APICaller.HttpMethod.PUT, new APICaller.ApiCallback() {
+                        apiCall.APICall("api/schedulelist/" + account.getEmail() + "/" + item.getId(), "", APICaller.HttpMethod.DELETE, new APICaller.ApiCallback() {
                             @Override
                             public void onResponse(String responseBody) {
                                 System.out.println("BODY: " + responseBody);
-                                eventName.setText(newEvent.getTitle());
-                                eventLocation.setText(newEvent.getLocation());
-                                startTime.setText(newEvent.getStartTime().substring(11,16));
-                                endTime.setText(newEvent.getEndTime().substring(11,16));
+                                apiCall.APICall("api/schedulelist/" + account.getEmail() + "/", jsonUpdateEvent, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
+                                    @Override
+                                    public void onResponse(String responseBody) {
+
+                                        System.out.println("BODY: " + responseBody);
+                                        Handler handler = new Handler(Looper.getMainLooper());
+                                        handler.post(() -> {
+                                            eventName.setText(newEvent.getTitle());
+                                            eventLocation.setText(newEvent.getLocation());
+                                            startTime.setText(newEvent.getStartTime().substring(11, 16));
+                                            endTime.setText(newEvent.getEndTime().substring(11, 16));
+                                        });
+                                    }
+
+                                    @Override
+                                    public void onError(String errorMessage) {
+                                        System.out.println("Error " + errorMessage);
+                                    }
+                                });
                             }
 
                             @Override

@@ -3,17 +3,12 @@ package com.example.routerider;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.lifecycle.Lifecycle;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
-import com.example.routerider.fragments.MapFragment;
+import com.example.routerider.fragments.RoutesFragment;
 import com.example.routerider.fragments.ProfileFragment;
 import com.example.routerider.fragments.ScheduleFragment;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class ViewPagerAdapter extends FragmentStateAdapter {
 
@@ -27,7 +22,7 @@ public class ViewPagerAdapter extends FragmentStateAdapter {
         if (position == 0) {
             return new ScheduleFragment();
         } else if(position == 1) {
-            return new MapFragment();
+            return new RoutesFragment();
         }
         return new ProfileFragment();
     }

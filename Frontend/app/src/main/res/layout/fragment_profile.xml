@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -35,6 +36,16 @@
             android:text="Email: " />
 
         <TextView
+            android:id="@+id/address"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginTop="14dp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="Address: "
+            app:drawableEndCompat="@drawable/right_arrow"/>
+
+        <TextView
             android:id="@+id/friendList"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -42,7 +53,7 @@
             android:layout_gravity="center"
             android:gravity="center"
             android:text="Friends"
-            android:drawableEnd="@drawable/right_arrow"/>
+            app:drawableEndCompat="@drawable/right_arrow" />
 
         <TextView
             android:id="@+id/preferences"
@@ -52,7 +63,7 @@
             android:layout_gravity="center"
             android:gravity="center"
             android:text="Preferences"
-            android:drawableEnd="@drawable/right_arrow"/>
+            app:drawableEndCompat="@drawable/right_arrow" />
     </LinearLayout>
 
 

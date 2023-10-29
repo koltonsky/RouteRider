@@ -56,6 +56,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 public class ScheduleFragment extends Fragment {
     private LinearLayout scheduleView;
@@ -158,18 +159,41 @@ public class ScheduleFragment extends Fragment {
                 String eventStartTime = eventStartTimeEditText.getText().toString();
                 String eventEndTime = eventEndTimeEditText.getText().toString();
 
-                if (EventInputListener.onEventInput(eventName, eventAddress, eventDate, eventStartTime, eventEndTime)) {
-//                    apiCall.APICall("api/schedulelist/", "", APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
-//                        @Override
-//                        public void onResponse(String responseBody) {
-//                            System.out.println("BODY: " + responseBody);
-//                        }
+                if (ScheduleFragment.EventInputListener.onEventInput(eventName, eventAddress, eventDate, eventStartTime, eventEndTime)) {
+                    CreateEventTask createTask = (CreateEventTask) new CreateEventTask(service, eventName, eventAddress, eventDate, eventStartTime, eventEndTime).execute();
+//                    try {
+//                        //Event createdEvent = createTask.get();
 //
-//                        @Override
-//                        public void onError(String errorMessage) {
-//                            System.out.println("Error " + errorMessage);
-//                        }
-//                    });
+//                    } catch (ExecutionException | InterruptedException e) {
+//                        throw new RuntimeException(e);
+//                    }
+
+                    ScheduleItem newEvent = new ScheduleItem(
+                            eventName,
+                            eventAddress,
+                            eventDate + "T" + eventStartTime + ":00",
+                            eventDate + "T" + eventEndTime + ":00",
+                            "testasdfjkal;sdkfjklne",
+                            "primary");
+
+                    String jsonUpdateEvent = new Gson().toJson(newEvent);
+
+                    apiCall.APICall("api/schedulelist/" + account.getEmail(), jsonUpdateEvent, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
+                        @Override
+                        public void onResponse(String responseBody) {
+                            System.out.println("BODY: " + responseBody);
+//                                eventName.setText(newEvent.getTitle());
+//                                eventLocation.setText(newEvent.getLocation());
+//                                startTime.setText(newEvent.getStartTime().substring(11,16));
+//                                endTime.setText(newEvent.getEndTime().substring(11,16));
+                        }
+
+                        @Override
+                        public void onError(String errorMessage) {
+                            System.out.println("Error " + errorMessage);
+                        }
+                    });
+
                     dialog.dismiss();
                 } else {
                     Toast.makeText(requireContext(), "Invalid inputs, please try again", Toast.LENGTH_SHORT).show();
@@ -177,36 +201,6 @@ public class ScheduleFragment extends Fragment {
             }));
 
             dialog.show();
-
-        });
-
-        transitFriend.setOnClickListener(v -> {
-            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(requireContext());
-            alertDialogBuilder.setTitle("Friend List");
-
-            // Define an array of items to display in the list
-            String[] friendNames = {"Friend 1", "Friend 2", "Friend 3", "Friend 4", "Friend 5", "Friend 6", "Friend 7", "Friend 8", "Friend 9", "Friend 10"};
-
-            // Set the item list and a click listener
-            alertDialogBuilder.setItems(friendNames, (dialog, which) -> {
-                String selectedFriend = friendNames[which];
-                // Perform actions with the selected friend
-//                apiCall.APICall("api/schedulelist/", "", APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
-//                    @Override
-//                    public void onResponse(String responseBody) {
-//                        System.out.println("BODY: " + responseBody);
-//                    }
-//
-//                    @Override
-//                    public void onError(String errorMessage) {
-//                        System.out.println("Error " + errorMessage);
-//                    }
-//                });
-            });
-
-            // Create and show the AlertDialog
-            AlertDialog alertDialog = alertDialogBuilder.create();
-            alertDialog.show();
 
         });
 
@@ -614,5 +608,70 @@ class UpdateEventTask extends AsyncTask<Void, Void, Event> {
         }
     }
 }
+
+class CreateEventTask extends AsyncTask<Void, Void, Event> {
+    private Calendar service;
+    private final String eventName;
+    private final String eventAddress;
+    private final String eventDate;
+    private final String eventStartTime;
+    private final String eventEndTime;
+
+    public CreateEventTask(Calendar service, String eventName, String eventAddress, String eventDate, String eventStartTime, String eventEndTime) {
+        this.service = service;
+        this.eventName = eventName;
+        this.eventAddress = eventAddress;
+        this.eventDate = eventDate;
+        this.eventStartTime = eventStartTime;
+        this.eventEndTime = eventEndTime;
+    }
+
+    @Override
+    protected Event doInBackground(Void... voids) {
+        try {
+            // Initialize the Google Calendar service
+            // Create an event
+            Event event = new Event()
+                    .setSummary(eventName)
+                    .setLocation(eventAddress);
+
+            // Define the time zone
+            String timeZone = "America/Denver"; // UTC-7 (Mountain Daylight Time)
+
+            // Set the start time    2023-11-01T15:00:00.000-07:00
+            //                       2023-12-1T12:00:00.000-07:00
+            DateTime startDateTime = new DateTime(eventDate + "T" + eventStartTime + ":00.000-07:00");
+            EventDateTime start = new EventDateTime()
+                    .setDateTime(startDateTime)
+                    .setTimeZone(timeZone);
+            event.setStart(start);
+
+            // Set the end time
+            DateTime endDateTime = new DateTime(eventDate + "T" + eventEndTime + ":00.000-07:00");
+            EventDateTime end = new EventDateTime()
+                    .setDateTime(endDateTime)
+                    .setTimeZone(timeZone);
+            event.setEnd(end);
+
+            // Insert the event into the calendar
+            String calendarId = "primary"; // Use "primary" for the user's primary calendar
+            event = service.events().insert(calendarId, event).execute();
+            return event;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    protected void onPostExecute(Event event) {
+        if (event != null) {
+            System.out.printf("Event created: %s\n", event.getHtmlLink());
+        } else {
+            // Handle the error or show a message to the user
+        }
+    }
+}
+
 
 

@@ -47,4 +47,9 @@ public class ScheduleItem {
     public String getCalendarId() {
         return calendarID;
     }
+
+    public Void updateId(String newId) {
+        this.id = newId;
+        return null;
+    }
 }

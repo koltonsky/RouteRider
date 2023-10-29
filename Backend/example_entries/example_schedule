@@ -1,31 +1,29 @@
 {
-  "email": "johndoe@email.com",
+  "email": "koltonluu@gmail.com",
   "events": [
     {
-      "eventName": "Meeting with Client",
-      "date": "2023-10-23",
-      "timeFrame": {
-        "start": "08:00 AM",
-        "end": "10:00 AM"
-      },
-      "address": "123 Main St, City, Country",
+      "address": "UBC MacLeod, Room 4006",
+      "calendarID": "koltonluu@gmail.com",
+      "endTime": "2023-11-01T15:00:00.000-07:00",
+      "eventName": "CPEN 321 L1B",
       "geolocation": {
-        "latitude": 123.456789,
-        "longitude": 987.654321
-      }
+        "latitude": 0,
+        "longitude": 0
+      },
+      "id": "_64p36d1h6osjgchm6cp3gchk68r62oj3cgp3ge9h6krg_20231101T200000Z",
+      "startTime": "2023-11-01T13:00:00.000-07:00"
     },
     {
-      "eventName": "Lunch with Colleague",
-      "date": "2023-10-24",
-      "timeFrame": {
-        "start": "02:30 PM",
-        "end": "04:30 PM"
-      },
-      "address": "456 Elm St, City, Country",
+      "address": "UBC MacMillan, Room 360",
+      "calendarID": "koltonluu@gmail.com",
+      "endTime": "2023-11-01T17:00:00.000-07:00",
+      "eventName": "CPEN 321 101",
       "geolocation": {
-        "latitude": 45.678901,
-        "longitude": -67.890123
-      }
+        "latitude": 0,
+        "longitude": 0
+      },
+      "id": "_64p36d1h6osjgchm6cp3gchk68r62oj3cgpj4d1m64rg_20231101T223000Z",
+      "startTime": "2023-11-01T15:30:00.000-07:00"
     }
   ]
 }

@@ -92,7 +92,6 @@ public class ScheduleFragment extends Fragment {
             calendar.setTime(currentDay);
             calendar.add( java.util.Calendar.DAY_OF_YEAR, -1); // Subtract 1 day to get the previous day
             Date previousDay = calendar.getTime();
-
             changeDay(previousDay);
         });
 
@@ -101,8 +100,6 @@ public class ScheduleFragment extends Fragment {
             calendar.setTime(currentDay);
             calendar.add( java.util.Calendar.DAY_OF_YEAR, 1); // Add 1 day to get the next day
             Date nextDay = calendar.getTime();
-            currentDayText.setText(formatter.format(nextDay));
-            calendarAsyncTask.updateDisplay(nextDay);
             changeDay(nextDay);
         });
 

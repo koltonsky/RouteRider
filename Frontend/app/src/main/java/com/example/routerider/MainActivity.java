@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences pref = getSharedPreferences("routeRider", Context.MODE_PRIVATE);
         if(pref.getBoolean("isLoggedIn", false) && autoSignIn) {
             GoogleSignInOptions googleSignIn = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                    .requestScopes(new Scope(CalendarScopes.CALENDAR_READONLY))
+                    .requestScopes(new Scope(CalendarScopes.CALENDAR))
                     .requestEmail()
                     .build();
 
@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
             Button loginButton = findViewById(R.id.login_button);
             loginButton.setOnClickListener(v -> {
                 GoogleSignInOptions googleSignIn = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        .requestScopes(new Scope(CalendarScopes.CALENDAR_READONLY))
+                        .requestScopes(new Scope(CalendarScopes.CALENDAR))
                         .requestEmail()
                         .build();
 

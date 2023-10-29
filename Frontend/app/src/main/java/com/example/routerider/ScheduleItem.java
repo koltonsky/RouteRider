@@ -10,14 +10,18 @@ public class ScheduleItem {
     private String startTime;
     private String endTime;
     private Map<String, Object> geolocation = new LinkedHashMap<>();
+    private String id;
+    private String calendarID;
 
-    public ScheduleItem(String eventSummary, String eventLocation, String startTimeString, String endTimeString) {
-        eventName = eventSummary;
-        address = eventLocation;
-        startTime = startTimeString;
-        endTime = endTimeString;
-        geolocation.put("latitude", 0.0);
-        geolocation.put("longitude", 0.0);
+    public ScheduleItem(String eventSummary, String eventLocation, String startTimeString, String endTimeString, String id, String calendarId) {
+        this.eventName = eventSummary;
+        this.address = eventLocation;
+        this.startTime = startTimeString;
+        this.endTime = endTimeString;
+        this.id = id;
+        this.calendarID = calendarId;
+        this.geolocation.put("latitude", 0.0);
+        this.geolocation.put("longitude", 0.0);
     }
 
     public String getTitle() {
@@ -34,5 +38,13 @@ public class ScheduleItem {
 
     public String getEndTime() {
         return endTime;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getCalendarId() {
+        return calendarID;
     }
 }

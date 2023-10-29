@@ -36,6 +36,7 @@ import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.Events;
 import com.google.gson.Gson;
 
@@ -87,7 +88,7 @@ public class ScheduleFragment extends Fragment {
 
         APICaller apiCall = new APICaller();
         GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(
-                requireContext(), Collections.singleton(CalendarScopes.CALENDAR_READONLY));
+                requireContext(), Collections.singleton(CalendarScopes.CALENDAR));
         credential.setSelectedAccount(account.getAccount());
 
         Calendar service;
@@ -298,6 +299,7 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
     private List<ScheduleItem> eventList;
     private List<ScheduleItem> dayList;
     private GoogleSignInAccount account;
+    private Calendar service;
 
     private Context scheduleContext;
     private View scheduleView;
@@ -310,127 +312,124 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
     @Override
     protected Void doInBackground(Calendar... calendars) {
         dayList =  new ArrayList<>();
-            Calendar service = calendars[0];
-            eventList = new ArrayList<>();
-            APICaller apiCall = new APICaller();
+        service = calendars[0];
+        eventList = new ArrayList<>();
+        APICaller apiCall = new APICaller();
 
-            try {
-                CalendarList calendarList = service.calendarList().list().execute();
-                List<CalendarListEntry> items = calendarList.getItems();
+        try {
+            CalendarList calendarList = service.calendarList().list().execute();
+            List<CalendarListEntry> items = calendarList.getItems();
 
-                if (items.isEmpty()) {
-                    System.out.println("No calendars found.");
-                } else {
-                    System.out.println("Calendars:");
+            if (items.isEmpty()) {
+                System.out.println("No calendars found.");
+            } else {
+                System.out.println("Calendars:");
 
-                    for (CalendarListEntry calendarEntry : items) {
-                        String calendarId = calendarEntry.getId();
-                        String summary = calendarEntry.getSummary();
+                for (CalendarListEntry calendarEntry : items) {
+                    String calendarId = calendarEntry.getId();
+                    String summary = calendarEntry.getSummary();
 
 //                        System.out.println("Calendar ID: " + calendarId);
 //                        System.out.println("Summary: " + summary);
 //                        System.out.println();
 
-                        // List events for the calendar
-                        long sevenDaysInMillis = 365L * 24 * 60 * 60 * 1000;
-                        Events events = service.events().list(calendarId)
-                                .setSingleEvents(true)
-                                .setTimeMin(new DateTime(System.currentTimeMillis()))
-                                .setTimeMax(new DateTime(System.currentTimeMillis() + sevenDaysInMillis)) // Set the time range as needed
-                                .execute();
+                    // List events for the calendar
+                    long sevenDaysInMillis = 5L * 24 * 60 * 60 * 1000;
+                    Events events = service.events().list(calendarId)
+                            .setSingleEvents(true)
+                            .setTimeMin(new DateTime(System.currentTimeMillis()))
+                            .setTimeMax(new DateTime(System.currentTimeMillis() + sevenDaysInMillis)) // Set the time range as needed
+                            .execute();
 
-                        List<Event> itemsEvents = events.getItems();
-                        for (Event event : itemsEvents) {
-                            String eventId = event.getId();
-                            String eventSummary = event.getSummary();
-                            String eventLocation = (event.getLocation() != null) ? event.getLocation() : "N/A";
-                            DateTime startTime = event.getStart().getDateTime();
-                            DateTime endTime = event.getEnd().getDateTime();
+                    List<Event> itemsEvents = events.getItems();
+                    for (Event event : itemsEvents) {
+                        String eventId = event.getId();
+                        String eventSummary = event.getSummary();
+                        String eventLocation = (event.getLocation() != null) ? event.getLocation() : "N/A";
+                        DateTime startTime = event.getStart().getDateTime();
+                        DateTime endTime = event.getEnd().getDateTime();
 
 
-                            // Format the start and end times as strings (you can customize the format)
-                            String startTimeString = (startTime != null) ? startTime.toString() : "N/A";
-                            String endTimeString = (endTime != null) ? endTime.toString() : "N/A";
+                        // Format the start and end times as strings (you can customize the format)
+                        String startTimeString = (startTime != null) ? startTime.toString() : "N/A";
+                        String endTimeString = (endTime != null) ? endTime.toString() : "N/A";
 
-//                            System.out.println("Event ID: " + eventId);
+                        System.out.println("Event ID: " + eventId);
 //                            System.out.println("Event Summary: " + eventSummary);
 //                            System.out.println("Event Location: " + eventLocation);
 //                            System.out.println("Start Time: " + startTimeString);
 //                            System.out.println("End Time: " + endTimeString);
 //                            System.out.println();
-                            if (eventLocation.contains("Room")) {
-                                eventLocation = "UBC " + eventLocation;
-                            }
+                        if (eventLocation.contains("Room")) {
+                            eventLocation = "UBC " + eventLocation;
+                        }
 
-                            ScheduleItem newEvent = new ScheduleItem(
-                                    eventSummary,
-                                    eventLocation,
-                                    startTimeString,
-                                    endTimeString);
+                        ScheduleItem newEvent = new ScheduleItem(
+                                eventSummary,
+                                eventLocation,
+                                startTimeString,
+                                endTimeString,
+                                eventId,
+                                calendarId);
 
-                            if (!startTimeString.equals("N/A")) {
-                                eventList.add(newEvent);
-                                System.out.println("adding event");
-                            }
+                        if (!startTimeString.equals("N/A")) {
+                            System.out.println(eventId);
+                            eventList.add(newEvent);
+                            System.out.println("adding event");
                         }
                     }
                 }
-
-                Map<String, Object> test = new HashMap<>();
-                test.put("email", "koltonluu@gmail.com");
-                test.put("events", eventList);
-                String jsonSchedule = new Gson().toJson(test);
-
-                System.out.println(jsonSchedule);
-
-                apiCall.APICall("api/schedulelist/" + account.getEmail(), "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
-                    @Override
-                    public void onResponse(String responseBody) {
-                        System.out.println("BODY: " + responseBody);
-                        if(responseBody.equals("\"Schedule found\"")) {
-                            System.out.println("TRUE");
-                            apiCall.APICall("api/schedulelist/" + account.getEmail(), jsonSchedule, APICaller.HttpMethod.PUT, new APICaller.ApiCallback() {
-                                @Override
-                                public void onResponse(String responseBodyUpdate) {
-                                    System.out.println("Update schedule: " + responseBodyUpdate);
-                                }
-
-                                @Override
-                                public void onError(String errorMessage) {
-                                    System.out.println("Error: " + errorMessage);
-                                }
-                            });
-                        } else {
-                            System.out.println("TEST");
-                            apiCall.APICall("api/schedulelist/" + account.getEmail(), jsonSchedule, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
-                                @Override
-                                public void onResponse(String responseBodyPost) {
-                                    System.out.println("Created schedule: " + responseBodyPost);
-                                }
-
-                                @Override
-                                public void onError(String errorMessage) {
-                                    System.out.println("Error: " + errorMessage);
-                                }
-                            });
-                        }
-                    }
-
-                    @Override
-                    public void onError(String errorMessage) {
-                        System.out.println("Error " + errorMessage);
-                    }
-                });
-
-
-
-            } catch (IOException e) {
-                e.printStackTrace();
-                // Handle the network-related exception
-                // You can also use a handler to update the UI with any results or error messages
             }
 
-        //return eventList;
+            Map<String, Object> test = new HashMap<>();
+            test.put("email", "koltonluu@gmail.com");
+            test.put("events", eventList);
+            String jsonSchedule = new Gson().toJson(test);
+
+            System.out.println(jsonSchedule);
+
+            apiCall.APICall("api/schedulelist/" + account.getEmail(), "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
+                @Override
+                public void onResponse(String responseBody) {
+                    System.out.println("BODY: " + responseBody);
+                    if(responseBody.equals("\"Schedule found\"")) {
+                        System.out.println("TRUE");
+                        apiCall.APICall("api/schedulelist/" + account.getEmail(), jsonSchedule, APICaller.HttpMethod.PUT, new APICaller.ApiCallback() {
+                            @Override
+                            public void onResponse(String responseBodyUpdate) {
+                                System.out.println("Update schedule: " + responseBodyUpdate);
+                            }
+
+                            @Override
+                            public void onError(String errorMessage) {
+                                System.out.println("Error: " + errorMessage);
+                            }
+                        });
+                    } else {
+                        System.out.println("TEST");
+                        apiCall.APICall("api/schedulelist/" + account.getEmail(), jsonSchedule, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
+                            @Override
+                            public void onResponse(String responseBodyPost) {
+                                System.out.println("Created schedule: " + responseBodyPost);
+                            }
+
+                            @Override
+                            public void onError(String errorMessage) {
+                                System.out.println("Error: " + errorMessage);
+                            }
+                        });
+                    }
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    System.out.println("Error " + errorMessage);
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         return null;
     }
 
@@ -477,7 +476,7 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
             TextView startTime = view.findViewById(R.id.startTime);
             startTime.setText(item.getStartTime().substring(11,16));
             TextView endTime = view.findViewById(R.id.endTime);
-            endTime.setText(item.getEndTime().substring(24));
+            endTime.setText(item.getEndTime().substring(11,16));
             System.out.println(item);
 
             view.setOnClickListener(v -> {
@@ -501,7 +500,7 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
                 eventNameEditText.setText(item.getTitle());
                 eventAddressEditText.setText(item.getLocation());
                 eventStartTimeEditText.setText(item.getStartTime().substring(11,16));
-                eventEndTimeEditText.setText(item.getEndTime().substring(24));
+                eventEndTimeEditText.setText(item.getEndTime().substring(11,16));
                 eventDateMonthEditText.setText(item.getStartTime().substring(5,7));
                 eventDateDayEditText.setText(item.getStartTime().substring(8,10));
                 eventDateYearEditText.setText(item.getStartTime().substring(0,4));
@@ -523,18 +522,38 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
                     String eventStartTime = eventStartTimeEditText.getText().toString();
                     String eventEndTime = eventEndTimeEditText.getText().toString();
 
+                    // 2023-11-01T15:00:00.000-07:00
+                    System.out.println(eventDate + "T" + eventStartTime + ":00");
                     if (ScheduleFragment.EventInputListener.onEventInput(updateEventName, eventAddress, eventDate, eventStartTime, eventEndTime)) {
-//                    apiCall.APICall("api/schedulelist/", "", APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
-//                        @Override
-//                        public void onResponse(String responseBody) {
-//                            System.out.println("BODY: " + responseBody);
-//                        }
-//
-//                        @Override
-//                        public void onError(String errorMessage) {
-//                            System.out.println("Error " + errorMessage);
-//                        }
-//                    });
+                        ScheduleItem newEvent = new ScheduleItem(
+                                updateEventName,
+                                eventAddress,
+                                eventDate + "T" + eventStartTime + ":00",
+                                eventDate + "T" + eventEndTime + ":00",
+                                item.getId(),
+                                item.getCalendarId());
+
+                        String jsonUpdateEvent = new Gson().toJson(newEvent);
+                        APICaller apiCall = new APICaller();
+
+                        apiCall.APICall("api/schedulelist/" + account.getEmail() + "/" + item.getId(), jsonUpdateEvent, APICaller.HttpMethod.PUT, new APICaller.ApiCallback() {
+                            @Override
+                            public void onResponse(String responseBody) {
+                                System.out.println("BODY: " + responseBody);
+                                eventName.setText(newEvent.getTitle());
+                                eventLocation.setText(newEvent.getLocation());
+                                startTime.setText(newEvent.getStartTime().substring(11,16));
+                                endTime.setText(newEvent.getEndTime().substring(11,16));
+                            }
+
+                            @Override
+                            public void onError(String errorMessage) {
+                                System.out.println("Error " + errorMessage);
+                            }
+                        });
+
+                        UpdateEventTask calendarAsyncTask = (UpdateEventTask) new UpdateEventTask(service, newEvent).execute();
+
                         dialog.dismiss();
                     } else {
                         Toast.makeText(scheduleContext, "Invalid inputs, please try again", Toast.LENGTH_SHORT).show();
@@ -548,3 +567,52 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
         }
     }
 }
+
+class UpdateEventTask extends AsyncTask<Void, Void, Event> {
+    private Calendar service;
+    private ScheduleItem newEvent;
+
+    public UpdateEventTask(Calendar service, ScheduleItem newEvent) {
+        this.service = service;
+        this.newEvent = newEvent;
+    }
+    @Override
+    protected Event doInBackground(Void... voids) {
+        try {
+            Event event = service.events().get(newEvent.getCalendarId(), newEvent.getId()).execute();
+            event.setSummary(newEvent.getTitle());
+
+            DateTime updatedStartDateTime = new DateTime(newEvent.getStartTime() + ".000-07:00");
+            DateTime updatedEndDateTime = new DateTime(newEvent.getEndTime() + ".000-07:00");
+
+            EventDateTime updatedStart = new EventDateTime()
+                    .setDateTime(updatedStartDateTime)
+                    .setTimeZone("America/Denver"); // UTC-7 (Mountain Daylight Time)
+
+            EventDateTime updatedEnd = new EventDateTime()
+                    .setDateTime(updatedEndDateTime)
+                    .setTimeZone("America/Denver");
+
+            event.setStart(updatedStart);
+            event.setEnd(updatedEnd);
+
+            Event updatedEvent = service.events().update(newEvent.getCalendarId(), newEvent.getId(), event).execute();
+            System.out.println("Event updated: " + updatedEvent.getHtmlLink());
+            return updatedEvent;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    protected void onPostExecute(Event updatedEvent) {
+        if (updatedEvent != null) {
+            System.out.println("Event updated: " + updatedEvent.getHtmlLink());
+        } else {
+            // Handle the error or show a message to the user
+        }
+    }
+}
+
+

@@ -54,6 +54,8 @@ app.get('/api/schedulelist/:email', schedule.getScheduleByEmail);
 
 app.put('/api/schedulelist/:email', schedule.updateSchedule);
 
+app.get('/api/schedulelist/:email/:id', schedule.getCalendarID);
+
 app.post('/api/schedulelist/:email', schedule.addEvent);
 app.put('/api/schedulelist/:email/:id', schedule.editEventByID);
 app.delete('/api/schedulelist/:email/:id', schedule.deleteEventByID);

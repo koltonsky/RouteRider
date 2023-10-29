@@ -449,6 +449,42 @@ const createNewSchedule = async (req, res) => {
     }
   };
 
+  const getCalendarID = async (req, res) => {
+    try {
+      const userEmail = req.params.email;
+      const eventId = req.params.id; // Event ID
+  
+      const collection = client.db('ScheduleDB').collection('schedulelist');
+      const schedule = await collection.findOne({ email: userEmail });
+  
+      if (!schedule) {
+        res.status(404).json({ error: 'Schedule not found' });
+        return;
+      }
+  
+      // Find the event in the user's schedule based on the event ID
+      const event = schedule.events.find(event => event.id === eventId);
+  
+      if (!event) {
+        res.status(404).json({ error: 'Event not found in the schedule' });
+        return;
+      }
+  
+      // Assuming the event has a calendar ID property, you can access it like this
+      const calendarID = event.calendarID;
+  
+      if (calendarID) {
+        res.status(200).json({ calendarID: calendarID });
+      } else {
+        res.status(404).json({ error: 'Calendar ID not found for the event' });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  };
+  
+
   const editEventStartTime = async (req, res) => {
     try {
       const userEmail = req.params.email;
@@ -600,7 +636,8 @@ const createNewSchedule = async (req, res) => {
     updateSchedule,
     deleteEventByID,
     editEventByID,
-    addEvent
+    addEvent,
+    getCalendarID
 
 
 

@@ -44,22 +44,44 @@ app.delete('/api/userlist/:email/friends', user.deleteFriend);
 
 app.put('/api/userlist/:email', user.updateUser);
 
+// test/db purposes only
+app.delete('/api/userlist/:email', user.deleteUser);
+
 // Schedule DB
 app.post('/api/schedulelist', schedule.createNewSchedule);
 app.get('/api/schedulelist/:email', schedule.getScheduleByEmail);
 
-app.post('/api/schedulelist/:email/:index', schedule.insertEventAtIndex);
+app.put('/api/schedulelist/:email', schedule.updateSchedule);
 
+app.post('/api/schedulelist/:email/:index', schedule.insertEventAtIndex);
+app.put('/api/schedulelist/:email/:index', schedule.editEventAtIndex);
+app.delete('/api/schedulelist/:email/:index', schedule.deleteEventAtIndex);
+
+app.put('/api/schedulelist/:email/:index/geolocation', schedule.editEventGeolocation);
+
+
+app.delete('/api/schedulelist/:email/', schedule.deleteSchedule);
+
+/*
 app.put('/api/schedulelist/:email/:index/eventName', schedule.editEventName); // '{"eventName": "event name"}'
 app.put('/api/schedulelist/:email/:index/address', schedule.editEventAddress);
-app.put('/api/schedulelist/:email/:index/geolocation', schedule.editEventGeolocation);
+
+
+
 app.put('/api/schedulelist/:email/:index/date', schedule.editEventDate);
 app.put('/api/schedulelist/:email/:index/start', schedule.editEventStartTime);
 app.put('/api/schedulelist/:email/:index/end', schedule.editEventEndTime);
 
-app.delete('/api/schedulelist/:email/:index', schedule.deleteEventAtIndex);
+app.put('/api/schedulelist/:email/:index/startTime', schedule.editEventStartTime);
+app.put('/api/schedulelist/:email/:index/endTime', schedule.editEventEndTime);
 
-/*
+
+
+
+// test/db purposes only
+
+
+
 app.get('/api/userlist', async (req, res) => {
     const collection = client.db('UserDB').collection('userlist');
     const documents = await collection.find({}).toArray();

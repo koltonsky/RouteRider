@@ -18,11 +18,17 @@ const createNewUser = async (req, res) => {
 
     if (existingUser) {
       // If a user with the same email exists, return an error message
-      res.status(100).json({ message: 'User with this email already exists' });
+      const errorMessage = 'User with this email already exists';
+      const errorMessageLength = Buffer.byteLength(errorMessage, 'utf8');
+      res.set('Content-Length', errorMessageLength);
+      res.status(409).json({ message: errorMessage });
     } else {
       // If the user doesn't exist, insert the new user document into the collection
       const insertResult = await collection.insertOne(userData);
-      res.status(201).json({ message: 'User created successfully' });
+      const successMessage = 'User created successfully';
+      const successMessageLength = Buffer.byteLength(successMessage, 'utf8');
+      res.set('Content-Length', successMessageLength);
+      res.status(201).json({ message: successMessage });
     }
 
   } catch (error) {
@@ -30,6 +36,7 @@ const createNewUser = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
 
 const updateAddress = async (req, res) => {
   try {
@@ -369,6 +376,26 @@ const updateFriendList = async (req, res) => {
     }
   };
 */
+
+const deleteUser = async (req, res) => {
+  try {
+    const email = req.params.email; // Get the email from the URL parameter
+
+    // Delete the user based on their email
+    const collection = client.db('UserDB').collection('userlist');
+    const result = await collection.deleteOne({ email: email });
+
+  if (result.deletedCount === 1) {
+      res.status(200).json({ message: 'User deleted successfully' });
+    } else {
+      res.status(404).json({ error: 'User not found' });
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
   
   
   module.exports = {
@@ -381,5 +408,6 @@ const updateFriendList = async (req, res) => {
     addFriend,
     deleteFriend,
     updateUser,
+    deleteUser
   };
   

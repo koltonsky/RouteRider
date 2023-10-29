@@ -22,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.routerider.APICaller;
+import com.example.routerider.HelperFunc;
 import com.example.routerider.R;
 import com.example.routerider.ScheduleItem;
 import com.example.routerider.User;
@@ -161,19 +162,13 @@ public class ScheduleFragment extends Fragment {
 
                 if (ScheduleFragment.EventInputListener.onEventInput(eventName, eventAddress, eventDate, eventStartTime, eventEndTime)) {
                     CreateEventTask createTask = (CreateEventTask) new CreateEventTask(service, eventName, eventAddress, eventDate, eventStartTime, eventEndTime).execute();
-//                    try {
-//                        //Event createdEvent = createTask.get();
-//
-//                    } catch (ExecutionException | InterruptedException e) {
-//                        throw new RuntimeException(e);
-//                    }
 
                     ScheduleItem newEvent = new ScheduleItem(
                             eventName,
                             eventAddress,
                             eventDate + "T" + eventStartTime + ":00",
                             eventDate + "T" + eventEndTime + ":00",
-                            "testasdfjkal;sdkfjklne",
+                            HelperFunc.generateRandomString(64),
                             "primary");
 
                     String jsonUpdateEvent = new Gson().toJson(newEvent);
@@ -557,6 +552,42 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
                 dialog.show();
             });
 
+            LinearLayout finalEventListView = eventListView;
+            view.setOnLongClickListener(v -> {
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(scheduleContext);
+                alertDialogBuilder.setTitle("Delete Event");
+                alertDialogBuilder.setMessage("Are you sure you want to delete this event?");
+
+                alertDialogBuilder.setPositiveButton("OK", null);
+
+                alertDialogBuilder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+
+                final AlertDialog dialog = alertDialogBuilder.create();
+                dialog.setOnShowListener(dialogInterface -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view1 -> {
+                    APICaller apiCall = new APICaller();
+
+                    apiCall.APICall("api/schedulelist/" + account.getEmail() + "/" + item.getId(), "", APICaller.HttpMethod.DELETE, new APICaller.ApiCallback() {
+                        @Override
+                        public void onResponse(String responseBody) {
+                            System.out.println("BODY: " + responseBody);
+
+                        }
+
+                        @Override
+                        public void onError(String errorMessage) {
+                            System.out.println("Error " + errorMessage);
+                        }
+                    });
+                    finalEventListView.removeView(view);
+                    new DeleteEventTask(service, item).execute();
+                    dialog.dismiss();
+                }));
+
+                dialog.show();
+
+                return true;
+            });
+
             eventListView.addView(view);
         }
     }
@@ -670,6 +701,36 @@ class CreateEventTask extends AsyncTask<Void, Void, Event> {
         } else {
             // Handle the error or show a message to the user
         }
+    }
+}
+
+class DeleteEventTask extends AsyncTask<Void, Void, Event> {
+    private Calendar service;
+    private ScheduleItem item;
+    private LinearLayout eventListView;
+    private View view;
+
+    public DeleteEventTask(Calendar service,ScheduleItem item) {
+        this.service = service;
+        this.item = item;
+    }
+
+    @Override
+    protected Event doInBackground(Void... voids) {
+        try {
+            // Initialize the Google Calendar service
+            // Create an event
+            service.events().delete(item.getCalendarId(), item.getId()).execute();
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    protected void onPostExecute(Event event) {
+
     }
 }
 

@@ -12,7 +12,6 @@ const schedule = require('./routes/schedule.js')
 
 app.use(express.json());
 
-
 // MongoDB connection setup
 const uri = 'mongodb://0.0.0.0:27017'; // Replace with your MongoDB connection string
 const client = new MongoClient(uri);
@@ -57,7 +56,7 @@ app.put('/api/schedulelist/:email', schedule.updateSchedule);
 app.get('/api/schedulelist/:email/:id', schedule.getCalendarID);
 
 app.post('/api/schedulelist/:email', schedule.addEvent);
-app.put('/api/schedulelist/:email/:id', schedule.editEventByID);
+//app.put('/api/schedulelist/:email/:id', schedule.editEventByID);
 app.delete('/api/schedulelist/:email/:id', schedule.deleteEventByID);
 
 app.put('/api/schedulelist/:email/:index/geolocation', schedule.editEventGeolocation);

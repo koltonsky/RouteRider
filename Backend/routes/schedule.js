@@ -811,7 +811,7 @@ const editEventByID = async (req, res) => {
     deleteEventByID,
     //editEventByID,
     addEvent,
-    getCalendarID
+    getCalendarID,
 
 
 

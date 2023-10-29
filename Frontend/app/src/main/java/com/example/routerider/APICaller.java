@@ -66,7 +66,7 @@ public class APICaller {
                         throw new RuntimeException(e);
                     }
                 } else {
-                    callback.onError("Error: " + response.code());
+                    callback.onError("Error: " + response.code() + "," + response);
                 }
             }
         });

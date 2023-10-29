@@ -2,6 +2,8 @@ package com.example.routerider;
 
 import androidx.annotation.NonNull;
 
+import org.json.JSONException;
+
 import java.io.IOException;
 
 import okhttp3.Call;
@@ -16,7 +18,7 @@ public class APICaller {
     String hostUrl = "https://20.163.28.92:8081/";
 
     public interface ApiCallback {
-        void onResponse(String responseBody);
+        void onResponse(String responseBody) throws JSONException;
         void onError(String errorMessage);
     }
 
@@ -60,6 +62,8 @@ public class APICaller {
                         callback.onResponse(responseBody);
                     } catch (IOException e) {
                         callback.onError(e.getMessage());
+                    } catch (JSONException e) {
+                        throw new RuntimeException(e);
                     }
                 } else {
                     callback.onError("Error: " + response.code());

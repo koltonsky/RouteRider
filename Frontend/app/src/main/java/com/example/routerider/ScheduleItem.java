@@ -1,24 +1,31 @@
 package com.example.routerider;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 public class ScheduleItem {
-    private String title;
-    private String location;
+    private String eventName;
+    private String address;
     private String startTime;
     private String endTime;
+    private Map<String, Object> geolocation = new LinkedHashMap<>();
 
     public ScheduleItem(String eventSummary, String eventLocation, String startTimeString, String endTimeString) {
-        title = eventSummary;
-        location = eventLocation;
+        eventName = eventSummary;
+        address = eventLocation;
         startTime = startTimeString;
         endTime = endTimeString;
+        geolocation.put("latitude", 0.0);
+        geolocation.put("longitude", 0.0);
     }
 
     public String getTitle() {
-        return title;
+        return eventName;
     }
 
     public String getLocation() {
-        return location;
+        return address;
     }
 
     public String getStartTime() {

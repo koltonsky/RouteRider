@@ -40,6 +40,9 @@ import com.google.api.services.calendar.model.Events;
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -97,7 +100,7 @@ public class ScheduleFragment extends Fragment {
             throw new RuntimeException(e);
         }
 
-        calendarAsyncTask = (CalendarAsyncTask) new CalendarAsyncTask(this.getContext(),view).execute(service);
+        calendarAsyncTask = (CalendarAsyncTask) new CalendarAsyncTask(this.getContext(), view, account).execute(service);
 
 
         getPreviousDay.setOnClickListener(v -> {
@@ -222,7 +225,7 @@ public class ScheduleFragment extends Fragment {
         calendarAsyncTask.updateDisplay(day);
     }
 
-    private interface EventInputListener {
+    public interface EventInputListener {
         static boolean onEventInput(String eventName, String eventAddress, String eventDate, String eventStartTime, String eventEndTime) {
             if(validateInputs(eventName, eventAddress, eventDate, eventStartTime, eventEndTime)) {
                 return true;
@@ -294,12 +297,15 @@ public class ScheduleFragment extends Fragment {
 class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
     private List<ScheduleItem> eventList;
     private List<ScheduleItem> dayList;
+    private GoogleSignInAccount account;
 
     private Context scheduleContext;
     private View scheduleView;
-    CalendarAsyncTask(Context context, View view){
+    CalendarAsyncTask(Context context, View view,
+                      GoogleSignInAccount account){
         this.scheduleContext = context;
         this.scheduleView = view;
+        this.account = account;
     }
     @Override
     protected Void doInBackground(Calendar... calendars) {
@@ -321,9 +327,9 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
                         String calendarId = calendarEntry.getId();
                         String summary = calendarEntry.getSummary();
 
-                        System.out.println("Calendar ID: " + calendarId);
-                        System.out.println("Summary: " + summary);
-                        System.out.println();
+//                        System.out.println("Calendar ID: " + calendarId);
+//                        System.out.println("Summary: " + summary);
+//                        System.out.println();
 
                         // List events for the calendar
                         long sevenDaysInMillis = 365L * 24 * 60 * 60 * 1000;
@@ -346,12 +352,12 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
                             String startTimeString = (startTime != null) ? startTime.toString() : "N/A";
                             String endTimeString = (endTime != null) ? endTime.toString() : "N/A";
 
-                            System.out.println("Event ID: " + eventId);
-                            System.out.println("Event Summary: " + eventSummary);
-                            System.out.println("Event Location: " + eventLocation);
-                            System.out.println("Start Time: " + startTimeString);
-                            System.out.println("End Time: " + endTimeString);
-                            System.out.println();
+//                            System.out.println("Event ID: " + eventId);
+//                            System.out.println("Event Summary: " + eventSummary);
+//                            System.out.println("Event Location: " + eventLocation);
+//                            System.out.println("Start Time: " + startTimeString);
+//                            System.out.println("End Time: " + endTimeString);
+//                            System.out.println();
                             if (eventLocation.contains("Room")) {
                                 eventLocation = "UBC " + eventLocation;
                             }
@@ -370,25 +376,53 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
                     }
                 }
 
-//                String jsonStr = new Gson().toJson(eventList);
-//                System.out.println("STRING " + jsonStr);
-                Map<String, Object> test = new HashMap<>();//{"email"  "koltonluu@gmail.com", }
-                test.put("email", User.getCurrentAccount().getEmail());
-                test.put("schedule", eventList);
-                String json = new Gson().toJson(test);
-                System.out.println("STRING " + json);
+                Map<String, Object> test = new HashMap<>();
+                test.put("email", "koltonluu@gmail.com");
+                test.put("events", eventList);
+                String jsonSchedule = new Gson().toJson(test);
 
-//            apiCall.APICall("api/schedulelist", jsonStr, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
-//                @Override
-//                public void onResponse(String responseBody) {
-//                    System.out.println("BODY: " + responseBody);
-//                }
-//
-//                @Override
-//                public void onError(String errorMessage) {
-//                    System.out.println("Error " + errorMessage);
-//                }
-//            });
+                System.out.println(jsonSchedule);
+
+                apiCall.APICall("api/schedulelist/" + account.getEmail(), "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
+                    @Override
+                    public void onResponse(String responseBody) {
+                        System.out.println("BODY: " + responseBody);
+                        if(responseBody.equals("\"Schedule found\"")) {
+                            System.out.println("TRUE");
+                            apiCall.APICall("api/schedulelist/" + account.getEmail(), jsonSchedule, APICaller.HttpMethod.PUT, new APICaller.ApiCallback() {
+                                @Override
+                                public void onResponse(String responseBodyUpdate) {
+                                    System.out.println("Update schedule: " + responseBodyUpdate);
+                                }
+
+                                @Override
+                                public void onError(String errorMessage) {
+                                    System.out.println("Error: " + errorMessage);
+                                }
+                            });
+                        } else {
+                            System.out.println("TEST");
+                            apiCall.APICall("api/schedulelist/" + account.getEmail(), jsonSchedule, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
+                                @Override
+                                public void onResponse(String responseBodyPost) {
+                                    System.out.println("Created schedule: " + responseBodyPost);
+                                }
+
+                                @Override
+                                public void onError(String errorMessage) {
+                                    System.out.println("Error: " + errorMessage);
+                                }
+                            });
+                        }
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+                        System.out.println("Error " + errorMessage);
+                    }
+                });
+
+
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -403,9 +437,6 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
 
     @Override
     protected void onPostExecute(Void result) {
-
-        // This method runs on the UI thread and can be used to update the UI with results
-        // For example, you can show a toast message or update UI components here
         System.out.println(eventList.size());
         Button getNextDay = scheduleView.findViewById(R.id.nextDay);
         getNextDay.setEnabled(true);
@@ -418,20 +449,21 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
     public void updateDisplay(Date day) {
         dayList = new ArrayList<>();
         LinearLayout eventListView = scheduleView.findViewById(R.id.scheduleView);
+        TextView emptyListText = scheduleView.findViewById(R.id.emptyText);
         eventListView.removeAllViewsInLayout();
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String dateString = dateFormat.format(day);
         for (ScheduleItem item: eventList){
             String itemDay = item.getStartTime().substring(0,10);
-            System.out.println(itemDay);
-            //System.out.println(dateString);
             if (dateString.equals(itemDay)){
                 dayList.add(item);
             }
-
         }
-        System.out.println("DAY LIST");
-        System.out.println(dayList);
+        if(dayList.size() > 0) {
+            emptyListText.setVisibility(View.GONE);
+        } else {
+            emptyListText.setVisibility(View.VISIBLE);
+        }
 
         LayoutInflater inflater = LayoutInflater.from(scheduleContext);
         for (ScheduleItem item: dayList) {
@@ -447,6 +479,71 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
             TextView endTime = view.findViewById(R.id.endTime);
             endTime.setText(item.getEndTime().substring(24));
             System.out.println(item);
+
+            view.setOnClickListener(v -> {
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(scheduleContext);
+                alertDialogBuilder.setTitle("Update Event");
+
+                // Inflate the custom view for the dialog
+                LayoutInflater dialogInflater = LayoutInflater.from(scheduleContext);
+                View dialogView = dialogInflater.inflate(R.layout.add_event_dialog, null);
+                alertDialogBuilder.setView(dialogView);
+
+                final EditText eventNameEditText = dialogView.findViewById(R.id.eventName);
+                final EditText eventAddressEditText = dialogView.findViewById(R.id.eventAddress);
+                final EditText eventStartTimeEditText = dialogView.findViewById(R.id.eventStartTime);
+                final EditText eventEndTimeEditText = dialogView.findViewById(R.id.eventEndTime);
+
+                final EditText eventDateMonthEditText = dialogView.findViewById(R.id.eventDateMonth);
+                final EditText eventDateDayEditText = dialogView.findViewById(R.id.eventDateDay);
+                final EditText eventDateYearEditText = dialogView.findViewById(R.id.eventDateYear);
+
+                eventNameEditText.setText(item.getTitle());
+                eventAddressEditText.setText(item.getLocation());
+                eventStartTimeEditText.setText(item.getStartTime().substring(11,16));
+                eventEndTimeEditText.setText(item.getEndTime().substring(24));
+                eventDateMonthEditText.setText(item.getStartTime().substring(5,7));
+                eventDateDayEditText.setText(item.getStartTime().substring(8,10));
+                eventDateYearEditText.setText(item.getStartTime().substring(0,4));
+
+
+                alertDialogBuilder.setPositiveButton("OK", null);
+
+                alertDialogBuilder.setNegativeButton("Cancel", (dialog, which) -> {
+                    dialog.dismiss();
+                });
+
+                final AlertDialog dialog = alertDialogBuilder.create();
+                dialog.setOnShowListener(dialogInterface -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view1 -> {
+                    String updateEventName = eventNameEditText.getText().toString();
+                    String eventAddress = eventAddressEditText.getText().toString();
+                    String eventDate = eventDateYearEditText.getText().toString() + "-"
+                            + eventDateMonthEditText.getText().toString() + "-"
+                            + eventDateDayEditText.getText().toString();
+                    String eventStartTime = eventStartTimeEditText.getText().toString();
+                    String eventEndTime = eventEndTimeEditText.getText().toString();
+
+                    if (ScheduleFragment.EventInputListener.onEventInput(updateEventName, eventAddress, eventDate, eventStartTime, eventEndTime)) {
+//                    apiCall.APICall("api/schedulelist/", "", APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
+//                        @Override
+//                        public void onResponse(String responseBody) {
+//                            System.out.println("BODY: " + responseBody);
+//                        }
+//
+//                        @Override
+//                        public void onError(String errorMessage) {
+//                            System.out.println("Error " + errorMessage);
+//                        }
+//                    });
+                        dialog.dismiss();
+                    } else {
+                        Toast.makeText(scheduleContext, "Invalid inputs, please try again", Toast.LENGTH_SHORT).show();
+                    }
+                }));
+
+                dialog.show();
+            });
+
             eventListView.addView(view);
         }
     }

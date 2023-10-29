@@ -7,6 +7,13 @@
     android:paddingBottom="60dp"
     tools:context=".fragments.ScheduleFragment">
 
+    <TextView
+        android:id="@+id/emptyText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="There are currently no scheduled events"/>
+
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/floatingActionButton"

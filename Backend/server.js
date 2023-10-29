@@ -160,6 +160,15 @@ var dummy_schedule = {
       geolocation: { latitude: 0, longitude: 0 },
       id: '_64p36d1h6osjgchm6cp3gchk68r62oj3cgpj4d1m64rg_20231101T223000Z',
       startTime: '2023-11-01T15:30:00.000-07:00'
+    },
+    {
+      address: 'UBC Nest Building, Room 360',
+      calendarID: 'koltonluu@gmail.com',
+      endTime: '2023-11-03T17:00:00.000-07:00',
+      eventName: 'Club Meeting',
+      geolocation: { latitude: 0, longitude: 0 },
+      id: '_64p36d1h6osjgchm6cp3gchk68r62oj3cgpj4d1m64tr_20231101T223000Z',
+      startTime: '2023-11-03T15:30:00.000-07:00'
     }
   ]
 }
@@ -180,13 +189,15 @@ var dummy_user = {
 //   console.log("inserted user");
 // });
 
-var dummy = initReminders("koltonluu@gmail.com", "2023-11-01");
+// var dummy = initRoute("koltonluu@gmail.com", "2023-11-01");
+var dummy = initReminders("koltonluu@gmail.com");
 /**
  * Function returns an array of objects containing the following fields:
- * _id: bus number/Skytrain line name (e.g. 99, R4, Expo Line, etc.)
- * _leaveTime: time to leave
- * _leaveTimeNum: time to leave in number format
- * _type: type of transportation (Bus, SkyTrain, Walk)
+ *    _id: bus number/Skytrain line name (e.g. 99, R4, Expo Line, etc.)
+ *    _leaveTime: time to leave
+ *    _leaveTimeNum: time to leave in number format
+ *    _type: type of transportation (Bus, SkyTrain, Walk)
+ * The array represents the transit route the user should take to arrive at their destination on time.
  * 
  * For local testing, connect to a mongoDB instance and run commented client.db commands above. They should initialize the database with dummy data.
  *  
@@ -199,13 +210,12 @@ var dummy = initReminders("koltonluu@gmail.com", "2023-11-01");
  * @param {*} userEmail 
  * @param {*} date
  */
-async function initReminders(userEmail, date) {
-  /* Get static schedule of closest bus stop to home address */
-  console.log("called initReminders");
+async function initRoute(userEmail, date) {
+  console.log("called initRoute()");
   
   var schedule = await client.db('ScheduleDB').collection('schedulelist').findOne({email: userEmail});
   var user = await client.db('UserDB').collection('userlist').findOne({email: userEmail})
-  console.log("initReminders(): returned schedule: " + schedule);
+  console.log("initRoute(): returned schedule: " + schedule);
   console.log(schedule.events[0].eventName);
 
   /* Initialize fields that are need for Directions API call */
@@ -213,21 +223,21 @@ async function initReminders(userEmail, date) {
   var locationOfFirstEvent = "";
   var locationOfOrigin = user.address;
   for (var i = 0; i < schedule.events.length; i++) { // assumes events are sorted by date
-    // console.log("initReminders(): " + schedule.events[i].startTime + " " + date);
+    // console.log("initRoute(): " + schedule.events[i].startTime + " " + date);
     if (schedule.events[i].startTime.split('T')[0] == date) { 
-      // console.log("initReminders(): startTime " + schedule.events[i].startTime);
+      // console.log("initRoute(): startTime " + schedule.events[i].startTime);
       timeOfFirstEvent = schedule.events[i].startTime;
       locationOfFirstEvent = schedule.events[i].address;
       locationOfFirstEvent = locationOfFirstEvent.split(',')[0];
       break;
     }
   }
-  console.log("initReminders(): returned timeOfFirstEvent: " + timeOfFirstEvent);
-  console.log("initReminders(): returned locationOfFirstEvent: " + locationOfFirstEvent);
-  console.log("initReminders(): returned locationOfOrigin: " + locationOfOrigin);
+  console.log("initRoute(): returned timeOfFirstEvent: " + timeOfFirstEvent);
+  console.log("initRoute(): returned locationOfFirstEvent: " + locationOfFirstEvent);
+  console.log("initRoute(): returned locationOfOrigin: " + locationOfOrigin);
 
   planTransitTrip(locationOfOrigin, locationOfFirstEvent, new Date(timeOfFirstEvent)).then((trip) => {
-    console.log("initReminders(): returned trip: " + trip + " " + trip.routes[0].legs[0].steps[0].travel_mode);
+    console.log("initRoute(): returned trip: " + trip + " " + trip.routes[0].legs[0].steps[0].travel_mode);
     /* fields for object to be returned to frontend */
     var id = '';
     var leaveTime = '';
@@ -273,7 +283,7 @@ async function initReminders(userEmail, date) {
       }
       
       more.steps.push(step.html_instructions);
-      console.log("initReminders(): adding curStep to returnList " + id + " | " + leaveTime + " | " + type);
+      console.log("initRoute(): adding curStep to returnList " + id + " | " + leaveTime + " | " + type);
       curStep = {_id: id, _leaveTime: leaveTime, _leaveTimeNum: leaveTimeNum, _type: type};
       returnList.push(curStep);
     });
@@ -300,6 +310,60 @@ async function initReminders(userEmail, date) {
   });
 }
 
+/**
+ * Pretty much same logic as initRoute, but we only care about time to leave for the first step of each trip (when to leave the house)
+ * The time to leave determined by initRoute and initReminders should be the same 
+ * 
+ * @param userEmail
+ * @returns an array of objects that contain info on when to send notifications (time and date)
+ */
+async function initReminders(userEmail) {
+  console.log("called initReminders()");
+  var returnList = []
+  
+  var schedule = await client.db('ScheduleDB').collection('schedulelist').findOne({email: userEmail});
+  var user = await client.db('UserDB').collection('userlist').findOne({email: userEmail})
+  console.log("initReminders(): returned schedule: " + schedule);
+  console.log(schedule.events[0].eventName);
+
+  /* Get an array that contains the first event of each day */
+  var firstEvents = [];
+  var date = "default";
+  for (var i = 0; i < schedule.events.length; i++) { // assumes events are sorted by date
+    if (schedule.events[i].startTime.split('T')[0] != date) { 
+      var event = {};
+      event.locationOfOrigin = user.address;
+      event.timeOfFirstEvent = schedule.events[i].startTime;
+      event.locationOfFirstEvent = schedule.events[i].address.split(',')[0];
+      
+      firstEvents.push(event);
+
+      date = schedule.events[i].startTime.split('T')[0];
+    }
+  }
+  
+  for (var i = 0; i < firstEvents.length; i++) {
+    trip = await planTransitTrip(firstEvents[i].locationOfOrigin, firstEvents[i].locationOfFirstEvent, new Date(firstEvents[i].timeOfFirstEvent));
+    console.log("initReminders(): returned trip: " + trip + " " + trip.routes[0].legs[0].steps[0].travel_mode);
+    /* fields for object to be returned to frontend */
+    var reminder = {
+      date: 'default',
+      leaveTime: 'default',
+    };
+
+    reminder.date = firstEvents[i].timeOfFirstEvent;
+    reminder.leaveTime = departure_time = trip.routes[0].legs[0].departure_time.text;
+
+    returnList.push(reminder);
+  }
+  returnList.push({email: userEmail});
+  console.log("initReminders(): returned returnList: " + returnList.length); 
+  // for (var i = 0; i < returnList.length; i++) {
+  //   console.log("initReminders(): returned returnList: " + returnList[i].date + " " + returnList[i].leaveTime); 
+  // }
+
+  return returnList;
+}
 // getNearestBuses("EB Rumble St @ Gilley Ave").then((buses) => {
 //   console.log(buses[0].StopNo + " " + buses.length);
 // });
@@ -342,7 +406,7 @@ async function getNearestBuses(address) {
     console.log("getBuses: calling getlatlong");
     var address = "Student Union Boulevard, Vancouver, British Columbia, Canada";
     getLatLong(address).then((coords) => {
-      console.log("initReminders(): returned coords: " + coords);
+      console.log("getNearestBuses(): returned coords: " + coords);
       console.log("--------------------");
       lat = coords[0];
       long = coords[1];
@@ -394,9 +458,9 @@ async function planTransitTrip(origin, destination, arriveTime) {
     // var destination = 'UBC Exchange Bus Loop'; // ubc exhcange r4
   
     // determine whether to take 99 B-Line or R4 based on address. unused for now
-    var addressCoords = getLatLong(origin);
-    var distToCommercial = calcDist(addressCoords[0], addressCoords[1], 49.2624, -123.0698);
-    var distToJoyce = calcDist(addressCoords[0], addressCoords[1], 49.2412, -123.0298);
+    // var addressCoords = getLatLong(origin);
+    // var distToCommercial = calcDist(addressCoords[0], addressCoords[1], 49.2624, -123.0698);
+    // var distToJoyce = calcDist(addressCoords[0], addressCoords[1], 49.2412, -123.0298);
 
     const params = new URLSearchParams({
       origin: origin,
@@ -438,8 +502,8 @@ async function planTransitTrip(origin, destination, arriveTime) {
           console.log('No routes found.');
         }
         console.log("--------------------------------------------------------");
-        console.log(data);
-        console.log(JSON.parse(data));
+        // console.log(data);
+        // console.log(JSON.parse(data));
         console.log("--------------------------------------------------------");
         resolve(JSON.parse(data));
       });

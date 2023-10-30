@@ -16,6 +16,7 @@ const axios = require('axios')
 
 const user = require('./routes/user.js')
 const schedule = require('./routes/schedule.js');
+const commuters = require('./commuter_match.js');
 const { get } = require('http');
 const { time } = require('console');
 
@@ -189,6 +190,8 @@ var dummy_user = {
   ]
 }
 
+console.log(commuters.findCommuters());
+
 // client.db('ScheduleDB').collection('schedulelist').insertOne(dummy_schedule).then((result) => {
 //   console.log("inserted schedule");
 // });
@@ -342,6 +345,8 @@ async function initReminders(userEmail) {
       event.locationOfOrigin = user.address;
       event.timeOfFirstEvent = schedule.events[i].startTime;
       event.locationOfFirstEvent = schedule.events[i].address.split(',')[0];
+
+      console.log(event);
       
       firstEvents.push(event);
 
@@ -351,6 +356,7 @@ async function initReminders(userEmail) {
   
   for (var i = 0; i < firstEvents.length; i++) {
     trip = await planTransitTrip(firstEvents[i].locationOfOrigin, firstEvents[i].locationOfFirstEvent, new Date(firstEvents[i].timeOfFirstEvent));
+    console.log(trip);
     console.log("initReminders(): returned trip: " + trip + " " + trip.routes[0].legs[0].steps[0].travel_mode);
     /* fields for object to be returned to frontend */
     var reminder = {

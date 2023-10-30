@@ -94,26 +94,29 @@ public class FriendsActivity extends AppCompatActivity {
     }
 
     public void generateFriendList() {
-        // Clear the existing views in the friendListDisplay
         friendListDisplay.removeAllViews();
-
         if (friendList != null) {
             try {
                 for (int i = 0; i < friendList.length(); i++) {
-                    // Get the email from the JSON array
-                    String email = friendList.getString(i);
+                    // Get the JSON object at the current position
+                    JSONObject friend = friendList.getJSONObject(i);
 
-                    // Create a TextView for each email
-                    TextView emailTextView = new TextView(this);
-                    emailTextView.setText(email);
+                    // Extract email and name from the JSON object
+                    String email = friend.getString("email");
+                    String name = friend.getString("name");
+
+                    // Create a TextView for each email and name
+                    TextView friendTextView = new TextView(this);
+                    friendTextView.setText("Name: " + name + " | "+ "Email: " + email);
 
                     // Add the TextView to the friendListDisplay
-                    friendListDisplay.addView(emailTextView);
+                    friendListDisplay.addView(friendTextView);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
     }
+
 
 }

@@ -35,14 +35,25 @@ app.post('/api/userlist', user.createNewUser);
 app.get('/api/userlist/:email', user.getUserByEmail);
 app.get('/api/userlist/:email/name', user.getUserName);
 app.get('/api/userlist/:email/address', user.getUserAddress);
-app.get('/api/userlist/:email/friends', user.getFriendList);
+app.get('/api/userlist/:email/friends', user.getFriendListWithNames);
+// edit above to retrieve friend requests
+
+app.put('/api/userlist/:email/', user.updateAddress);
 
 app.put('/api/userlist/:email/', user.updateAddress);
 
 app.post('/api/userlist/:email/friends', user.addFriend);
 app.delete('/api/userlist/:email/friends', user.deleteFriend);
 
+app.post('/api/userlist/:email/friendRequest', user.sendFriendRequest);
+
+app.post('/api/userlist/:email/:friendRequest/accept', user.acceptFriendRequest);
+app.delete('/api/userlist/:email/:friendRequest/decline', user.declineFriendRequest);
+
 app.put('/api/userlist/:email', user.updateUser);
+
+// test/db purposes only
+app.delete('/api/userlist/:email', user.deleteUser);
 
 // test/db purposes only
 app.delete('/api/userlist/:email', user.deleteUser);
@@ -52,6 +63,13 @@ app.post('/api/schedulelist', schedule.createNewSchedule);
 app.get('/api/schedulelist/:email', schedule.getScheduleByEmail);
 
 app.put('/api/schedulelist/:email', schedule.updateSchedule);
+app.put('/api/schedulelist/:email', schedule.updateSchedule);
+
+app.get('/api/schedulelist/:email/:id', schedule.getCalendarID);
+
+app.post('/api/schedulelist/:email', schedule.addEvent);
+//app.put('/api/schedulelist/:email/:id', schedule.editEventByID);
+app.delete('/api/schedulelist/:email/:id', schedule.deleteEventByID);
 
 app.get('/api/schedulelist/:email/:id', schedule.getCalendarID);
 
@@ -62,6 +80,8 @@ app.delete('/api/schedulelist/:email/:id', schedule.deleteEventByID);
 app.put('/api/schedulelist/:email/:index/geolocation', schedule.editEventGeolocation);
 
 
+
+app.delete('/api/schedulelist/:email/', schedule.deleteSchedule);
 app.delete('/api/schedulelist/:email/', schedule.deleteSchedule);
 
 /*

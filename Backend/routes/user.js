@@ -22,6 +22,7 @@ const createNewUser = async (req, res) => {
       const errorMessageLength = Buffer.byteLength(errorMessage, 'utf8');
       res.set('Content-Length', errorMessageLength);
       res.status(109).json({ message: errorMessage });
+      console.log("existing user");
     } else {
       // If the user doesn't exist, insert the new user document into the collection
       const insertResult = await collection.insertOne(userData);
@@ -29,6 +30,7 @@ const createNewUser = async (req, res) => {
       const successMessageLength = Buffer.byteLength(successMessage, 'utf8');
       res.set('Content-Length', successMessageLength);
       res.status(201).json({ message: successMessage });
+      //console.log("existing user");
     }
 
   } catch (error) {
@@ -162,6 +164,55 @@ const getFriendList = async (req, res) => {
     }
   };
 
+  const getFriendListWithNames = async (req, res) => {
+    try {
+      const userEmail = req.params.email; // User email whose friend list needs to be retrieved
+  
+      // Assuming you have already connected to the MongoDB client
+      const collection = client.db('UserDB').collection('userlist');
+  
+      // Find the user by their email
+      const user = await collection.findOne({ email: userEmail });
+  
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      } else {
+        const friendEmails = user.friends;
+  
+        // Create an array to store friend details (email and name)
+        const friendsWithNames = [];
+  
+        // Iterate over the friendEmails and find their names
+        for (const friendEmail of friendEmails) {
+          const friend = await collection.findOne({ email: friendEmail });
+  
+          if (friend) {
+            friendsWithNames.push({
+              email: friend.email,
+              name: friend.name,
+            });
+          } else {
+            // Handle cases where a friend is not found (optional)
+            friendsWithNames.push({
+              email: friendEmail,
+              name: 'Unknown', // Set to 'Unknown' if friend not found
+            });
+          }
+        }
+  
+        // Include the list of friendRequests in the response
+        const friendRequests = user.friendRequests;
+  
+        res.status(200).json({ friendsWithNames, friendRequests });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  };
+  
+
+
   const addFriend = async (req, res) => {
     try {
       const userEmail = req.params.email; // User's email for whom the friend list needs to be updated
@@ -172,12 +223,23 @@ const getFriendList = async (req, res) => {
   
       // Find the user by their email
       const user = await collection.findOne({ email: userEmail });
+
+
   
       if (!user) {
         res.status(404).json({ error: 'User not found' });
         return;
       }
+
+      
+      console.log(friend);
+
+      if (!friend) {
+        res.status(404).json({ error: 'Friend not found' });
+        return;
+      }
   
+      
       // Check if the friend's email exists in the user's friend list
       const friendExists = user.friends.includes(friendEmail);
   
@@ -248,6 +310,160 @@ const getFriendList = async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   };
+  
+  const sendFriendRequest = async (req, res) => {
+    try {
+      const userEmail = req.params.email; // User's email
+      const friendEmail = req.body.email; // Friend's email to be added to friend requests
+  
+      const userCollection = client.db('UserDB').collection('userlist');
+  
+      // Check if the user or friend doesn't exist in the userlist collection
+      const [user, friend] = await Promise.all([
+        userCollection.findOne({ email: userEmail }),
+        userCollection.findOne({ email: friendEmail }),
+      ]);
+  
+      
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      
+  
+      if (!friend) {
+        console.error(`Friend with email ${friendEmail} not found in the userlist.`);
+        return res.status(404).json({ error: 'Friend not found in the userlist' });
+      }
+  
+      /*
+      // Check if the user has friendRequests property, and if not, initialize it as an empty array
+      if (!user.friendRequests) {
+        user.friendRequests = [];
+      }
+      */
+  
+      // Check if the friend's email is already in the user's friend requests
+      if (!user.friendRequests.includes(friendEmail)) {
+        // Friend not found in friend requests, add the friend's email
+        user.friendRequests.push(friendEmail);
+  
+        // Update the user's document in the collection
+        const updateResult = await userCollection.updateOne(
+          { _id: user._id },
+          { $set: { friendRequests: user.friendRequests } }
+        );
+  
+        if (updateResult.modifiedCount > 0) {
+          return res.status(200).json({ message: 'Friend request sent successfully' });
+        } else {
+          return res.status(500).json({ error: 'Failed to send friend request' });
+        }
+      } else {
+        return res.status(400).json({ error: 'Friend request already sent' });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  };
+  const acceptFriendRequest = async (req, res) => {
+    try {
+      const userEmail = req.params.email; // User's email
+      const friendEmail = req.params.friendRequest; // Friend's email to accept
+  
+      const userCollection = client.db('UserDB').collection('userlist');
+  
+      // Check if the user exists in the userlist collection
+      const user = await userCollection.findOne({ email: userEmail });
+  
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+  
+      // Check if the friend's email exists in the user's friendRequests
+      if (!user.friendRequests.includes(friendEmail)) {
+        return res.status(400).json({ error: 'Friend request not found in the user\'s friend requests' });
+      }
+  
+      // Remove the friend request
+      const updatedFriendRequests = user.friendRequests.filter(request => request !== friendEmail);
+  
+      // Add the friend to the user's list of friends
+      user.friends.push(friendEmail);
+  
+      // Find the friend and add the user to their list of friends
+      const friend = await userCollection.findOne({ email: friendEmail });
+  
+      if (!friend) {
+        return res.status(404).json({ error: 'Friend not found in the userlist' });
+      }
+  
+      friend.friends.push(userEmail);
+  
+      // Update both user and friend documents
+      const updateResults = await Promise.all([
+        userCollection.updateOne({ _id: user._id }, { $set: { friendRequests: updatedFriendRequests, friends: user.friends } }),
+        userCollection.updateOne({ _id: friend._id }, { $set: { friends: friend.friends } }),
+      ]);
+  
+      if (updateResults.every(result => result.modifiedCount > 0)) {
+        return res.status(200).json({ message: 'Friend request accepted successfully' });
+      } else {
+        return res.status(500).json({ error: 'Failed to accept friend request' });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  };
+
+  const declineFriendRequest = async (req, res) => {
+    try {
+      const userEmail = req.params.email; // User's email
+      const friendEmail = req.params.friendRequest; // Friend's email to decline
+  
+      const userCollection = client.db('UserDB').collection('userlist');
+  
+      // Check if the user exists in the userlist collection
+      const user = await userCollection.findOne({ email: userEmail });
+  
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+  
+      // Check if the friend's email exists in the user's friendRequests
+      if (!user.friendRequests.includes(friendEmail)) {
+        return res.status(400).json({ error: 'Friend request not found in the user\'s friend requests' });
+      }
+  
+      // Remove the friend request
+      const updatedFriendRequests = user.friendRequests.filter(request => request !== friendEmail);
+  
+      // Update the user's document in the collection to remove the friend request
+      const updateResult = await userCollection.updateOne(
+        { _id: user._id },
+        { $set: { friendRequests: updatedFriendRequests } }
+      );
+  
+      if (updateResult.modifiedCount > 0) {
+        return res.status(200).json({ message: 'Friend request declined successfully' });
+      } else {
+        return res.status(500).json({ error: 'Failed to decline friend request' });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  };
+  
+  
+  
+
+
+  
+  
+  
+  
   
 
 
@@ -396,6 +612,9 @@ const deleteUser = async (req, res) => {
   }
 };
 
+
+
+
   
   
   module.exports = {
@@ -405,9 +624,13 @@ const deleteUser = async (req, res) => {
     getUserName,
     getUserAddress,
     getFriendList,
+    getFriendListWithNames,
     addFriend,
     deleteFriend,
     updateUser,
-    deleteUser
+    deleteUser,
+    sendFriendRequest,
+    acceptFriendRequest,
+    declineFriendRequest,
   };
   

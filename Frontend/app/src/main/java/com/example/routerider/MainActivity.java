@@ -30,6 +30,7 @@ import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 
 import java.io.IOException;
@@ -49,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        FirebaseMessaging.getInstance().subscribeToTopic("RouteRider");
         googleSignIn(true);
     }
 
@@ -114,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
         user.put("name", account.getDisplayName());
         user.put("address", "");
         user.put("friends", emptyList());
+        user.put("friendRequests", emptyList());
         String jsonStr = new Gson().toJson(user);
         //System.out.println(jsonStr);
 

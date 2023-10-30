@@ -48,6 +48,12 @@ app.put('/api/userlist/:email/', user.updateAddress);
 app.post('/api/userlist/:email/friends', user.addFriend);
 app.delete('/api/userlist/:email/friends', user.deleteFriend);
 
+
+app.post('/api/userlist/:email/friendRequest', user.sendFriendRequest);
+
+app.post('/api/userlist/:email/:friendRequest/accept', user.acceptFriendRequest);
+app.delete('/api/userlist/:email/:friendRequest/decline', user.declineFriendRequest);
+
 app.put('/api/userlist/:email', user.updateUser);
 
 // test/db purposes only

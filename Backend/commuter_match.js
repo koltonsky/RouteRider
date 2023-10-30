@@ -38,7 +38,22 @@ async function findUsers(userEmail) {
     return "print test";
 }
 */
-
+/**
+ * Retrieves the first events of each day from a user's schedule.
+ *
+ * @param {string} userEmail - The email address of the user whose schedule is to be queried.
+ * @returns {Object} An object containing an array of the first events of each day.
+ *
+ * This function performs the following steps:
+ * 1. Retrieves the user's schedule from the database based on their email address.
+ * 2. Checks if the user's schedule exists and is not empty; if not, it returns an empty array.
+ * 3. Constructs an aggregation pipeline to find the first event of each day within the user's schedule.
+ * 4. Executes the aggregation pipeline to retrieve the first events.
+ * 5. Reverses the order of the first events to have the most recent first events at the beginning.
+ * 6. Logs the first events of each day for reference.
+ * 7. Returns an object containing the array of reversed first events.
+ * 8. In case of an error, it returns an object with an empty events array.
+ */
 async function getFirstEventsOfEachDay(userEmail) {
     try {
 
@@ -85,8 +100,20 @@ async function getFirstEventsOfEachDay(userEmail) {
     }
 }
 
-
-  // new function: finds other emails, excluding userEmail
+/**
+ * Finds and retrieves email addresses of schedules excluding the specified user's schedule.
+ *
+ * @param {string} userEmail - The email address of the user whose schedule is to be excluded.
+ * @returns {Array} An array of email addresses belonging to other users' schedules.
+ *
+ * This function performs the following steps:
+ * 1. Constructs an aggregation pipeline to filter out email addresses that are not the specified user's email.
+ * 2. Executes the aggregation pipeline to find schedules belonging to other users.
+ * 3. Extracts email addresses from the query result and stores them in an array.
+ * 4. Logs the email addresses of schedules excluding the specified user for reference.
+ * 5. Returns an array of email addresses.
+ * 6. In case of an error, it returns an empty array.
+ */
   async function findOtherEmails(userEmail) {
     try {
 
@@ -118,6 +145,21 @@ async function getFirstEventsOfEachDay(userEmail) {
     }
 }
 
+/**
+ * Finds matching users based on the first events of the day for a given user.
+ *
+ * @param {string} userEmail - The email of the user to find matching users for.
+ * @returns {Set} A Set of unique email addresses of users who have matching events.
+ *
+ * This function performs the following steps:
+ * 1. Retrieves the first events of the day for the specified user.
+ * 2. Retrieves a list of other email addresses, excluding the specified user's email.
+ * 3. Compares the first events of the user with the first events of other users.
+ * 4. If events have the same location (first 3 characters are 'UBC') and the same start time,
+ *    the email address of the other user is added to the Set of matching users.
+ * 5. Returns the Set of unique email addresses of users with matching events.
+ * 6. In case of an error, it returns an empty array.
+ */
 
 async function findMatchingUsers(userEmail) {
     try {

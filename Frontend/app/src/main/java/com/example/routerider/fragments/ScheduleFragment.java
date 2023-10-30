@@ -16,7 +16,6 @@ import android.transition.TransitionManager;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.net.ParseException;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
@@ -270,7 +269,7 @@ public class ScheduleFragment extends Fragment {
 
             assert parsedDate != null;
             return parsedDate.after(currentDate); // Date is valid and ahead of the current date
-        } catch (ParseException | java.text.ParseException e) {
+        } catch (java.text.ParseException e) {
             // Parsing failed, the date is not valid
             return false;
         }
@@ -291,7 +290,7 @@ public class ScheduleFragment extends Fragment {
 
             assert start != null;
             return start.before(end);
-        } catch (ParseException | java.text.ParseException e) {
+        } catch (java.text.ParseException e) {
             // Parsing failed, the times are not valid
             return false;
         }

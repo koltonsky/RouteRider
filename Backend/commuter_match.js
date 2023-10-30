@@ -90,8 +90,8 @@ async function getFirstEventsOfEachDay(userEmail) {
         const firstEvents = await client.db('ScheduleDB').collection('schedulelist').aggregate(pipeline).toArray();
         const reversedFirstEvents = firstEvents.reverse();
 
-        console.log('First events of each day:');
-        console.log(reversedFirstEvents);
+        //console.log('First events of each day:');
+        //console.log(reversedFirstEvents);
 
         return { events: reversedFirstEvents };
     } catch (err) {
@@ -135,8 +135,8 @@ async function getFirstEventsOfEachDay(userEmail) {
         // Extract the email addresses from the result
         const emailsExcludingUser = result.map(schedule => schedule.email);
 
-        console.log('Emails of schedules excluding the user:');
-        console.log(emailsExcludingUser);
+        //console.log('Emails of schedules excluding the user:');
+        //console.log(emailsExcludingUser);
 
         return emailsExcludingUser;
     } catch (err) {
@@ -146,67 +146,67 @@ async function getFirstEventsOfEachDay(userEmail) {
 }
 
 /**
- * Finds matching users based on the first events of the day for a given user.
+ * Finds and retrieves users with matching events and their corresponding matching events.
  *
- * @param {string} userEmail - The email of the user to find matching users for.
- * @returns {Set} A Set of unique email addresses of users who have matching events.
+ * @param {string} userEmail - The email address of the user to find matching users for.
+ * @returns {Object} A dictionary where each key is a user's email and the value is a list of matching events.
  *
  * This function performs the following steps:
  * 1. Retrieves the first events of the day for the specified user.
  * 2. Retrieves a list of other email addresses, excluding the specified user's email.
- * 3. Compares the first events of the user with the first events of other users.
- * 4. If events have the same location (first 3 characters are 'UBC') and the same start time,
- *    the email address of the other user is added to the Set of matching users.
- * 5. Returns the Set of unique email addresses of users with matching events.
- * 6. In case of an error, it returns an empty array.
+ * 3. Constructs a dictionary to store matching users and their corresponding matching events.
+ * 4. Compares the first events of the user with the first events of other users.
+ * 5. If events have the same 'UBC' address and the same start time, they are considered matching.
+ * 6. Matching events are stored in an array with 'startTime' and 'address: UBC'.
+ * 7. Entries are added to the dictionary, where the key is the user's email and the value is the list of matching events.
+ * 8. Only users with matching events are included in the result.
+ * 9. Returns a dictionary with user emails as keys and their matching events as values.
+ * 10. In case of an error, it returns an empty object.
  */
-
 async function findMatchingUsers(userEmail) {
     try {
-
         // Step 1: Get the first events for the user
         const userFirstEvents = await getFirstEventsOfEachDay(userEmail);
-
-        console.log('User First Events:');
-        console.log(userFirstEvents);
 
         // Step 2: Find other emails, excluding the user's email
         const otherEmails = await findOtherEmails(userEmail);
 
-        // Step 3: Create an empty list to hold the set of users
-        const matchingUsers = new Set();
+        // Step 3: Create a dictionary to hold matching users and their matching events
+        const matchingUsers = {};
 
         for (const email of otherEmails) {
             const firstEventsOfTheDay = await getFirstEventsOfEachDay(email);
 
-            console.log(`First Events of the Day for ${email}:`);
-            console.log(firstEventsOfTheDay);
-
-            // Step 4: Compare the events and add email to the list if conditions match
+            // Step 4: Compare the events and add user and matching events if conditions match
+            const matchedEvents = [];
             for (const userEvent of userFirstEvents.events) {
                 for (const otherEvent of firstEventsOfTheDay.events) {
-                    
                     if (
                         userEvent.event.address.slice(0, 3) === 'UBC' &&
                         otherEvent.event.address.slice(0, 3) === 'UBC' &&
                         userEvent.event.startTime === otherEvent.event.startTime
                     ) {
-                        matchingUsers.add(email);
+                        matchedEvents.push({
+                            startTime: userEvent.event.startTime,
+                            address: 'UBC',
+                        });
                         break; // Once a match is found, no need to check other events for this email
                     }
                 }
             }
-        }
 
-        console.log('Users with matching events:');
-        console.log(matchingUsers);
+            if (matchedEvents.length > 0) {
+                matchingUsers[email] = matchedEvents;
+            }
+        }
 
         return matchingUsers;
     } catch (err) {
         console.error('Error:', err);
-        return []; // Return an empty array in case of an error
+        return {}; // Return an empty object in case of an error
     }
 }
+
 
   
 
@@ -220,10 +220,12 @@ async function findMatchingUsers(userEmail) {
   //const findScheduleReturn = findSchedule(userEmail, emailsExcludingUser);
 
   
+  /*
 findMatchingUsers(userEmail).then(result => {
     console.log('Schedule for other users:');
     console.log(result);
 });
+*/
 
   //findMatchingCommuters("koltonluu@gmail.com");
   //findUsers("koltonluu")

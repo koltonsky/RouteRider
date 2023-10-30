@@ -24,6 +24,7 @@ import com.example.routerider.PreferencesActivity;
 import com.example.routerider.R;
 import com.example.routerider.User;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 
 import org.json.JSONException;

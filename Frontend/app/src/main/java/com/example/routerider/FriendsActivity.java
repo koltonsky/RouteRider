@@ -24,7 +24,9 @@ import java.util.Map;
 public class FriendsActivity extends AppCompatActivity {
 
     private JSONArray friendList;
+    private JSONArray friendRequestList;
     private LinearLayout friendListDisplay;
+    private LinearLayout friendRequestDisplay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,20 +37,22 @@ public class FriendsActivity extends AppCompatActivity {
 
         Button addFriend = findViewById(R.id.addFriendButton);
         friendListDisplay = findViewById(R.id.friendList);
+        friendRequestDisplay = findViewById(R.id.friendRequestList);
         APICaller apiCall = new APICaller();
 
         apiCall.APICall("api/userlist/" + account.getEmail() + "/friends", "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
             @Override
-            public void onResponse(final String responseBody) {
+            public void onResponse(final String responseBody) throws JSONException {
                 System.out.println("BODY: " + responseBody);
-                try {
-                    friendList = new JSONArray(responseBody);
-                    runOnUiThread(() -> {
-                        generateFriendList();
-                    });
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                JSONObject json = new JSONObject(responseBody);
+                friendList = json.getJSONArray("friendsWithNames");
+                friendRequestList = json.getJSONArray("friendRequestsWithNames");
+                System.out.println(friendRequestList);
+                System.out.println(friendList);
+                runOnUiThread(() -> {
+                    generateFriendList();
+                    generateFriendRequestList();
+                });
             }
 
             @Override
@@ -70,9 +74,10 @@ public class FriendsActivity extends AppCompatActivity {
 
                 Map<String, Object> map = new HashMap<>();
                 map.put("email", userInput);
+//                map.put("add", "true")
                 String jsonSchedule = new Gson().toJson(map);
 
-                apiCall.APICall("api/userlist/" + account.getEmail() + "/friends", jsonSchedule, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
+                apiCall.APICall("api/userlist/" + account.getEmail() + "/friendRequest", jsonSchedule, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
                     @Override
                     public void onResponse(final String responseBody) {
                         System.out.println("BODY: " + responseBody);
@@ -117,6 +122,83 @@ public class FriendsActivity extends AppCompatActivity {
             }
         }
     }
+
+    public void generateFriendRequestList() {
+        APICaller apiCall = new APICaller();
+        friendRequestDisplay.removeAllViews();
+        if (friendList != null) {
+            try {
+                for (int i = 0; i < friendRequestList.length(); i++) {
+                    JSONObject friend = friendRequestList.getJSONObject(i);
+                    final String email = friend.getString("email");
+                    final String name = friend.getString("name");
+
+                    LinearLayout friendLayout = new LinearLayout(this);
+                    friendLayout.setOrientation(LinearLayout.VERTICAL);
+                    TextView friendTextView = new TextView(this);
+                    friendTextView.setText("Name: " + name + " | Email: " + email);
+                    LinearLayout buttonLayout = new LinearLayout(this);
+                    buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
+
+                    Button acceptButton = new Button(this);
+                    acceptButton.setText("Accept");
+                    acceptButton.setOnClickListener(view -> {
+                        JSONObject friendObject = new JSONObject();
+                        try {
+                            friendObject.put("name", name);
+                            friendObject.put("email", email);
+                            friendList.put(friendObject);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        friendRequestDisplay.removeView(friendLayout);
+                        generateFriendList();
+                        GoogleSignInAccount account = User.getCurrentAccount();
+
+                        apiCall.APICall("api/userlist/" + account.getEmail() + "/" + email + "/accept", "", APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
+                            @Override
+                            public void onResponse(String responseBody) {
+                                System.out.println("BODY: " + responseBody);
+                            }
+
+                            @Override
+                            public void onError(String errorMessage) {
+                                System.out.println("Error: " + errorMessage);
+                            }
+                        });
+                    });
+
+                    Button declineButton = new Button(this);
+                    declineButton.setText("Decline");
+                    declineButton.setOnClickListener(view -> {
+                        GoogleSignInAccount account = User.getCurrentAccount();
+                        apiCall.APICall("api/userlist/" + account.getEmail() + "/" + email + "/decline", "", APICaller.HttpMethod.DELETE, new APICaller.ApiCallback() {
+                            @Override
+                            public void onResponse(String responseBody) {
+                                System.out.println("BODY: " + responseBody);
+                            }
+
+                            @Override
+                            public void onError(String errorMessage) {
+                                System.out.println("Error: " + errorMessage);
+                            }
+                        });
+                        friendRequestDisplay.removeView(friendLayout);
+                    });
+
+                    buttonLayout.addView(acceptButton);
+                    buttonLayout.addView(declineButton);
+                    friendLayout.addView(friendTextView);
+                    friendLayout.addView(buttonLayout);
+                    friendRequestDisplay.addView(friendLayout);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
 
 
 }

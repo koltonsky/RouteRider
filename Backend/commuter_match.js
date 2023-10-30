@@ -24,6 +24,7 @@ const uri = 'mongodb://0.0.0.0:27017'; // Replace with your MongoDB connection s
 const client = new MongoClient(uri);
 
 // returns a list of users and events which match up on the first day
+/*
 async function findUsers(userEmail) {
     var userSchedule = await client.db('ScheduleDB').collection('schedulelist').findOne({email: userEmail});
     if (!userSchedule) {
@@ -36,6 +37,7 @@ async function findUsers(userEmail) {
     var matchingEvents = [];
     return "print test";
 }
+*/
 
 async function getFirstEventsOfEachDay(userEmail) {
     try {
@@ -87,31 +89,116 @@ async function getFirstEventsOfEachDay(userEmail) {
 }
 
 
-  // new function: takes in useremail and firstevents, 
-  async function findMatchingCommuters(userEmail) {
-    await client.connect();
-    const userFirstEvents = getFirstEventsOfEachDay(userEmail);
+  // new function: finds other emails, excluding userEmail
+  async function findOtherEmails(userEmail) {
+    try {
+        await client.connect();
 
-    // Construct a query to find all schedules except the user's schedule
-    const query = { email: { $ne: userEmail } };
+        // Construct an aggregation pipeline to find emails of schedules except the user's schedule
+        const pipeline = [
+            {
+                $match: { email: { $ne: userEmail } }
+            },
+            {
+                $project: {
+                    email: 1
+                }
+            }
+        ];
 
-    // Find schedules that match the query
-    const schedulesExcludingUser = await client.db('ScheduleDB').collection('schedulelist').find(query).toArray();
+        // Execute the aggregation pipeline
+        const result = await client.db('ScheduleDB').collection('schedulelist').aggregate(pipeline).toArray();
 
-    console.log('Schedules excluding the user:');
-    console.log(schedulesExcludingUser);
+        // Extract the email addresses from the result
+        const emailsExcludingUser = result.map(schedule => schedule.email);
 
-    console.log(userFirstEvents);
-  }
+        console.log('Emails of schedules excluding the user:');
+        console.log(emailsExcludingUser);
+
+        return emailsExcludingUser;
+    } catch (err) {
+        console.error('Error:', err);
+        return []; // Return an empty array in case of an error
+    } finally {
+        await client.close();
+    }
+}
+
+
+async function findSchedule(userEmail) {
+    try {
+        await client.connect();
+
+        // Step 1: Get the first events for the user
+        const userFirstEvents = await getFirstEventsOfEachDay(userEmail);
+
+        console.log('User First Events:');
+        console.log(userFirstEvents);
+
+        // Step 2: Find other emails, excluding the user's email
+        const otherEmails = await findOtherEmails(userEmail);
+
+        // Step 3: Create an empty list to hold the set of users
+        const matchingUsers = new Set();
+
+        for (const email of otherEmails) {
+            const firstEventsOfTheDay = await getFirstEventsOfEachDay(email);
+
+            console.log(`First Events of the Day for ${email}:`);
+            console.log(firstEventsOfTheDay);
+
+            // Step 4: Compare the events and add email to the list if conditions match
+            for (const userEvent of userFirstEvents.events) {
+                for (const otherEvent of firstEventsOfTheDay.events) {
+                    
+                    if (
+                        userEvent.event.address.slice(0, 3) === 'UBC' &&
+                        otherEvent.event.address.slice(0, 3) === 'UBC' &&
+                        userEvent.event.startTime === otherEvent.event.startTime
+                    ) {
+                        matchingUsers.add(email);
+                        break; // Once a match is found, no need to check other events for this email
+                    }
+                }
+            }
+        }
+
+        console.log('Users with matching events:');
+        console.log(matchingUsers);
+
+        return matchingUsers;
+    } catch (err) {
+        console.error('Error:', err);
+        return []; // Return an empty array in case of an error
+    } finally {
+        await client.close();
+    }
+}
+
   
 
 
   //getFirstEventsOfEachDay("koltonluu@gmail.com");
-  findMatchingCommuters("koltonluu@gmail.com");
+  const userEmail = "koltonluu@gmail.com";
+  //const getFirstEventsOfEachDayReturn = getFirstEventsOfEachDay(userEmail);
+
+  //const emailsExcludingUser = findOtherEmails(userEmail);
+  //console.log(emailsExcludingUser);
+  //const findScheduleReturn = findSchedule(userEmail, emailsExcludingUser);
+
+  
+findSchedule(userEmail).then(result => {
+    console.log('Schedule for other users:');
+    console.log(result);
+});
+
+  //findMatchingCommuters("koltonluu@gmail.com");
   //findUsers("koltonluu")
 
 module.exports = {
-    findUsers,
+    //findUsers,
     getFirstEventsOfEachDay,
+    findOtherEmails,
+
   };
   

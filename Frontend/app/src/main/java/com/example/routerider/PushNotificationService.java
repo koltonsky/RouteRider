@@ -11,6 +11,12 @@ import androidx.core.app.NotificationManagerCompat;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.google.gson.Gson;
+
+import org.checkerframework.checker.units.qual.A;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class PushNotificationService extends FirebaseMessagingService {
     @Override
@@ -20,9 +26,22 @@ public class PushNotificationService extends FirebaseMessagingService {
         sendRegistrationToServer(token);
     }
 
-    private void sendRegistrationToServer(String token) {
-        // Send the token to your Azure server or store it locally
-        // You may associate it with the user's account if needed
-    }
+    void sendRegistrationToServer(String token) {
+        APICaller apiCall = new APICaller();
+        Map<String, Object> map = new HashMap<>();
+        map.put("token", token);
+        String jsonToken = new Gson().toJson(map);
 
+        apiCall.APICall("api/userlist", jsonToken, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
+            @Override
+            public void onResponse(String responseBody) {
+                System.out.println("BODY: " + responseBody);
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                System.out.println("Error: " + errorMessage);
+            }
+        });
+    }
 }

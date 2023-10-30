@@ -72,9 +72,41 @@ public class FriendsActivity extends AppCompatActivity {
                 EditText editText = dialogView.findViewById(R.id.addFriendEmail);
                 String userInput = editText.getText().toString();
 
+//                apiCall.getRecipientFCMToken(recipientEmail, new APICaller.ApiCallback() {
+//                    @Override
+//                    public void onResponse(String recipientToken) {
+//                        // Create a notification payload
+//                        Map<String, String> notificationData = new HashMap<>();
+//                        notificationData.put("title", "Friend Request");
+//                        notificationData.put("body", "You have received a friend request!");
+//
+//                        // Create the FCM message
+//                        Map<String, Object> messageData = new HashMap<>();
+//                        messageData.put("data", notificationData);
+//                        messageData.put("to", recipientToken);
+//
+//                        // Send the FCM notification
+//                        apiCall.sendFCMNotification(messageData, new APICaller.ApiCallback() {
+//                            @Override
+//                            public void onResponse(String responseBody) {
+//                                System.out.println("Notification sent: " + responseBody);
+//                            }
+//
+//                            @Override
+//                            public void onError(String errorMessage) {
+//                                System.out.println("Error sending notification: " + errorMessage);
+//                            }
+//                        });
+//                    }
+//
+//                    @Override
+//                    public void onError(String errorMessage) {
+//                        System.out.println("Error getting recipient's FCM token: " + errorMessage);
+//                    }
+//                });
+
                 Map<String, Object> map = new HashMap<>();
                 map.put("email", userInput);
-//                map.put("add", "true")
                 String jsonSchedule = new Gson().toJson(map);
 
                 apiCall.APICall("api/userlist/" + account.getEmail() + "/friendRequest", jsonSchedule, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {

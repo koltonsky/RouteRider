@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -20,6 +21,19 @@ public class HomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
+        PushNotificationService pushNotificationService = new PushNotificationService();
+
+        // Retrieve the FCM token
+        FirebaseMessaging.getInstance().getToken()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        String token = task.getResult();
+                        pushNotificationService.sendRegistrationToServer(token);
+                    } else {
+                        // Handle the case where token retrieval fails
+                    }
+                });
 
         // Set up the ViewPager with the sections adapter.
         tabLayout = findViewById(R.id.tab_layout);

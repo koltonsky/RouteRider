@@ -1,5 +1,7 @@
 package com.example.routerider;
 
+import static java.util.Collections.emptyList;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
@@ -28,11 +30,15 @@ import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
+import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -43,20 +49,20 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        googleSignIn();
+        googleSignIn(true);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        googleSignIn();
+        googleSignIn(false);
     }
 
-    private void googleSignIn() {
+    private void googleSignIn(boolean autoSignIn) {
         SharedPreferences pref = getSharedPreferences("routeRider", Context.MODE_PRIVATE);
-        if(pref.getBoolean("isLoggedIn", false)) {
+        if(pref.getBoolean("isLoggedIn", false) && autoSignIn) {
             GoogleSignInOptions googleSignIn = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                    .requestScopes(new Scope(CalendarScopes.CALENDAR_READONLY))
+                    .requestScopes(new Scope(CalendarScopes.CALENDAR))
                     .requestEmail()
                     .build();
 
@@ -71,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
             Button loginButton = findViewById(R.id.login_button);
             loginButton.setOnClickListener(v -> {
                 GoogleSignInOptions googleSignIn = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        .requestScopes(new Scope(CalendarScopes.CALENDAR_READONLY))
+                        .requestScopes(new Scope(CalendarScopes.CALENDAR))
                         .requestEmail()
                         .build();
 
@@ -101,7 +107,29 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void handleSignInSuccess(GoogleSignInAccount account) {
+        APICaller apiCall = new APICaller();
         User.updateGoogleAccount(account);
+        Map<String, Object> user = new LinkedHashMap<>();
+        user.put("email", account.getEmail());
+        user.put("name", account.getDisplayName());
+        user.put("address", "");
+        user.put("friends", emptyList());
+        String jsonStr = new Gson().toJson(user);
+        //System.out.println(jsonStr);
+
+
+        apiCall.APICall("api/userlist", jsonStr, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
+            @Override
+            public void onResponse(String responseBody) {
+                System.out.println("BODY: " + responseBody);
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                System.out.println("Error: " + errorMessage);
+            }
+        });
+
 
         SharedPreferences preferences = getSharedPreferences("routeRider", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();

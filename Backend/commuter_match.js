@@ -41,7 +41,6 @@ async function findUsers(userEmail) {
 
 async function getFirstEventsOfEachDay(userEmail) {
     try {
-        await client.connect();
 
         const userSchedule = await client.db('ScheduleDB').collection('schedulelist').findOne({ email: userEmail });
 
@@ -83,8 +82,6 @@ async function getFirstEventsOfEachDay(userEmail) {
     } catch (err) {
         console.error('Error:', err);
         return { events: [] }; // Return an empty array in case of an error
-    } finally {
-        await client.close();
     }
 }
 
@@ -92,7 +89,6 @@ async function getFirstEventsOfEachDay(userEmail) {
   // new function: finds other emails, excluding userEmail
   async function findOtherEmails(userEmail) {
     try {
-        await client.connect();
 
         // Construct an aggregation pipeline to find emails of schedules except the user's schedule
         const pipeline = [
@@ -119,15 +115,12 @@ async function getFirstEventsOfEachDay(userEmail) {
     } catch (err) {
         console.error('Error:', err);
         return []; // Return an empty array in case of an error
-    } finally {
-        await client.close();
     }
 }
 
 
-async function findSchedule(userEmail) {
+async function findMatchingUsers(userEmail) {
     try {
-        await client.connect();
 
         // Step 1: Get the first events for the user
         const userFirstEvents = await getFirstEventsOfEachDay(userEmail);
@@ -170,8 +163,6 @@ async function findSchedule(userEmail) {
     } catch (err) {
         console.error('Error:', err);
         return []; // Return an empty array in case of an error
-    } finally {
-        await client.close();
     }
 }
 
@@ -187,7 +178,7 @@ async function findSchedule(userEmail) {
   //const findScheduleReturn = findSchedule(userEmail, emailsExcludingUser);
 
   
-findSchedule(userEmail).then(result => {
+findMatchingUsers(userEmail).then(result => {
     console.log('Schedule for other users:');
     console.log(result);
 });
@@ -199,6 +190,7 @@ module.exports = {
     //findUsers,
     getFirstEventsOfEachDay,
     findOtherEmails,
+    findMatchingUsers,
 
   };
   

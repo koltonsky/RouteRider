@@ -190,7 +190,10 @@ var dummy_user = {
   ]
 }
 
-console.log(commuters.findCommuters());
+commuters.findMatchingUsers("koltonluu@gmail.com").then(result => {
+  console.log('Schedule for other users:');
+  console.log(result);
+});
 
 // client.db('ScheduleDB').collection('schedulelist').insertOne(dummy_schedule).then((result) => {
 //   console.log("inserted schedule");

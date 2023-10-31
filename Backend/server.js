@@ -611,17 +611,17 @@ app.post('/api/store-token', (req, res) => {
 });
 
 app.post('/api/send-notification', (req, res) => {
-// Send a message to a specific device
-const message = {
-  token: req.to,
-  messageData: req.data
-};
+  // Send a message to a specific device
+  const message = {
+    token: req.to,
+    messageData: req.data
+  };
 
-admin.messaging().send(message)
-  .then((response) => {
-    console.log('Successfully sent message:', response);
-  })
-  .catch((error) => {
-    console.error('Error sending message:', error);
-  });
+  admin.messaging().send(message)
+    .then((response) => {
+      console.log('Successfully sent message:', response);
+    })
+    .catch((error) => {
+      console.error('Error sending message:', error);
+    });
 });

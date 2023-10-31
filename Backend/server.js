@@ -17,7 +17,7 @@ const axios = require('axios')
 const user = require('./routes/user.js')
 const schedule = require('./routes/schedule.js');
 const { get } = require('http');
-const { time } = require('console');
+const { time, error } = require('console');
 
 // MongoDB connection setup
 const uri = 'mongodb://0.0.0.0:27017'; // Replace with your MongoDB connection string
@@ -197,7 +197,7 @@ var dummy_user = {
 // });
 
 // var dummy = initRoute("koltonluu@gmail.com", "2023-11-01");
-var dummy = initReminders("koltonluu@gmail.com");
+// var dummy = initReminders("koltonluu@gmail.com");
 /**
  * Function returns an array of objects containing the following fields:
  *    _id: bus number/Skytrain line name (e.g. 99, R4, Expo Line, etc.)
@@ -217,11 +217,11 @@ var dummy = initReminders("koltonluu@gmail.com");
  * @param {*} userEmail 
  * @param {*} date
  */
-async function initRoute(userEmail, date) {
+const initRoute = async (req, res) => {
   console.log("called initRoute()");
   
-  var schedule = await client.db('ScheduleDB').collection('schedulelist').findOne({email: userEmail});
-  var user = await client.db('UserDB').collection('userlist').findOne({email: userEmail})
+  var schedule = await client.db('ScheduleDB').collection('schedulelist').findOne({email: req.body.userEmail});
+  var user = await client.db('UserDB').collection('userlist').findOne({email: req.body.userEmail})
   console.log("initRoute(): returned schedule: " + schedule);
   console.log(schedule.events[0].eventName);
 
@@ -231,7 +231,7 @@ async function initRoute(userEmail, date) {
   var locationOfOrigin = user.address;
   for (var i = 0; i < schedule.events.length; i++) { // assumes events are sorted by date
     // console.log("initRoute(): " + schedule.events[i].startTime + " " + date);
-    if (schedule.events[i].startTime.split('T')[0] == date) { 
+    if (schedule.events[i].startTime.split('T')[0] == req.body.date) { 
       // console.log("initRoute(): startTime " + schedule.events[i].startTime);
       timeOfFirstEvent = schedule.events[i].startTime;
       locationOfFirstEvent = schedule.events[i].address;
@@ -313,7 +313,7 @@ async function initRoute(userEmail, date) {
       console.log("updated leavetime: " + returnList[i]._leaveTime);
     }
   
-    return returnList;
+    res.status(200).json({"returnList": returnList});
   });
 }
 
@@ -324,12 +324,12 @@ async function initRoute(userEmail, date) {
  * @param userEmail
  * @returns an array of objects that contain info on when to send notifications (time and date)
  */
-async function initReminders(userEmail) {
+const initReminders = async (req, res) => {
   console.log("called initReminders()");
   var returnList = []
   
-  var schedule = await client.db('ScheduleDB').collection('schedulelist').findOne({email: userEmail});
-  var user = await client.db('UserDB').collection('userlist').findOne({email: userEmail})
+  var schedule = await client.db('ScheduleDB').collection('schedulelist').findOne({email: req.body.userEmail});
+  var user = await client.db('UserDB').collection('userlist').findOne({email: req.body.userEmail})
   console.log("initReminders(): returned schedule: " + schedule);
   console.log(schedule.events[0].eventName);
 
@@ -369,11 +369,16 @@ async function initReminders(userEmail) {
   //   console.log("initReminders(): returned returnList: " + returnList[i].date + " " + returnList[i].leaveTime); 
   // }
 
-  return returnList;
+  res.status(200).json({"returnList": returnList});
 }
 // getNearestBuses("EB Rumble St @ Gilley Ave").then((buses) => {
 //   console.log(buses[0].StopNo + " " + buses.length);
 // });
+app.route('/api/reminderlist/:email').get((req, res) => {
+  initReminders(req.params.email).then((returnList) => {
+    res.status(200).json(returnList);
+  });
+});
 
 function getLatLong(address) {
   return new Promise((resolve, reject) => {
@@ -563,3 +568,54 @@ function combineDateAndTime(dateString, timeString) {
 
   return date.toISOString();
 }
+
+const admin = require('firebase-admin');
+const serviceAccount = require('path/to/serviceAccountKey.json');
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+
+
+// Define an API endpoint to handle incoming tokens
+app.post('/api/store-token', (req, res) => {
+  // Your token handling logic goes here
+  const token = req.body.token; // Assuming the token is sent as a JSON field named "token"
+  const userId = req.body.userId; // Assuming the user ID is sent from the app
+
+  db.insertToken(token);
+  client.db('TokenDB').collection('tokenlist').insertOne({token: token}).then((result) => {
+    console.log("inserted token");
+    res.json({ message: 'Token stored successfully' });
+  },
+  (error) => {
+    console.log("error inserting token: " + error);
+    res.status(500).json({ error: 'Token storage failed' });
+  }).then(() => {
+    client.db('UserDB').collection('userlist').findOne({email: userId}).then((result) => {
+      console.log("found user");
+      result.fcmToken = token;
+      res.json({ message: 'Token assigned successfully' });
+    },
+    (error) => {
+      console.log("error finding user: " + error);
+      res.status(500).json({ error: 'Token assignment failed' });
+    });
+  });
+});
+
+app.post('/api/send-notification', (req, res) => {
+// Send a message to a specific device
+const message = {
+  token: req.to,
+  messageData: req.data
+};
+
+admin.messaging().send(message)
+  .then((response) => {
+    console.log('Successfully sent message:', response);
+  })
+  .catch((error) => {
+    console.error('Error sending message:', error);
+  });
+});

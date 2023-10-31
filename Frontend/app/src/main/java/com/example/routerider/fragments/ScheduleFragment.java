@@ -1,9 +1,21 @@
 package com.example.routerider.fragments;
 
+import static androidx.core.content.ContextCompat.startActivity;
+
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Bundle;
+
+import androidx.cardview.widget.CardView;
+import androidx.fragment.app.Fragment;
+
+import android.transition.AutoTransition;
+import android.transition.TransitionManager;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.net.ParseException;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
@@ -16,6 +28,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -27,6 +40,7 @@ import com.example.routerider.APICaller;
 import com.example.routerider.HelperFunc;
 import com.example.routerider.R;
 import com.example.routerider.ScheduleItem;
+import com.example.routerider.TimeGapRecommendation;
 import com.example.routerider.User;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -50,6 +64,8 @@ import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.sql.Time;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -253,7 +269,7 @@ public class ScheduleFragment extends Fragment {
 
             assert parsedDate != null;
             return parsedDate.after(currentDate); // Date is valid and ahead of the current date
-        } catch (ParseException | java.text.ParseException e) {
+        } catch (java.text.ParseException e) {
             // Parsing failed, the date is not valid
             return false;
         }
@@ -274,7 +290,7 @@ public class ScheduleFragment extends Fragment {
 
             assert start != null;
             return start.before(end);
-        } catch (ParseException | java.text.ParseException e) {
+        } catch (java.text.ParseException e) {
             // Parsing failed, the times are not valid
             return false;
         }
@@ -472,17 +488,107 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
         }
 
         LayoutInflater inflater = LayoutInflater.from(scheduleContext);
-        for (ScheduleItem item: dayList) {
+//        for (ScheduleItem item: dayList) {
+//            eventListView = scheduleView.findViewById(R.id.scheduleView);
+//            View view  = inflater.inflate(R.layout.view_event, eventListView, false);
+//            // set item content in view
+//            TextView eventName = view.findViewById(R.id.eventName);
+//            eventName.setText(item.getTitle());
+//            TextView eventLocation = view.findViewById(R.id.eventLocation);
+//            eventLocation.setText(item.getLocation());
+//            TextView startTime = view.findViewById(R.id.startTime);
+//            startTime.setText(item.getStartTime().substring(11,16));
+//            TextView endTime = view.findViewById(R.id.endTime);
+//            endTime.setText(item.getEndTime().substring(24));
+//            System.out.println(item);
+//            eventListView.addView(view);
+//        }
+        SimpleDateFormat fullDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
+
+        long fifteenMinutesInMillis = 15 * 60 * 1000; // 15 minutes in milliseconds
+        View previousEventView = null;
+
+        for (ScheduleItem item : dayList) {
             eventListView = scheduleView.findViewById(R.id.scheduleView);
-            View view  = inflater.inflate(R.layout.view_event, eventListView, false);
-            // set item content in view
+            View view = inflater.inflate(R.layout.view_event, eventListView, false);
+
             TextView eventName = view.findViewById(R.id.eventName);
             eventName.setText(item.getTitle());
+
             TextView eventLocation = view.findViewById(R.id.eventLocation);
             eventLocation.setText(item.getLocation());
+
             TextView startTime = view.findViewById(R.id.startTime);
-            startTime.setText(item.getStartTime().substring(11,16));
+            startTime.setText(item.getStartTime().substring(11, 16));
+
             TextView endTime = view.findViewById(R.id.endTime);
+            endTime.setText(item.getEndTime().substring(11, 16)); // Adjust substring as needed
+
+            // Check if there is a previous event view and the time gap is more than 15 minutes
+            if (previousEventView != null) {
+                try {
+                    Date previousEndTime = fullDateFormat.parse(dayList.get(dayList.indexOf(item) - 1).getEndTime());
+                    Date currentStartTime = fullDateFormat.parse(item.getStartTime());
+                    long timeDifference = currentStartTime.getTime() - previousEndTime.getTime();
+
+                    if (timeDifference > fifteenMinutesInMillis) {
+                        View timeGapView = inflater.inflate(R.layout.timegap_chip, eventListView, false);
+                        TextView timeGapTextView = timeGapView.findViewById(R.id.timeGapTextView);
+                        timeGapTextView.setText("Gap: " + formatTimeDifference(timeDifference));
+                        LinearLayout hiddenView = timeGapView.findViewById(R.id.hidden_view);
+                        CardView cardView = timeGapView.findViewById(R.id.base_cardview);
+                        Button viewRecommendationsButton = timeGapView.findViewById(R.id.viewRecommendationsButton);
+                        viewRecommendationsButton.setOnClickListener(v -> {
+                            ArrayList<TimeGapRecommendation> recs = new ArrayList<>();
+                            for (int i = 0; i<5; i++){
+                                TimeGapRecommendation rec1 = new TimeGapRecommendation("cafe", "Starbucks", "123 Main St H2Z 0D4 Vancouver BC Canada");
+                                TimeGapRecommendation rec2 = new TimeGapRecommendation("library", "Irving K Barber Library", "123 Main St H2Z 0D4 Vancouver BC Canada");
+                                TimeGapRecommendation rec3 = new TimeGapRecommendation("restaurant", "Cactus Club Cafe", "123 Main St H2Z 0D4 Vancouver BC Canada");
+                                recs.add(rec1);
+                                recs.add(rec2);
+                                recs.add(rec3);
+                            }
+                            for (TimeGapRecommendation rec: recs) {
+                                View timeGapRecView;
+                                if (rec.getType() == "cafe") {
+                                    timeGapRecView = inflater.inflate(R.layout.cafe_chip, hiddenView, false);
+                                } else if (rec.getType() == "library") {
+                                    timeGapRecView = inflater.inflate(R.layout.library_chip, hiddenView, false);
+
+                                } else {
+                                    timeGapRecView = inflater.inflate(R.layout.restaurant_chip, hiddenView, false);
+                                }
+                                TextView recNameText = timeGapRecView.findViewById(R.id.recName);
+                                recNameText.setText(rec.getName());
+                                TextView recAddressText = timeGapRecView.findViewById(R.id.recAddress);
+                                recAddressText.setText(rec.getAddress());
+                                ImageButton recMapsButton = timeGapRecView.findViewById(R.id.mapsButton);
+                                recMapsButton.setOnClickListener(v2 -> {
+                                    Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
+                                            Uri.parse("google.navigation:q="+ rec.getAddress()));
+                                    startActivity(scheduleContext,intent,null);
+                                });
+                                hiddenView.addView(timeGapRecView);
+                            }
+                            if (hiddenView.getVisibility() == View.VISIBLE) {
+                                TransitionManager.beginDelayedTransition(cardView, new AutoTransition());
+                                hiddenView.setVisibility(View.GONE);
+                                viewRecommendationsButton.setText("Show Recommendations");
+                            }
+                            else {
+                                TransitionManager.beginDelayedTransition(cardView, new AutoTransition());
+                                hiddenView.setVisibility(View.VISIBLE);
+                                viewRecommendationsButton.setText("Hide Recommendations");
+                            }
+                        });
+
+                        eventListView.addView(timeGapView);
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
             endTime.setText(item.getEndTime().substring(11,16));
             System.out.println(item);
 
@@ -621,7 +727,21 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
             });
 
             eventListView.addView(view);
+            previousEventView = view;
         }
+
+
+    }
+
+    private void mockRecs(ArrayList<TimeGapRecommendation> recs) {
+
+    }
+
+    // Helper method to format the time difference as HH:mm
+    private String formatTimeDifference(long timeDifference) {
+        long minutes = (timeDifference / (1000 * 60)) % 60;
+        long hours = (timeDifference / (1000 * 60 * 60)) % 24;
+        return String.format("%02d:%02d", hours, minutes);
     }
 }
 

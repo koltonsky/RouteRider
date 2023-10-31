@@ -1,6 +1,10 @@
 package com.example.routerider.fragments;
 
+import static androidx.core.content.ContextCompat.startActivity;
+
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.cardview.widget.CardView;
@@ -119,6 +123,9 @@ public class RoutesFragment extends Fragment {
             });
             mapsButton.setOnClickListener(v -> {
                 // open google maps
+//                Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
+//                        Uri.parse("google.navigation:q="+ rec.getAddress()));
+//                startActivity(context,intent,null);
             });
             TextView leaveByTimeText = singleRouteView.findViewById(R.id.leaveByTime);
             leaveByTimeText.setText("Leave by " + item.getLeaveBy());

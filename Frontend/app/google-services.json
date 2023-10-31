@@ -1,0 +1,38 @@
+{
+  "project_info": {
+    "project_number": "95945786031",
+    "project_id": "routerider-402800",
+    "storage_bucket": "routerider-402800.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:95945786031:android:48424a0bc6f1a6de454a5a",
+        "android_client_info": {
+          "package_name": "com.example.routerider"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "95945786031-mfpslnvqp17kggu7hslcmuuaoelkvhre.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.routerider",
+            "certificate_hash": "2caab30deedfe64b82dcd288ea5803813fbc7382"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCf9_-a_GsTzbk7p7U6nEgaqjBtnVQqTY4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

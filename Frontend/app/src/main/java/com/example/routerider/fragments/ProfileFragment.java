@@ -24,6 +24,7 @@ import com.example.routerider.PreferencesActivity;
 import com.example.routerider.R;
 import com.example.routerider.User;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 
 import org.json.JSONException;
@@ -52,45 +53,33 @@ public class ProfileFragment extends Fragment {
         APICaller apiCall = new APICaller();
         TextView address = view.findViewById(R.id.address);
 
-//        apiCall.APICall("api/userlist/" + account.getEmail(), "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
-//            @Override
-//            public void onResponse(final String responseBody) {
-//                if (getActivity() != null) {
-//                    getActivity().runOnUiThread(() -> {
-//                        System.out.println("BODY: " + responseBody);
-//                        try {
-//                            JSONObject json = new JSONObject(responseBody);
-//                            address.setText("Address: " + json.getString("address"));
-//                        } catch (JSONException e) {
-//                            e.printStackTrace();
-//                        }
-//                    });
-//                }
-//            }
-//
-//            @Override
-//            public void onError(String errorMessage) {
-//                System.out.println("Error " + errorMessage);
-//            }
-//        });
+        apiCall.APICall("api/userlist/" + account.getEmail(), "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
+            @Override
+            public void onResponse(final String responseBody) {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        System.out.println("BODY: " + responseBody);
+                        try {
+                            JSONObject json = new JSONObject(responseBody);
+                            address.setText("Address: " + json.getString("address"));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                System.out.println("Error " + errorMessage);
+            }
+        });
 
 
         TextView friends = view.findViewById(R.id.friendList);
         friends.setOnClickListener(v -> {
-            apiCall.APICall("api/userlist/newuser@example.com", "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
-
-                @Override
-                public void onResponse(String responseBody) {
-                    System.out.println("BODY: " + responseBody);
-                }
-
-                @Override
-                public void onError(String errorMessage) {
-                    System.out.println("Error " + errorMessage);
-                }
-            });
-//            Intent intent = new Intent(requireContext(), FriendsActivity.class);
-//            startActivity(intent);
+            Intent intent = new Intent(requireContext(), FriendsActivity.class);
+            startActivity(intent);
         });
 
         TextView userPreferences = view.findViewById(R.id.preferences);
@@ -118,7 +107,6 @@ public class ProfileFragment extends Fragment {
                 newAddress.put("address", userInput);
 
                 apiCall.APICall("api/userlist/" + account.getEmail(), new Gson().toJson(newAddress), APICaller.HttpMethod.PUT, new APICaller.ApiCallback() {
-
                     @Override
                     public void onResponse(String responseBody) {
                         if (getActivity() != null) {
@@ -126,7 +114,8 @@ public class ProfileFragment extends Fragment {
                                 System.out.println("BODY: " + responseBody);
                                 try {
                                     JSONObject json = new JSONObject(responseBody);
-                                    if(json.getString("message").equals("User information updated successfully")) {
+                                    System.out.println(json.getString("message"));
+                                    if(json.getString("message").equals("User address updated successfully")) {
                                         address.setText("Address: " + userInput);
                                     } else {
                                         Toast.makeText(requireContext(), "Failed to get address", Toast.LENGTH_SHORT).show();

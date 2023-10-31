@@ -16,6 +16,7 @@ const axios = require('axios')
 
 const user = require('./routes/user.js')
 const schedule = require('./routes/schedule.js');
+const commuters = require('./commuter_match.js');
 const { get } = require('http');
 const { time } = require('console');
 
@@ -194,6 +195,14 @@ var dummy_user = {
     "friend2@example.com"
   ]
 }
+
+// CODE TO FIND COMMUTE BUDDIES
+/*
+commuters.findMatchingUsers("koltonluu@gmail.com").then(result => {
+  console.log('Schedule for other users:');
+  console.log(result);
+});
+*/
 
 // client.db('ScheduleDB').collection('schedulelist').insertOne(dummy_schedule).then((result) => {
 //   console.log("inserted schedule");

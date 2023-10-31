@@ -164,52 +164,71 @@ const getFriendList = async (req, res) => {
     }
   };
 
-  const getFriendListWithNames = async (req, res) => {
-    try {
-      const userEmail = req.params.email; // User email whose friend list needs to be retrieved
-  
-      // Assuming you have already connected to the MongoDB client
-      const collection = client.db('UserDB').collection('userlist');
-  
-      // Find the user by their email
-      const user = await collection.findOne({ email: userEmail });
-  
-      if (!user) {
-        return res.status(404).json({ error: 'User not found' });
-      } else {
-        const friendEmails = user.friends;
-  
-        // Create an array to store friend details (email and name)
-        const friendsWithNames = [];
-  
-        // Iterate over the friendEmails and find their names
-        for (const friendEmail of friendEmails) {
-          const friend = await collection.findOne({ email: friendEmail });
-  
-          if (friend) {
-            friendsWithNames.push({
-              email: friend.email,
-              name: friend.name,
-            });
-          } else {
-            // Handle cases where a friend is not found (optional)
-            friendsWithNames.push({
-              email: friendEmail,
-              name: 'Unknown', // Set to 'Unknown' if friend not found
-            });
-          }
+const getFriendListWithNames = async (req, res) => {
+  try {
+    const userEmail = req.params.email; // User email whose friend list needs to be retrieved
+
+    // Assuming you have already connected to the MongoDB client
+    const collection = client.db('UserDB').collection('userlist');
+
+    // Find the user by their email
+    const user = await collection.findOne({ email: userEmail });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    } else {
+      const friendEmails = user.friends;
+      const friendRequestEmails = user.friendRequests;
+
+      // Create an array to store friend details (email and name)
+      const friendsWithNames = [];
+      const friendRequestsWithNames = [];
+
+      // Retrieve names for friends
+      for (const friendEmail of friendEmails) {
+        const friend = await collection.findOne({ email: friendEmail });
+
+        if (friend) {
+          friendsWithNames.push({
+            email: friend.email,
+            name: friend.name,
+          });
+        } else {
+          // Handle cases where a friend is not found (optional)
+          friendsWithNames.push({
+            email: friendEmail,
+            name: 'Unknown', // Set to 'Unknown' if friend not found
+          });
         }
-  
-        // Include the list of friendRequests in the response
-        const friendRequests = user.friendRequests;
-  
-        res.status(200).json({ friendsWithNames, friendRequests });
       }
-    } catch (error) {
-      console.error('Error:', error);
-      res.status(500).json({ error: 'Internal server error' });
+
+      // Retrieve names for friend requests
+      for (const friendRequestEmail of friendRequestEmails) {
+        const friendRequestUser = await collection.findOne({ email: friendRequestEmail });
+
+        if (friendRequestUser) {
+          friendRequestsWithNames.push({
+            email: friendRequestUser.email,
+            name: friendRequestUser.name,
+          });
+        } else {
+          // Handle cases where a friend request sender is not found (optional)
+          friendRequestsWithNames.push({
+            email: friendRequestEmail,
+            name: 'Unknown', // Set to 'Unknown' if sender not found
+          });
+        }
+      }
+
+      // Include the list of friendRequests and friends in the response
+      res.status(200).json({ friendsWithNames, friendRequestsWithNames });
     }
-  };
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
   
 
 

@@ -19,6 +19,18 @@ const schedule = require('./routes/schedule.js');
 const { get } = require('http');
 const { time, error } = require('console');
 
+const admin = require('firebase-admin');
+const serviceAccount = require('./serviceAccountKey.json');
+
+const cron = require('node-cron');
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: 'https://routerider-402800.firebaseio.com',
+});
+
+
+
 // MongoDB connection setup
 const uri = 'mongodb://0.0.0.0:27017'; // Replace with your MongoDB connection string
 const client = new MongoClient(uri);
@@ -75,6 +87,90 @@ app.put('/api/schedulelist/:email/:index/geolocation', schedule.editEventGeoloca
 
 
 app.delete('/api/schedulelist/:email/', schedule.deleteSchedule);
+
+app.post('/api/store_token', (req, res) => {
+  const token = req.body.token;
+  const email = req.body.email;
+
+  console.log("TOKEN TEST");
+
+  // Insert the token into the 'tokenlist' collection
+  
+  client.db('TokenDB').collection('tokenlist').insertOne({ email: email, token: token })
+    .then((result) => {
+      console.log("Inserted token");
+      // Attempt to find the user
+      return client.db('UserDB').collection('userlist').findOne({ email: email });
+    })
+    .then((user) => {
+      if (user) {
+        // Update the 'fcmToken' field in the database for the found entry
+        return client.db('UserDB').collection('userlist').updateOne(
+          { _id: user._id },
+          { $set: { fcmToken: token } }
+        );
+      } else {
+        console.log("User not found");
+        res.json({ message: 'Token stored successfully' });
+      }
+    })
+    .then(() => {
+      console.log("fcmToken updated successfully in the database");
+      res.json({ message: 'Token stored and fcmToken updated successfully' });
+    })
+    .catch((error) => {
+      console.error("Error: " + error);
+      res.status(500).json({ error: 'An error occurred' });
+    });
+});
+
+
+app.post('/api/send-notification', (req, res) => {
+  // Send a message to a specific device
+  const message = {
+    token: req.to,
+    messageData: req.data
+  };
+  
+  admin.messaging().send(message)
+    .then((response) => {
+      console.log('Successfully sent message:', response);
+    })
+    .catch((error) => {
+      console.error('Error sending message:', error);
+    });
+});
+
+// Define your API request function
+function makeApiCall() {
+  console.log("its time!");
+
+  const message = {
+    token: 'dJ8XXSK2T32bxcPjCULZWq:APA91bGk55eHZuyVN59hWw0313o_63OMptOnOqgHIEmBT5g9jIaYouLDGvtT-Knybc6UTHn2L4G7qh7osMSstIpIAd4Nt3Uy_k9_SHJkMoSgoPiZ2c2QJXhvXZDnkMlYQuiyZB2gizK4',
+    notification: {
+      title: 'Notification Title',
+      body: 'Notification Body',
+    },
+  };
+
+  console.log("token check");
+
+  admin.messaging().send(message)
+  .then((response) => {
+    console.log('Successfully sent message:', response);
+  })
+  .catch((error) => {
+    console.error('Error sending message:', error);
+  });
+
+  console.log("consolke check");
+  
+}
+cron.schedule('*/5 * * * * *', () => {
+  makeApiCall();
+});
+
+
 
 /*
 app.get('/api/userlist', async (req, res) => {
@@ -134,8 +230,10 @@ app.use('/', (req, res, next) => {
 })
 
 const sslServer = https.createServer({
-    key:fs.readFileSync(path.join(__dirname, 'certification', 'test_key.key')),
-    cert:fs.readFileSync(path.join(__dirname, 'certification', 'certificate.pem'))
+    // key:fs.readFileSync(path.join(__dirname, 'certification', 'test_key.key')),
+    // cert:fs.readFileSync(path.join(__dirname, 'certification', 'certificate.pem'))
+    key:fs.readFileSync(path.join(__dirname, 'certification', 'private_key.key')),
+    cert:fs.readFileSync(path.join(__dirname, 'certification', 'cert.pem'))
 }, app)
 
 
@@ -575,40 +673,11 @@ function combineDateAndTime(dateString, timeString) {
   return date.toISOString();
 }
 
-const admin = require('firebase-admin');
-const serviceAccount = require('path/to/serviceAccountKey.json');
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
 
 
 // Define an API endpoint to handle incoming tokens
-app.post('/api/store-token', (req, res) => {
-  // Your token handling logic goes here
-  const token = req.body.token; // Assuming the token is sent as a JSON field named "token"
-  const userId = req.body.userId; // Assuming the user ID is sent from the app
 
-  db.insertToken(token);
-  client.db('TokenDB').collection('tokenlist').insertOne({token: token}).then((result) => {
-    console.log("inserted token");
-    res.json({ message: 'Token stored successfully' });
-  },
-  (error) => {
-    console.log("error inserting token: " + error);
-    res.status(500).json({ error: 'Token storage failed' });
-  }).then(() => {
-    client.db('UserDB').collection('userlist').findOne({email: userId}).then((result) => {
-      console.log("found user");
-      result.fcmToken = token;
-      res.json({ message: 'Token assigned successfully' });
-    },
-    (error) => {
-      console.log("error finding user: " + error);
-      res.status(500).json({ error: 'Token assignment failed' });
-    });
-  });
-});
 
 app.post('/api/send-notification', (req, res) => {
   // Send a message to a specific device

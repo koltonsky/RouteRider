@@ -90,8 +90,8 @@ async function getFirstEventsOfEachDay(userEmail) {
         const firstEvents = await client.db('ScheduleDB').collection('schedulelist').aggregate(pipeline).toArray();
         const reversedFirstEvents = firstEvents.reverse();
 
-        //console.log('First events of each day:');
-        //console.log(reversedFirstEvents);
+        console.log('First events of each day:');
+        console.log(reversedFirstEvents);
 
         return { events: reversedFirstEvents };
     } catch (err) {
@@ -99,6 +99,41 @@ async function getFirstEventsOfEachDay(userEmail) {
         return { events: [] }; // Return an empty array in case of an error
     }
 }
+
+async function getAllEvents(userEmail) {
+    try {
+        const userSchedule = await client.db('ScheduleDB').collection('schedulelist').findOne({ email: userEmail });
+
+        if (!userSchedule) {
+            console.log('User not found or schedule is empty.');
+            return { events: [] };
+        }
+
+        // Unwind the events array and sort by start time
+        const pipeline = [
+            {
+                $match: { email: userEmail },
+            },
+            {
+                $unwind: '$events',
+            },
+            {
+                $sort: { 'events.startTime': 1 }, // Sort events by start time in ascending order
+            },
+        ];
+
+        const events = await client.db('ScheduleDB').collection('schedulelist').aggregate(pipeline).toArray();
+
+        //console.log('All events:');
+        //console.log(events);
+
+        return { events };
+    } catch (err) {
+        console.error('Error:', err);
+        return { events: [] }; // Return an empty array in case of an error
+    }
+}
+
 
 /**
  * Finds and retrieves email addresses of schedules excluding the specified user's schedule.
@@ -164,9 +199,10 @@ async function getFirstEventsOfEachDay(userEmail) {
  * 10. In case of an error, it returns an empty object.
  */
 async function findMatchingUsers(userEmail) {
+    
     try {
         // Step 1: Get the first events for the user
-        const userFirstEvents = await getFirstEventsOfEachDay(userEmail);
+        const userEvents = await getFirstEventsOfEachDay(userEmail);
 
         // Step 2: Find other emails, excluding the user's email
         const otherEmails = await findOtherEmails(userEmail);
@@ -175,12 +211,12 @@ async function findMatchingUsers(userEmail) {
         const matchingUsers = {};
 
         for (const email of otherEmails) {
-            const firstEventsOfTheDay = await getFirstEventsOfEachDay(email);
+            const otherUserEvents = await getFirstEventsOfEachDay(email);
 
             // Step 4: Compare the events and add user and matching events if conditions match
             const matchedEvents = [];
-            for (const userEvent of userFirstEvents.events) {
-                for (const otherEvent of firstEventsOfTheDay.events) {
+            for (const userEvent of userEvents.events) {
+                for (const otherEvent of otherUserEvents.events) {
                     if (
                         userEvent.event.address.slice(0, 3) === 'UBC' &&
                         otherEvent.event.address.slice(0, 3) === 'UBC' &&
@@ -233,6 +269,7 @@ findMatchingUsers(userEmail).then(result => {
 module.exports = {
     //findUsers,
     getFirstEventsOfEachDay,
+    getAllEvents,
     findOtherEmails,
     findMatchingUsers,
 

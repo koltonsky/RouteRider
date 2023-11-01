@@ -71,6 +71,19 @@ app.put('/api/schedulelist/:email/:index/geolocation', schedule.editEventGeoloca
 
 app.delete('/api/schedulelist/:email/', schedule.deleteSchedule);
 
+// Find commute buddy
+app.get('/api/findMatchingUsers/:userEmail', async (req, res) => {
+  const userEmail = req.params.userEmail;
+
+  try {
+      const matchingUsers = await commuters.findMatchingUsers(userEmail);
+      res.json({ matchingUsers });
+  } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 /*
 app.get('/api/userlist', async (req, res) => {
     const collection = client.db('UserDB').collection('userlist');

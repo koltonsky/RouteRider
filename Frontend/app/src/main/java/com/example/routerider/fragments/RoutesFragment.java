@@ -10,6 +10,7 @@ import android.os.Bundle;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 
+import android.os.Handler;
 import android.transition.AutoTransition;
 import android.transition.TransitionManager;
 import android.view.LayoutInflater;
@@ -19,6 +20,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.routerider.APICaller;
 import com.example.routerider.HelperFunc;
@@ -87,19 +89,34 @@ public class RoutesFragment extends Fragment {
         return fragment;
     }
 
-    private void fetchRoutes(Date day) {
+    private void fetchRoutes(View view, Date day) {
         GoogleSignInAccount account = User.getCurrentAccount();
-        System.out.println("called fetchroutes");
         APICaller apiCall = new APICaller();
-        System.out.println("called apicaller");
         DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
-
+//        // Create a Handler to implement the timeout
+//        Handler handler = new Handler();
+//
+//        // Define a timeout duration in milliseconds (2 seconds)
+//        int timeoutDuration = 500;
+//
+//        // Start a timer when you make the API call
+//        handler.postDelayed(() -> {
+//            // This code will run after the timeout duration (2 seconds)
+//            // You can cancel the API call and handle the timeout here
+//            // apiCall.wait(); // Assuming there is a method to cancel the API call
+//            displayRoutes(view,getContext());
+//            // Handle the timeout, e.g., show an error message or perform any other action
+//            // For example, you can display a Toast message:
+//            getActivity().runOnUiThread(() -> {
+//                Toast.makeText(getContext(), "API call timed out", Toast.LENGTH_SHORT).show();
+//            });
+//        }, timeoutDuration);
 
         apiCall.APICall("api/recommendation/routes/" + account.getEmail() + "/" + formatter.format(day), "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
             @Override
             public void onResponse(final String responseBody) {
-                System.out.println("HEREEEEE");
+                // handler.removeCallbacksAndMessages(null);
                 getActivity().runOnUiThread(() -> {
                     System.out.println("BODY: " + responseBody);
                     try {
@@ -112,28 +129,21 @@ public class RoutesFragment extends Fragment {
                         for (int i = 0; i < routes.length(); i++) {
                             JSONObject item = (JSONObject) routes.get(i);
                             if ( item.has("_id")) {
-                                System.out.println("logging transit item");
                                 String id = item.getString("_id");
                                 String type = item.getString("_type");
                                 String leaveTime = item.getString("_leaveTime");
                                 TransitItem transitItem = new TransitItem(id, type, leaveTime);
                                 transitItemList.add(transitItem);
                             } else {
-                                System.out.println("logging step");
                                 JSONArray steps = item.getJSONArray("steps");
                                 for (int j = 0; j < steps.length(); j++) {
                                     String element = steps.getString(j);
                                     stepsList.add(element);
                                 }
-
                             }
-
                         }
                         RouteItem routeItem = new RouteItem(transitItemList, stepsList, "0", "0");
                         dayRoutes.add(routeItem);
-                        System.out.println("dayroutes:");
-                        System.out.println(dayRoutes);
-                        // address.setText("Address: " + json.getString("address"));
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -147,34 +157,21 @@ public class RoutesFragment extends Fragment {
         });
     }
 
-    private void mockRoutes() {
-        TransitItem transit1 = new TransitItem("R4", "bus", "9:41 AM");
-        TransitItem transit2 = new TransitItem("44", "bus", "9:41 AM");
-        TransitItem transit3 = new TransitItem("Canada Line", "train", "9:41 AM");
-        TransitItem transit4 = new TransitItem("Expo Line", "train", "9:41 AM");
-        ArrayList<TransitItem> transitItems1 = new ArrayList<>();
-        transitItems1.add(transit1);
-        transitItems1.add(transit3);
-        ArrayList<TransitItem> transitItems2 = new ArrayList<>();
-        transitItems2.add(transit2);
-        transitItems2.add(transit4);
-        String[] steps = {"foo", "bar", "fooo", "barr"};
-        dayRoutes = new ArrayList<>();
-        dayRoutes.add(new RouteItem(transitItems1, Arrays.asList(steps),"30 km", "1 hr"));
-        dayRoutes.add(new RouteItem(transitItems2, Arrays.asList(steps),"20 km", "25 min"));
-    }
-
     private void displayRoutes(View view, Context context) {
         routesView = view.findViewById(R.id.routesView);
         routesView.removeAllViewsInLayout();
         LayoutInflater inflater = LayoutInflater.from(context);
+        System.out.println("displaying routes");
+        System.out.println(dayRoutes);
         if (dayRoutes == null || dayRoutes.isEmpty()){
+            TextView emptyRoutes = new TextView(context);
+            emptyRoutes.setText("There are no routes for this day");
+            routesView.addView(emptyRoutes);
             return;
         }
         for (RouteItem item: dayRoutes) {
             View singleRouteView  = inflater.inflate(R.layout.view_route, routesView, false);
             ImageButton expandButton = singleRouteView.findViewById(R.id.expandButton);
-            ImageButton mapsButton = singleRouteView.findViewById(R.id.mapsButton);
             LinearLayout hiddenView = singleRouteView.findViewById(R.id.hidden_view);
             CardView cardView = singleRouteView.findViewById(R.id.base_cardview);
             expandButton.setOnClickListener(v -> {
@@ -188,12 +185,6 @@ public class RoutesFragment extends Fragment {
                     hiddenView.setVisibility(View.VISIBLE);
                     expandButton.setImageResource(R.drawable.baseline_expand_less_24);
                 }
-            });
-            mapsButton.setOnClickListener(v -> {
-                // open google maps
-//                Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
-//                        Uri.parse("google.navigation:q="+ rec.getAddress()));
-//                startActivity(context,intent,null);
             });
             TextView leaveByTimeText = singleRouteView.findViewById(R.id.leaveByTime);
             leaveByTimeText.setText("Leave by " + item.getLeaveBy());
@@ -262,8 +253,8 @@ public class RoutesFragment extends Fragment {
             calendar.add( java.util.Calendar.DAY_OF_YEAR, -1); // Subtract 1 day to get the previous day
             Date previousDay = calendar.getTime();
             changeDay(previousDay);
-            fetchRoutes(previousDay);
-            displayRoutes(view,this.getContext());
+            fetchRoutes(view, previousDay);
+            displayRoutes(view, getContext());
         });
 
         getNextDay.setOnClickListener(v -> {
@@ -272,13 +263,15 @@ public class RoutesFragment extends Fragment {
             calendar.add( java.util.Calendar.DAY_OF_YEAR, 1); // Add 1 day to get the next day
             Date nextDay = calendar.getTime();
             changeDay(nextDay);
-            fetchRoutes(nextDay);
-            displayRoutes(view,this.getContext());
+            fetchRoutes(view, nextDay);
+            displayRoutes(view, getContext());
+
         });
 
-        fetchRoutes(new Date());
+        fetchRoutes(view, new Date());
+        displayRoutes(view, getContext());
 
-        displayRoutes(view,this.getContext());
+
         return view;
     }
 

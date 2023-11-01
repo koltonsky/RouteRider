@@ -89,11 +89,11 @@ app.get('/api/findMatchingUsers/:userEmail', async (req, res) => {
   const userEmail = req.params.userEmail;
 
   try {
-      const matchingUsers = await commuters.findMatchingUsers(userEmail);
-      res.json({ matchingUsers });
+    const matchingUsers = await commuters.findMatchingUsers(userEmail);
+    res.json({ matchingUsers });
   } catch (error) {
-      console.error('Error:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
@@ -334,14 +334,14 @@ async function initRoute(userEmail, date) {
       new Date(timeOfFirstEvent)
     )
       .then((trip) => {
-        if (trip.routes) {
-          console.log(
-            'initRoute(): returned trip: ' +
-              trip +
-              ' ' +
-              trip.routes[0].legs[0].steps[0].travel_mode
-          );
-        }
+        if (trip.routes.length === 0) return;
+        console.log(
+          'initRoute(): returned trip: ' +
+            trip +
+            ' ' +
+            trip.routes[0].legs[0].steps[0].travel_mode
+        );
+
         /* fields for object to be returned to frontend */
         var id = '';
         var leaveTime = '';

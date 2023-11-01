@@ -17,6 +17,7 @@ const axios = require('axios');
 const user = require('./routes/user.js');
 const schedule = require('./routes/schedule.js');
 const commuters = require('./commuter_match.js');
+const recommendation = require('./recommendation.js');
 const { get } = require('http');
 const { time } = require('console');
 
@@ -99,18 +100,6 @@ app.get('/api/findMatchingUsers/:userEmail', async (req, res) => {
 
 // RecommendationFinder
 
-// app.get('/api/recommendation/routes/:email/:date', async (req, res) => {
-
-//   // try {
-//   //   console.log('called /api/recommendation/routes/' + req.params.email + '/' + req.params.date);
-//   //   result = await initRoute(req.params.email, req.params.date);
-//   //   return res.status(200).json({ routes: result });
-//   // } catch (error) {
-//   //   console.error('Error in /api/recommendation/routes/:email/:date', error);
-//   //   return res.status(500).json({ error: 'An error occurred' });
-//   // }
-// });
-
 const getRecommendedRoutes = async (req, res) => {
   try {
     const email = req.params.email;
@@ -124,6 +113,20 @@ const getRecommendedRoutes = async (req, res) => {
 };
 
 app.get('/api/recommendation/routes/:email/:date', getRecommendedRoutes);
+
+const getTimeGapRecommendations = async (req, res) => {
+  try {
+    const addr1 = req.params.addr1;
+    const addr2 = req.params.addr2;
+    const result = await recommendation(addr1, addr2);
+    return res.status(200).json({ suggestions: result });
+  } catch (error) {
+    console.error('Error in /api/recommendation/timegap/:addr1/:addr2', error);
+    return res.status(500).json({ error: 'An error occurred' });
+  }
+};
+
+app.get('/api/recommendation/timegap/:addr1/:addr2', getTimeGapRecommendations);
 
 /*
 app.get('/api/userlist', async (req, res) => {

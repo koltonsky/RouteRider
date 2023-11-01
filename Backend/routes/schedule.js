@@ -264,7 +264,6 @@ const editEventByID = async (req, res) => {
 
 const addEvent = async (req, res) => {
   try {
-    console.log('adding event');
     const userEmail = req.params.email;
     const newEvent = req.body; // Assuming the new event data is sent in the request body
 
@@ -273,6 +272,40 @@ const addEvent = async (req, res) => {
 
     if (!schedule) {
       res.status(404).json({ error: 'Schedule not found' });
+      return;
+    }
+
+    // Validate startTime and endTime
+    const newEventStart = new Date(newEvent.startTime);
+    const newEventEnd = new Date(newEvent.endTime);
+
+    if (isNaN(newEventStart) || isNaN(newEventEnd) || newEventStart >= newEventEnd) {
+      res.status(400).json({ error: 'Invalid startTime or endTime' });
+      return;
+    }
+
+    // Calculate event duration
+    const eventDuration = newEventEnd - newEventStart;
+
+    if (eventDuration <= 0) {
+      res.status(400).json({ error: 'Event duration must be greater than 0' });
+      return;
+    }
+
+    // Check if the new event overlaps with existing events
+    const isOverlap = schedule.events.some((event) => {
+      const eventStart = new Date(event.startTime);
+      const eventEnd = new Date(event.endTime);
+
+      return (
+        (newEventStart >= eventStart && newEventStart < eventEnd) ||
+        (newEventEnd > eventStart && newEventEnd <= eventEnd) ||
+        (newEventStart <= eventStart && newEventEnd >= eventEnd)
+      );
+    });
+
+    if (isOverlap) {
+      res.status(400).json({ error: 'Event overlaps with existing events' });
       return;
     }
 

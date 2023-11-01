@@ -141,35 +141,85 @@ app.post('/api/send-notification', (req, res) => {
     });
 });
 
-// Define your API request function
-function makeApiCall() {
+// could split this into two functions, one for checking and one for sending notifs
+checkLiveTransitTime("xxx", '123', '51439', "xxx");
+async function checkLiveTransitTime(userEmail, busNumber, stopNumber, scheduledLeaveTime) {
   console.log("its time!");
+  const apiKey = 'crj9j8Kj97pbPkkc61dX';
+  var user = await client.db('UserDB').collection('userlist').findOne({email: userEmail});
+  var userToken = user.fcmToken;
+  
+  const apiUrl = `https://api.translink.ca/rttiapi/v1/stops/${stopNumber}/estimates?apikey=${apiKey}&count=3&timeframe=120&routeNo=${busNumber}`;
 
-  const message = {
-    token: 'dJ8XXSK2T32bxcPjCULZWq:APA91bGk55eHZuyVN59hWw0313o_63OMptOnOqgHIEmBT5g9jIaYouLDGvtT-Knybc6UTHn2L4G7qh7osMSstIpIAd4Nt3Uy_k9_SHJkMoSgoPiZ2c2QJXhvXZDnkMlYQuiyZB2gizK4',
-    notification: {
-      title: 'Notification Title',
-      body: 'Notification Body',
+  const options = {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/JSON',
     },
   };
-
-  console.log("token check");
-
-  admin.messaging().send(message)
-  .then((response) => {
-    console.log('Successfully sent message:', response);
-  })
-  .catch((error) => {
-    console.error('Error sending message:', error);
-  });
-
-  console.log("consolke check");
   
-}
-cron.schedule('*/5 * * * * *', () => {
-  makeApiCall();
-});
+  const req = https.request(apiUrl, options, (res) => {
+    let data = '';
+  
+    res.on('data', (chunk) => {
+      data += chunk;
+    });
+  
+    res.on('end', () => {
+      if (res.statusCode === 200) {
+        const realTimeData = JSON.parse(data);
+        console.log(realTimeData);
+        console.log(realTimeData[0].Schedules);
+        console.log(realTimeData[0].Schedules[0].ExpectedLeaveTime);
+        console.log(realTimeData[0].Schedules[0].ExpectedCountdown);
 
+        if (!compareTimeStrings(realTimeData[0].Schedules[0].ExpectedLeaveTime, scheduledLeaveTime)) {
+          console.log("bus is off schedule");
+          
+          const message = {
+            token: userToken,
+            notification: {
+              title: `The ${busNumber} bus at stop ${stopNumber} is off schedule!`,
+              body: `The expected ETA is ${realTimeData[0].Schedules[0].ExpectedLeaveTime}.`
+            },
+          };
+        
+          admin.messaging().send(message)
+          .then((response) => {
+            console.log('Successfully sent message:', response);
+          })
+          .catch((error) => {
+            console.error('Error sending message:', error);
+          });           
+        }
+      } else {
+        console.error(`API request failed with status: ${res.statusCode}`);
+      }
+    });
+  });
+  
+  req.on('error', (error) => {
+    console.error(`API request error: ${error.message}`);
+  });
+  
+  req.end();
+}
+
+// function test() {
+//   console.log("test");
+//   for (var i = 1; i < 6; i++) {
+//     var currentDate = new Date();
+//     var futureDate = new Date(currentDate.getTime() + i*5000);
+//     var isoTimestamp = futureDate.toISOString();
+//     cronTime = isoToCron(isoTimestamp);
+//     console.log("time: " + cronTime + " " + isoTimestamp);
+//     cron.schedule(cronTime, () => {
+//       // checkRealTransitTime();
+//       console.log("cron job executed");
+//     });
+//   }
+// }
+// test();
 
 
 /*
@@ -416,11 +466,16 @@ const initRoute = async (req, res) => {
       }
       console.log("updated leavetime: " + returnList[i]._leaveTime);
     }
-  
+    
     res.status(200).json({"returnList": returnList});
   });
 }
-
+const xdd = {
+  body: {
+    userEmail: "koltonluu@gmail.com"
+  }
+}
+// initReminders(xdd);
 /**
  * Pretty much same logic as initRoute, but we only care about time to leave for the first step of each trip (when to leave the house)
  * The time to leave determined by initRoute and initReminders should be the same 
@@ -428,8 +483,9 @@ const initRoute = async (req, res) => {
  * @param userEmail
  * @returns an array of objects that contain info on when to send notifications (time and date)
  */
-const initReminders = async (req, res) => {
+async function initReminders(req) {
   console.log("called initReminders()");
+  console.log("initReminders(): req.body.userEmail: " + req.body.userEmail);
   var returnList = []
   
   var schedule = await client.db('ScheduleDB').collection('schedulelist').findOne({email: req.body.userEmail});
@@ -452,29 +508,100 @@ const initReminders = async (req, res) => {
       date = schedule.events[i].startTime.split('T')[0];
     }
   }
+  console.log("initReminders(): returned firstEvents: " + firstEvents.length);
+  // console.log(firstEvents[1].timeOfFirstEvent);
   
   for (var i = 0; i < firstEvents.length; i++) {
+    console.log("planTrip inputs :" + firstEvents[i].locationOfOrigin + " " + firstEvents[i].locationOfFirstEvent + " " + firstEvents[i].timeOfFirstEvent);
     trip = await planTransitTrip(firstEvents[i].locationOfOrigin, firstEvents[i].locationOfFirstEvent, new Date(firstEvents[i].timeOfFirstEvent));
     console.log("initReminders(): returned trip: " + trip + " " + trip.routes[0].legs[0].steps[0].travel_mode);
     /* fields for object to be returned to frontend */
     var reminder = {
       date: 'default',
       leaveTime: 'default',
+      leaveTime_iso: 'default',
+      firstBus: {
+        type: 'default',
+        id: 'default',
+        stopNumber: 'default',
+        leaveTime: 'default'
+      }
     };
 
-    reminder.date = firstEvents[i].timeOfFirstEvent;
+    /* Find first instance of bus or skytrain */
+    for (var j = 0; j < trip.routes[0].legs[0].steps.length; j++) {
+      step = trip.routes[0].legs[0].steps[j];
+      travelMode = step.travel_mode;
+  
+      if (travelMode == "TRANSIT") {
+        switch(step.transit_details.line.vehicle.name) {
+          case("Bus"):
+            reminder.firstBus.type = "Bus";
+            reminder.firstBus.id = step.transit_details.line.short_name;
+            reminder.firstBus.stopNumber = step.transit_details.departure_stop.name;
+            reminder.firstBus.leaveTime = step.transit_details.departure_time.text;  
+            break;
+          case("Subway"):
+            reminder.firstBus.type = "SkyTrain";
+            reminder.firstBus.id = step.transit_details.line.name;
+            reminder.firstBus.leaveTime = step.transit_details.departure_time.text; 
+            break;
+          default:
+            type = "default";
+            id = "default";
+            break;
+        }
+        break;
+      }
+    }
+    
+    reminder.date = firstEvents[i].timeOfFirstEvent.split('T')[0];
     reminder.leaveTime = departure_time = trip.routes[0].legs[0].departure_time.text;
-
+    reminder.leaveTime_iso = combineDateAndTime(reminder.date, reminder.leaveTime); // DEBUG: is there are problems with time, its probably because of this 
+    
     returnList.push(reminder);
   }
-  returnList.push({email: userEmail});
   console.log("initReminders(): returned returnList: " + returnList.length); 
   // for (var i = 0; i < returnList.length; i++) {
   //   console.log("initReminders(): returned returnList: " + returnList[i].date + " " + returnList[i].leaveTime); 
   // }
+  client.db('TripDB').collection('triplist').insertOne({email: req.body.userEmail, trips: returnList}).then((result) => {
+    console.log("planned trips for whole schedule");
+  });
 
-  res.status(200).json({"returnList": returnList});
+  var cronTime1 = '';
+  var cronTime2 = '';
+  var cronTime3 = '';
+  var cronTime4 = '';
+  var cronTime5 = '';
+  for (var i = 0; i < returnList.length; i++) {
+    if (returnList[i].firstBus.type == "Bus") { // make this cleaner by changing case statement to only look for buses (RTTI API doesnt support skytrains)
+      cronTime1 = isoToCron(returnList[i].leaveTime_iso, 1);
+      cronTime2 = isoToCron(returnList[i].leaveTime_iso, 2);
+      cronTime3 = isoToCron(returnList[i].leaveTime_iso, 3);
+      cronTime4 = isoToCron(returnList[i].leaveTime_iso, 4);
+      cronTime5 = isoToCron(returnList[i].leaveTime_iso, 5);
+      cron.schedule(cronTime1, () => {
+        checkLiveTransitTime(req.body.userEmail, returnList[i].firstBus.id, returnList[i].firstBus.stopNumber, returnList[i].firstBus.leaveTime);
+      });
+      cron.schedule(cronTime2, () => {
+        checkLiveTransitTime(req.body.userEmail, returnList[i].firstBus.id, returnList[i].firstBus.stopNumber, returnList[i].firstBus.leaveTime);
+      });
+      cron.schedule(cronTime3, () => {
+        checkLiveTransitTime(req.body.userEmail, returnList[i].firstBus.id, returnList[i].firstBus.stopNumber, returnList[i].firstBus.leaveTime);
+      });
+      cron.schedule(cronTime4, () => {
+        checkLiveTransitTime(req.body.userEmail, returnList[i].firstBus.id, returnList[i].firstBus.stopNumber, returnList[i].firstBus.leaveTime);
+      });
+      cron.schedule(cronTime5, () => {
+        checkLiveTransitTime(req.body.userEmail, returnList[i].firstBus.id, returnList[i].firstBus.stopNumber, returnList[i].firstBus.leaveTime);
+      });
+    }
+  }
 }
+
+
+
 // getNearestBuses("EB Rumble St @ Gilley Ave").then((buses) => {
 //   console.log(buses[0].StopNo + " " + buses.length);
 // });
@@ -649,7 +776,9 @@ function timestampToTime(timestamp) {
 
 function combineDateAndTime(dateString, timeString) {
   // Convert the time to 24-hour format and add seconds
-  const timeComponents = timeString.match(/(\d+):(\d+) (A|P)M/);
+  // console.log("inputs: " + dateString + " " + timeString);
+  // const timeComponents = timeString.match(/(\d+):(\d+) (A|P)M/);
+  const timeComponents = timeString.match(/(\d+):(\d+)\s?(A|P)M/);
   if (!timeComponents) {
       throw new Error("Invalid time format");
   }
@@ -673,8 +802,20 @@ function combineDateAndTime(dateString, timeString) {
   return date.toISOString();
 }
 
+function isoToCron(isoString, minutesBefore) {
+  const date = new Date(isoString);
+  const cronString = `${date.getSeconds()} ${date.getMinutes() - minutesBefore} ${date.getHours()} ${date.getDate()} ${date.getMonth() + 1} *`;
+  return cronString;
+}
 
+function compareTimeStrings(timeStr1, timeStr2) {
+  // Convert both strings to lowercase and remove spaces
+  const formattedTimeStr1 = timeStr1.toLowerCase().replace(/\s/g, '');
+  const formattedTimeStr2 = timeStr2.toLowerCase().replace(/\s/g, '');
 
+  // Compare the formatted strings
+  return formattedTimeStr1 === formattedTimeStr2;
+}
 
 // Define an API endpoint to handle incoming tokens
 

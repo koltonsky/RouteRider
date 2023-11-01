@@ -9,6 +9,7 @@ import android.os.Bundle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +22,7 @@ import com.example.routerider.APICaller;
 import com.example.routerider.FriendsActivity;
 import com.example.routerider.HomeActivity;
 import com.example.routerider.PreferencesActivity;
+import com.example.routerider.PushNotificationService;
 import com.example.routerider.R;
 import com.example.routerider.User;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -84,8 +86,23 @@ public class ProfileFragment extends Fragment {
 
         TextView userPreferences = view.findViewById(R.id.preferences);
         userPreferences.setOnClickListener(v -> {
-            Intent intent = new Intent(requireContext(), PreferencesActivity.class);
-            startActivity(intent);
+
+//            PushNotificationService pushNotificationService = new PushNotificationService();
+//
+//            // Retrieve the FCM token
+//            FirebaseMessaging.getInstance().getToken()
+//                    .addOnCompleteListener(task -> {
+//                        if (task.isSuccessful() && task.getResult() != null) {
+//                            String token = task.getResult();
+//                            Log.d("NOTIFICATION TAG", "SUCCESS: " + token);
+//                            pushNotificationService.sendRegistrationToServer(token);
+//                        } else {
+//                            // Handle the case where token retrieval fails
+//                            Log.d("NOTIFICATION TAG", "FAILED");
+//                        }
+//                    });
+//            Intent intent = new Intent(requireContext(), PreferencesActivity.class);
+//            startActivity(intent);
         });
 
         TextView name = view.findViewById(R.id.name_text);

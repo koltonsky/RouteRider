@@ -44,15 +44,37 @@ public class FriendsActivity extends AppCompatActivity {
             @Override
             public void onResponse(final String responseBody) throws JSONException {
                 System.out.println("BODY: " + responseBody);
-                JSONObject json = new JSONObject(responseBody);
-                friendList = json.getJSONArray("friendsWithNames");
-                friendRequestList = json.getJSONArray("friendRequestsWithNames");
-                System.out.println(friendRequestList);
-                System.out.println(friendList);
-                runOnUiThread(() -> {
-                    generateFriendList();
-                    generateFriendRequestList();
-                });
+                try {
+                    JSONObject json = new JSONObject(responseBody);
+
+                    // Check if the "friendsWithNames" and "friendRequestsWithNames" keys exist in the JSON
+                    if (json.has("friendsWithNames") && json.has("friendRequestsWithNames")) {
+                        JSONArray friendList = json.getJSONArray("friendsWithNames");
+                        JSONArray friendRequestList = json.getJSONArray("friendRequestsWithNames");
+
+                        // Check if the arrays are empty
+                        if (friendList.length() > 0) {
+                            System.out.println(friendList);
+                        } else {
+                            System.out.println("Friend list is empty.");
+                        }
+
+                        if (friendRequestList.length() > 0) {
+                            System.out.println(friendRequestList);
+                        } else {
+                            System.out.println("Friend request list is empty.");
+                        }
+
+                        runOnUiThread(() -> {
+                            generateFriendList();
+                            generateFriendRequestList();
+                        });
+                    } else {
+                        System.out.println("The JSON object doesn't contain the expected keys.");
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
 
             @Override
@@ -72,48 +94,30 @@ public class FriendsActivity extends AppCompatActivity {
                 EditText editText = dialogView.findViewById(R.id.addFriendEmail);
                 String userInput = editText.getText().toString();
 
-//                apiCall.getRecipientFCMToken(recipientEmail, new APICaller.ApiCallback() {
-//                    @Override
-//                    public void onResponse(String recipientToken) {
-//                        // Create a notification payload
-//                        Map<String, String> notificationData = new HashMap<>();
-//                        notificationData.put("title", "Friend Request");
-//                        notificationData.put("body", "You have received a friend request!");
-//
-//                        // Create the FCM message
-//                        Map<String, Object> messageData = new HashMap<>();
-//                        messageData.put("data", notificationData);
-//                        messageData.put("to", recipientToken);
-//
-//                        // Send the FCM notification
-//                        apiCall.sendFCMNotification(messageData, new APICaller.ApiCallback() {
-//                            @Override
-//                            public void onResponse(String responseBody) {
-//                                System.out.println("Notification sent: " + responseBody);
-//                            }
-//
-//                            @Override
-//                            public void onError(String errorMessage) {
-//                                System.out.println("Error sending notification: " + errorMessage);
-//                            }
-//                        });
-//                    }
-//
-//                    @Override
-//                    public void onError(String errorMessage) {
-//                        System.out.println("Error getting recipient's FCM token: " + errorMessage);
-//                    }
-//                });
-
                 Map<String, Object> map = new HashMap<>();
                 map.put("email", userInput);
-                String jsonSchedule = new Gson().toJson(map);
+                String jsonEmail = new Gson().toJson(map);
 
-                apiCall.APICall("api/userlist/" + account.getEmail() + "/friendRequest", jsonSchedule, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
+                apiCall.APICall("api/userlist/" + account.getEmail() + "/friendRequest", jsonEmail, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
                     @Override
                     public void onResponse(final String responseBody) {
                         System.out.println("BODY: " + responseBody);
 
+                        Map<String, Object> requestMap = new HashMap<>();
+                        requestMap.put("receiverEmail", userInput);
+                        requestMap.put("senderName", account.getDisplayName());
+                        String requestJson = new Gson().toJson(requestMap);
+                        apiCall.APICall("api/send-friend-notification", requestJson, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
+                            @Override
+                            public void onResponse(String responseBody) {
+                                System.out.println("BODY: " + responseBody);
+                            }
+
+                            @Override
+                            public void onError(String errorMessage) {
+                                System.out.println("Error: " + errorMessage);
+                            }
+                        });
                     }
 
                     @Override
@@ -121,6 +125,8 @@ public class FriendsActivity extends AppCompatActivity {
                         System.out.println("Error " + errorMessage);
                     }
                 });
+
+
 
             });
             builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
@@ -135,18 +141,13 @@ public class FriendsActivity extends AppCompatActivity {
         if (friendList != null) {
             try {
                 for (int i = 0; i < friendList.length(); i++) {
-                    // Get the JSON object at the current position
                     JSONObject friend = friendList.getJSONObject(i);
 
-                    // Extract email and name from the JSON object
                     String email = friend.getString("email");
                     String name = friend.getString("name");
-
-                    // Create a TextView for each email and name
                     TextView friendTextView = new TextView(this);
                     friendTextView.setText("Name: " + name + " | "+ "Email: " + email);
 
-                    // Add the TextView to the friendListDisplay
                     friendListDisplay.addView(friendTextView);
                 }
             } catch (JSONException e) {
@@ -229,8 +230,4 @@ public class FriendsActivity extends AppCompatActivity {
             }
         }
     }
-
-
-
-
 }

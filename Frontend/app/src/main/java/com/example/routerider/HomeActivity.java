@@ -6,11 +6,17 @@ import androidx.viewpager.widget.ViewPager;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.gson.Gson;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -29,11 +35,30 @@ public class HomeActivity extends AppCompatActivity {
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && task.getResult() != null) {
                         String token = task.getResult();
+                        Log.d("NOTIFICATION TAG", "SUCCESS: " + token);
                         pushNotificationService.sendRegistrationToServer(token);
                     } else {
                         // Handle the case where token retrieval fails
+                        Log.d("NOTIFICATION TAG", "FAILED");
                     }
                 });
+
+        GoogleSignInAccount account = User.getCurrentAccount();
+        Map<String, Object> requestMap = new HashMap<>();
+        requestMap.put("email", account.getEmail());
+        String requestJson = new Gson().toJson(requestMap);
+        APICaller apiCall = new APICaller();
+        apiCall.APICall("api/initReminders", requestJson, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
+            @Override
+            public void onResponse(String responseBody) {
+                System.out.println("BODY: " + responseBody);
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                System.out.println("Error: " + errorMessage);
+            }
+        });
 
         // Set up the ViewPager with the sections adapter.
         tabLayout = findViewById(R.id.tab_layout);

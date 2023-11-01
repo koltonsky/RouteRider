@@ -92,134 +92,172 @@ app.post('/api/store_token', (req, res) => {
   const token = req.body.token;
   const email = req.body.email;
 
-  console.log("TOKEN TEST");
-
   // Insert the token into the 'tokenlist' collection
-  
   client.db('TokenDB').collection('tokenlist').insertOne({ email: email, token: token })
-    .then((result) => {
-      console.log("Inserted token");
-      // Attempt to find the user
-      return client.db('UserDB').collection('userlist').findOne({ email: email });
-    })
-    .then((user) => {
+  .then((result) => {
+    console.log("Inserted token in TokenDB");
+    // Attempt to find the user
+    client.db('UserDB').collection('userlist').findOne({ email: email }).then((user) => {
       if (user) {
         // Update the 'fcmToken' field in the database for the found entry
-        return client.db('UserDB').collection('userlist').updateOne(
+        client.db('UserDB').collection('userlist').updateOne(
           { _id: user._id },
           { $set: { fcmToken: token } }
-        );
+        ).then(() => {
+          console.log("fcmToken updated successfully in UserDB");
+          res.json({ message: 'Token stored and user fcmToken updated successfully' });
+        });
       } else {
         console.log("User not found");
-        res.json({ message: 'Token stored successfully' });
+        res.json({ message: 'Token stored successfully, failed to update user fcmToken' });
       }
-    })
-    .then(() => {
-      console.log("fcmToken updated successfully in the database");
-      res.json({ message: 'Token stored and fcmToken updated successfully' });
-    })
-    .catch((error) => {
-      console.error("Error: " + error);
-      res.status(500).json({ error: 'An error occurred' });
+    }).catch((error) => {
+      console.log("Error: " + error);
+      res.json({ message: error });
     });
+  });
 });
 
 
-app.post('/api/send-notification', (req, res) => {
-  // Send a message to a specific device
-  const message = {
-    token: req.to,
-    messageData: req.data
-  };
-  
-  admin.messaging().send(message)
-    .then((response) => {
-      console.log('Successfully sent message:', response);
-    })
-    .catch((error) => {
-      console.error('Error sending message:', error);
-    });
+app.post('/api/send-friend-notification', (req, res) => {
+  const senderName = req.body.senderName;
+  const receiverEmail = req.body.receiverEmail;
+
+  console.log(receiverEmail);
+
+  client.db('UserDB').collection('userlist').findOne({email: receiverEmail}).then((receiver) => {
+    console.log("grabbed user: " + receiver + " " + receiver.fcmToken + " " + receiver.email);
+    var receiverToken = receiver.fcmToken;
+
+    console.log(receiverToken);
+
+    const message = {
+      token: receiverToken,
+      notification: {
+        title: 'New Friend Request',
+        body: `${senderName} has sent you a friend request!`,
+      },
+    };
+    console.log(message.token);
+    
+    admin.messaging().send(message)
+      .then((response) => {
+        console.log('Successfully sent message:', response);
+        res.send(response);
+      })
+      .catch((error) => {
+        console.error('Error sending message:', error);
+        res.send(error);
+      });
+  });
+});
+
+app.post('/api/initReminders', (req, res) => {
+  console.log("*****called initReminders api endpoint*****");
+  initReminders(req).then(() => {
+    res.status(200).json({ message: 'Reminders initialized' });
+  }).catch(error => {
+    console.log("initReminders api endpoint connection error");
+    res.status(500).json({ message: error });
+  });
 });
 
 // could split this into two functions, one for checking and one for sending notifs
-checkLiveTransitTime("xxx", '123', '51439', "xxx");
+// checkLiveTransitTime("xxx", '123', '51439', "xxx");
 async function checkLiveTransitTime(userEmail, busNumber, stopNumber, scheduledLeaveTime) {
-  console.log("its time!");
-  const apiKey = 'crj9j8Kj97pbPkkc61dX';
-  var user = await client.db('UserDB').collection('userlist').findOne({email: userEmail});
-  var userToken = user.fcmToken;
+  return new Promise((resolve, reject) => {
+    console.log("its time!");
+    const apiKey = 'crj9j8Kj97pbPkkc61dX';
+    client.db('UserDB').collection('userlist').findOne({email: userEmail}).then((user) => {
+      var userToken = user.fcmToken;
   
-  const apiUrl = `https://api.translink.ca/rttiapi/v1/stops/${stopNumber}/estimates?apikey=${apiKey}&count=3&timeframe=120&routeNo=${busNumber}`;
-
-  const options = {
-    method: 'GET',
-    headers: {
-      'Accept': 'application/JSON',
-    },
-  };
+      //var userToken = "dJ8XXSK2T32bxcPjCULZWq:APA91bGk55eHZuyVN59hWw0313o_63OMptOnOqgHIEmBT5g9jIaYouLDGvtT-Knybc6UTHn2L4G7qh7osMSstIpIAd4Nt3Uy_k9_SHJkMoSgoPiZ2c2QJXhvXZDnkMlYQuiyZB2gizK4"
+      
+      const apiUrl = `https://api.translink.ca/rttiapi/v1/stops/${stopNumber}/estimates?apikey=${apiKey}&count=3&timeframe=120&routeNo=${busNumber}`;
   
-  const req = https.request(apiUrl, options, (res) => {
-    let data = '';
+      const options = {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/JSON',
+        },
+      };
+      
+      const req =  https.request(apiUrl, options, (res) => {
+        let data = '';
+      
+        res.on('data', (chunk) => {
+          data += chunk;
+        });
+      
+        res.on('end', () => {
+          if (res.statusCode === 200) {
+            const realTimeData = JSON.parse(data);
+            console.log(realTimeData);
+            console.log(realTimeData[0].Schedules);
+            console.log(realTimeData[0].Schedules[0].ExpectedLeaveTime);
+            console.log(realTimeData[0].Schedules[0].ExpectedCountdown);
   
-    res.on('data', (chunk) => {
-      data += chunk;
-    });
-  
-    res.on('end', () => {
-      if (res.statusCode === 200) {
-        const realTimeData = JSON.parse(data);
-        console.log(realTimeData);
-        console.log(realTimeData[0].Schedules);
-        console.log(realTimeData[0].Schedules[0].ExpectedLeaveTime);
-        console.log(realTimeData[0].Schedules[0].ExpectedCountdown);
-
-        if (!compareTimeStrings(realTimeData[0].Schedules[0].ExpectedLeaveTime, scheduledLeaveTime)) {
-          console.log("bus is off schedule");
-          
-          const message = {
-            token: userToken,
-            notification: {
-              title: `The ${busNumber} bus at stop ${stopNumber} is off schedule!`,
-              body: `The expected ETA is ${realTimeData[0].Schedules[0].ExpectedLeaveTime}.`
-            },
-          };
-        
-          admin.messaging().send(message)
-          .then((response) => {
-            console.log('Successfully sent message:', response);
-          })
-          .catch((error) => {
-            console.error('Error sending message:', error);
-          });           
-        }
-      } else {
-        console.error(`API request failed with status: ${res.statusCode}`);
-      }
+            if (!compareTimeStrings(realTimeData[0].Schedules[0].ExpectedLeaveTime, scheduledLeaveTime)) {
+              console.log("bus is off schedule");
+              
+              const message = {
+                token: userToken,
+                notification: {
+                  title: `The ${busNumber} bus at stop ${stopNumber} is off schedule!`,
+                  body: `The expected ETA is ${realTimeData[0].Schedules[0].ExpectedLeaveTime}.`
+                }
+              };
+            
+              admin.messaging().send(message)
+              .then((response) => {
+                console.log('Successfully sent message:', response);
+                resolve(true);
+              })
+              .catch((error) => {
+                console.error('Error sending message:', error);
+                resolve(false);
+              });           
+            }
+            else {
+              resolve(false);
+            }
+          } else {
+            console.error(`API request failed with status: ${res.statusCode}`);
+            resolve(false);
+          }
+        });
+      });
+      
+      req.on('error', (error) => {
+        console.error(`API request error: ${error.message}`);
+      });
+      
+      req.end();
     });
   });
-  
-  req.on('error', (error) => {
-    console.error(`API request error: ${error.message}`);
-  });
-  
-  req.end();
 }
 
-// function test() {
-//   console.log("test");
-//   for (var i = 1; i < 6; i++) {
-//     var currentDate = new Date();
-//     var futureDate = new Date(currentDate.getTime() + i*5000);
-//     var isoTimestamp = futureDate.toISOString();
-//     cronTime = isoToCron(isoTimestamp);
-//     console.log("time: " + cronTime + " " + isoTimestamp);
-//     cron.schedule(cronTime, () => {
-//       // checkRealTransitTime();
-//       console.log("cron job executed");
-//     });
-//   }
-// }
-// test();
+function test() {
+  console.log("test");
+  cronTasks = [];
+  for (var i = 1; i < 6; i++) {
+    var currentDate = new Date();
+    var futureDate = new Date(currentDate.getTime() + i*5000);
+    var isoTimestamp = futureDate.toISOString();
+    cronTime = isoToCron(isoTimestamp, 0);
+    console.log("time: " + cronTime + " " + isoTimestamp);
+    cronTasks[i - 1] = cron.schedule(cronTime, () => {
+      checkLiveTransitTime("koltonluu@gmail.com", '123', '51408', "9:20pm").then((ret) => {
+        if(ret) {
+          cronTasks.forEach(element => {
+            element.stop();
+          });
+        }
+      });
+    });
+  }
+}
+//test();
 
 
 /*
@@ -280,10 +318,11 @@ app.use('/', (req, res, next) => {
 })
 
 const sslServer = https.createServer({
-    // key:fs.readFileSync(path.join(__dirname, 'certification', 'test_key.key')),
-    // cert:fs.readFileSync(path.join(__dirname, 'certification', 'certificate.pem'))
-    key:fs.readFileSync(path.join(__dirname, 'certification', 'private_key.key')),
-    cert:fs.readFileSync(path.join(__dirname, 'certification', 'cert.pem'))
+    key:fs.readFileSync(path.join(__dirname, 'certification', 'test_key.key')),
+    cert:fs.readFileSync(path.join(__dirname, 'certification', 'certificate.pem'))
+    // certificates for Kolton cpu
+    // key:fs.readFileSync(path.join(__dirname, 'certification', 'private_key.key')),
+    // cert:fs.readFileSync(path.join(__dirname, 'certification', 'cert.pem'))
 }, app)
 
 
@@ -368,7 +407,7 @@ var dummy_user = {
  *                        App ID  (unused):  cOIE7nteY1IGtsu8BGpr
  * Google Direction API ($200 credit): AIzaSyBVsUyKxBvRjE0XdooMuoDrpAfu1KO_2mM 
  * 
- * @param {*} userEmail 
+ * @param {*} userEmail
  * @param {*} date
  */
 const initRoute = async (req, res) => {
@@ -472,7 +511,7 @@ const initRoute = async (req, res) => {
 }
 const xdd = {
   body: {
-    userEmail: "koltonluu@gmail.com"
+    email: "koltonluu@gmail.com"
   }
 }
 // initReminders(xdd);
@@ -480,16 +519,16 @@ const xdd = {
  * Pretty much same logic as initRoute, but we only care about time to leave for the first step of each trip (when to leave the house)
  * The time to leave determined by initRoute and initReminders should be the same 
  * 
- * @param userEmail
+ * @param email
  * @returns an array of objects that contain info on when to send notifications (time and date)
  */
 async function initReminders(req) {
   console.log("called initReminders()");
-  console.log("initReminders(): req.body.userEmail: " + req.body.userEmail);
+  console.log("initReminders(): req.body.email: " + req.body.email);
   var returnList = []
   
-  var schedule = await client.db('ScheduleDB').collection('schedulelist').findOne({email: req.body.userEmail});
-  var user = await client.db('UserDB').collection('userlist').findOne({email: req.body.userEmail})
+  var schedule = await client.db('ScheduleDB').collection('schedulelist').findOne({email: req.body.email});
+  var user = await client.db('UserDB').collection('userlist').findOne({email: req.body.email})
   console.log("initReminders(): returned schedule: " + schedule);
   console.log(schedule.events[0].eventName);
 
@@ -565,51 +604,33 @@ async function initReminders(req) {
   // for (var i = 0; i < returnList.length; i++) {
   //   console.log("initReminders(): returned returnList: " + returnList[i].date + " " + returnList[i].leaveTime); 
   // }
-  client.db('TripDB').collection('triplist').insertOne({email: req.body.userEmail, trips: returnList}).then((result) => {
+  client.db('TripDB').collection('triplist').insertOne({email: req.body.email, trips: returnList}).then((result) => {
     console.log("planned trips for whole schedule");
   });
 
-  var cronTime1 = '';
-  var cronTime2 = '';
-  var cronTime3 = '';
-  var cronTime4 = '';
-  var cronTime5 = '';
+  var cronTasks = [];
   for (var i = 0; i < returnList.length; i++) {
     if (returnList[i].firstBus.type == "Bus") { // make this cleaner by changing case statement to only look for buses (RTTI API doesnt support skytrains)
-      cronTime1 = isoToCron(returnList[i].leaveTime_iso, 1);
-      cronTime2 = isoToCron(returnList[i].leaveTime_iso, 2);
-      cronTime3 = isoToCron(returnList[i].leaveTime_iso, 3);
-      cronTime4 = isoToCron(returnList[i].leaveTime_iso, 4);
-      cronTime5 = isoToCron(returnList[i].leaveTime_iso, 5);
-      cron.schedule(cronTime1, () => {
-        checkLiveTransitTime(req.body.userEmail, returnList[i].firstBus.id, returnList[i].firstBus.stopNumber, returnList[i].firstBus.leaveTime);
-      });
-      cron.schedule(cronTime2, () => {
-        checkLiveTransitTime(req.body.userEmail, returnList[i].firstBus.id, returnList[i].firstBus.stopNumber, returnList[i].firstBus.leaveTime);
-      });
-      cron.schedule(cronTime3, () => {
-        checkLiveTransitTime(req.body.userEmail, returnList[i].firstBus.id, returnList[i].firstBus.stopNumber, returnList[i].firstBus.leaveTime);
-      });
-      cron.schedule(cronTime4, () => {
-        checkLiveTransitTime(req.body.userEmail, returnList[i].firstBus.id, returnList[i].firstBus.stopNumber, returnList[i].firstBus.leaveTime);
-      });
-      cron.schedule(cronTime5, () => {
-        checkLiveTransitTime(req.body.userEmail, returnList[i].firstBus.id, returnList[i].firstBus.stopNumber, returnList[i].firstBus.leaveTime);
-      });
+      for(var k = 1; k < 6; k++) {
+        cronTimek = isoToCron(returnList[i].leaveTime_iso, k);
+        cronTasks[k - 1] = cron.schedule(cronTimek, () => {
+          checkLiveTransitTime(req.body.email, returnList[i].firstBus.id, returnList[i].firstBus.stopNumber, returnList[i].firstBus.leaveTime).then((ret) => {
+            if (ret) {
+              cronTasks.forEach(task => {
+                task.stop();
+              });
+            }
+          });
+        });
+      }
     }
   }
 }
 
-
-
 // getNearestBuses("EB Rumble St @ Gilley Ave").then((buses) => {
 //   console.log(buses[0].StopNo + " " + buses.length);
 // });
-app.route('/api/reminderlist/:email').get((req, res) => {
-  initReminders(req.params.email).then((returnList) => {
-    res.status(200).json(returnList);
-  });
-});
+
 
 function getLatLong(address) {
   return new Promise((resolve, reject) => {
@@ -816,22 +837,3 @@ function compareTimeStrings(timeStr1, timeStr2) {
   // Compare the formatted strings
   return formattedTimeStr1 === formattedTimeStr2;
 }
-
-// Define an API endpoint to handle incoming tokens
-
-
-app.post('/api/send-notification', (req, res) => {
-  // Send a message to a specific device
-  const message = {
-    token: req.to,
-    messageData: req.data
-  };
-
-  admin.messaging().send(message)
-    .then((response) => {
-      console.log('Successfully sent message:', response);
-    })
-    .catch((error) => {
-      console.error('Error sending message:', error);
-    });
-});

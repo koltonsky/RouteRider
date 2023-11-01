@@ -16,6 +16,7 @@ import okhttp3.Response;
 
 public class APICaller {
     String hostUrl = "https://20.163.28.92:8081/";
+    //String hostUrl = "https://10.0.2.2:8081/";
 
     public interface ApiCallback {
         void onResponse(String responseBody) throws JSONException;
@@ -79,3 +80,5 @@ public class APICaller {
         DELETE
     }
 }
+
+

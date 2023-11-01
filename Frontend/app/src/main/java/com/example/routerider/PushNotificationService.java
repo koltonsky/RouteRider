@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
@@ -26,13 +27,15 @@ public class PushNotificationService extends FirebaseMessagingService {
         sendRegistrationToServer(token);
     }
 
-    void sendRegistrationToServer(String token) {
+    public void sendRegistrationToServer(String token) {
+        GoogleSignInAccount account = User.getCurrentAccount();
         APICaller apiCall = new APICaller();
         Map<String, Object> map = new HashMap<>();
         map.put("token", token);
+        map.put("email", account.getEmail());
         String jsonToken = new Gson().toJson(map);
 
-        apiCall.APICall("api/userlist", jsonToken, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
+        apiCall.APICall("api/store_token", jsonToken, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
             @Override
             public void onResponse(String responseBody) {
                 System.out.println("BODY: " + responseBody);

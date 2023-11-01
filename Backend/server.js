@@ -204,7 +204,7 @@ async function checkLiveTransitTime(userEmail, busNumber, stopNumber, scheduledL
                 token: userToken,
                 notification: {
                   title: `The ${busNumber} bus at stop ${stopNumber} is off schedule!`,
-                  body: `The expected ETA is ${realTimeData[0].Schedules[0].ExpectedLeaveTime}.`
+                  body: `The expected vs. actual ETA is ${realTimeData[0].Schedules[0].ExpectedLeaveTime} vs ${scheduledLeaveTime}`
                 }
               };
             
@@ -239,23 +239,38 @@ async function checkLiveTransitTime(userEmail, busNumber, stopNumber, scheduledL
 
 function test() {
   console.log("test");
-  cronTasks = [];
+  const scheduledReminders = {
+    email: "koltonluu@gmail.com",
+    date: "123",
+    reminders: []
+  }
+  client.db("ReminderDB").collection("reminderlist").findOne({email: "koltonluu@gmail.com", date: "123"}).then((existingReminders) => {
+    if (existingReminders != null) {
+      console.log("removing reminders for " + existingReminders.date);
+      existingReminders.reminders.forEach((existingReminder) => {
+        existingReminder.stop(); // DEBUG: this line is prob the issue, might need to use chatgpt implementation involving checking for an 'active' field
+      });
+    }
+  });
   for (var i = 1; i < 6; i++) {
     var currentDate = new Date();
     var futureDate = new Date(currentDate.getTime() + i*5000);
     var isoTimestamp = futureDate.toISOString();
     cronTime = isoToCron(isoTimestamp, 0);
     console.log("time: " + cronTime + " " + isoTimestamp);
-    cronTasks[i - 1] = cron.schedule(cronTime, () => {
+    scheduledReminders.reminders[i - 1] = cron.schedule(cronTime, () => {
       checkLiveTransitTime("koltonluu@gmail.com", '123', '51408', "9:20pm").then((ret) => {
         if(ret) {
-          cronTasks.forEach(element => {
+          scheduledReminders.reminders.forEach(element => {
             element.stop();
           });
         }
       });
     });
   }
+  client.db("ReminderDB").collection("reminderlist").insertOne(scheduledReminders).then((result) => {    
+    console.log("planned reminders for " + scheduledReminders.date);
+  });
 }
 //test();
 
@@ -410,11 +425,21 @@ var dummy_user = {
  * @param {*} userEmail
  * @param {*} date
  */
-const initRoute = async (req, res) => {
+async function initRoute(req, res) {
   console.log("called initRoute()");
   
   var schedule = await client.db('ScheduleDB').collection('schedulelist').findOne({email: req.body.userEmail});
-  var user = await client.db('UserDB').collection('userlist').findOne({email: req.body.userEmail})
+  var user = await client.db('UserDB').collection('userlist').findOne({email: req.body.userEmail});
+  if (schedule == null) {
+    var errorString = "initReminders(): no matching email exists in schedule database";
+    console.log(errorString);
+    return errorString;
+  }
+  else if(user == null) {
+    var errorString = "initReminders(): no matching email exists in user database";
+    console.log(errorString);
+    return errorString;
+  }
   console.log("initRoute(): returned schedule: " + schedule);
   console.log(schedule.events[0].eventName);
 
@@ -436,7 +461,7 @@ const initRoute = async (req, res) => {
   console.log("initRoute(): returned locationOfFirstEvent: " + locationOfFirstEvent);
   console.log("initRoute(): returned locationOfOrigin: " + locationOfOrigin);
 
-  planTransitTrip(locationOfOrigin, locationOfFirstEvent, new Date(timeOfFirstEvent)).then((trip) => {
+  planTransitTrip(locationOfOrigin, locationOfFirstEvent, new Date(timeOfFirstEvent), 'none').then((trip) => {
     console.log("initRoute(): returned trip: " + trip + " " + trip.routes[0].legs[0].steps[0].travel_mode);
     /* fields for object to be returned to frontend */
     var id = '';
@@ -506,7 +531,7 @@ const initRoute = async (req, res) => {
       console.log("updated leavetime: " + returnList[i]._leaveTime);
     }
     
-    res.status(200).json({"returnList": returnList});
+    return returnList;
   });
 }
 const xdd = {
@@ -528,7 +553,17 @@ async function initReminders(req) {
   var returnList = []
   
   var schedule = await client.db('ScheduleDB').collection('schedulelist').findOne({email: req.body.email});
-  var user = await client.db('UserDB').collection('userlist').findOne({email: req.body.email})
+  var user = await client.db('UserDB').collection('userlist').findOne({email: req.body.email});
+  if (schedule == null) {
+    var errorString = "initReminders(): no matching email exists in schedule database";
+    console.log(errorString);
+    return errorString;
+  }
+  else if(user == null) {
+    var errorString = "initReminders(): no matching email exists in user database";
+    console.log(errorString);
+    return errorString;
+  }
   console.log("initReminders(): returned schedule: " + schedule);
   console.log(schedule.events[0].eventName);
 
@@ -552,10 +587,10 @@ async function initReminders(req) {
   
   for (var i = 0; i < firstEvents.length; i++) {
     console.log("planTrip inputs :" + firstEvents[i].locationOfOrigin + " " + firstEvents[i].locationOfFirstEvent + " " + firstEvents[i].timeOfFirstEvent);
-    trip = await planTransitTrip(firstEvents[i].locationOfOrigin, firstEvents[i].locationOfFirstEvent, new Date(firstEvents[i].timeOfFirstEvent));
+    trip = await planTransitTrip(firstEvents[i].locationOfOrigin, firstEvents[i].locationOfFirstEvent, new Date(firstEvents[i].timeOfFirstEvent), 'none');
     console.log("initReminders(): returned trip: " + trip + " " + trip.routes[0].legs[0].steps[0].travel_mode);
     /* fields for object to be returned to frontend */
-    var reminder = {
+    const reminder = {
       date: 'default',
       leaveTime: 'default',
       leaveTime_iso: 'default',
@@ -608,29 +643,176 @@ async function initReminders(req) {
     console.log("planned trips for whole schedule");
   });
 
-  var cronTasks = [];
+  const scheduledReminders = {
+    email: req.body.email,
+    date: date,
+    reminders: []
+  }
   for (var i = 0; i < returnList.length; i++) {
-    if (returnList[i].firstBus.type == "Bus") { // make this cleaner by changing case statement to only look for buses (RTTI API doesnt support skytrains)
+    if (returnList[i].firstBus.type == "Bus") { // RTTI API doesnt support skytrains, so we only need to check for buses
+      // check for existing scheduled reminders before setting new ones
+      existingReminders = await client.db("ReminderDB").collection("reminderlist").findOne({email: req.body.email, date: returnList[i].date}); 
+      if (existingReminders != null) {
+        console.log("removing reminders for " + existingReminders.date);
+        existingReminders.reminders.forEach((existingReminder) => {
+          existingReminder.stop(); // DEBUG: this line is prob the issue, might need to use chatgpt implementation involving checking for an 'active' field
+        });
+      }
       for(var k = 1; k < 6; k++) {
-        cronTimek = isoToCron(returnList[i].leaveTime_iso, k);
-        cronTasks[k - 1] = cron.schedule(cronTimek, () => {
+        reminderTimek = isoToCron(returnList[i].leaveTime_iso, k);
+        scheduledReminders.reminders[k - 1] = cron.schedule(reminderTimek, () => {
           checkLiveTransitTime(req.body.email, returnList[i].firstBus.id, returnList[i].firstBus.stopNumber, returnList[i].firstBus.leaveTime).then((ret) => {
             if (ret) {
-              cronTasks.forEach(task => {
-                task.stop();
+              scheduledReminders.reminders.forEach(scheduledReminder => {
+                scheduledReminder.stop();
               });
             }
           });
         });
       }
+      client.db("ReminderDB").collection("reminderlist").insertOne(scheduledReminders).then((result) => {    
+        console.log("planned reminders for " + scheduledReminders.date);
+      });
     }
   }
 }
 
-// getNearestBuses("EB Rumble St @ Gilley Ave").then((buses) => {
-//   console.log(buses[0].StopNo + " " + buses.length);
-// });
+async function initRouteWithFriends(req) {
+  var userEmail = req.body.userEmail;
+  var friendEmail = req.body.friendEmail;
+  var date = req.body.date;
 
+  var user = client.db('UserDB').collection('userlist').findOne({email: userEmail});
+  var friend = client.db('UserDB').collection('userlist').findOne({email: friendEmail});
+
+  var schedule_user = client.db('ScheduleDB').collection('schedulelist').findOne({email: userEmail});
+  var schedule_friend = client.db('ScheduleDB').collection('schedulelist').findOne({email: friendEmail});
+
+  // determine when to arrive to campus
+  var timeOfFirstEvent_user = "";
+  var locationOfFirstEvent_user = "";
+  var locationOfOrigin_user = user.address;
+  var timeOfFirstEvent_friend = "";
+  var locationOfFirstEvent_friend = "";
+  var locationOfOrigin_friend = friend.address;
+  for (var i = 0; i < schedule_user.events.length; i++) { // assumes events are sorted by date
+    // console.log("initRoute(): " + schedule.events[i].startTime + " " + date);
+    if (schedule_user.events[i].startTime.split('T')[0] == req.body.date) { 
+      // console.log("initRoute(): startTime " + schedule.events[i].startTime);
+      timeOfFirstEvent_user = schedule_user.events[i].startTime;
+      locationOfFirstEvent_user = schedule_user.events[i].address;
+      locationOfFirstEvent_user = locationOfFirstEvent_user.split(',')[0];
+      break;
+    }
+  }
+  for (var i = 0; i < schedule_friend.events.length; i++) { // assumes events are sorted by date
+    // console.log("initRoute(): " + schedule.events[i].startTime + " " + date);
+    if (schedule_friend.events[i].startTime.split('T')[0] == req.body.date) { 
+      // console.log("initRoute(): startTime " + schedule.events[i].startTime);
+      timeOfFirstEvent_friend = schedule_friend.events[i].startTime;
+      locationOfFirstEvent_friend = schedule_friend.events[i].address;
+      locationOfFirstEvent_friend = locationOfFirstEvent_friend.split(',')[0];
+      break;
+    }
+  }
+
+  if (new Date(timeOfFirstEvent_user < new Date(timeOfFirstEvent_friend))) {
+    var timeOfFirstEvent = timeOfFirstEvent_user;
+    var locationOfFirstEvent = locationOfFirstEvent_user;
+  }
+  else {
+    var timeOfFirstEvent = timeOfFirstEvent_friend;
+    var locationOfFirstEvent = locationOfFirstEvent_friend;
+  }
+  
+  // determine whether to take 99 B-Line or R4 based on address. unused for now
+  var addressCoords_user = getLatLong(locationOfOrigin_user);
+  var addressCoords_friend = getLatLong(locationOfOrigin_friend);
+  var distToCommercial_user = calcDist(addressCoords_user[0], addressCoords_user[1], 49.2624, -123.0698);
+  var distToJoyce_user = calcDist(addressCoords_user[0], addressCoords_user[1], 49.2412, -123.0298);
+  var distToCommercial_friend = calcDist(addressCoords_friend[0], addressCoords_friend[1], 49.2624, -123.0698);
+  var distToJoyce_friend = calcDist(addressCoords_friend[0], addressCoords_friend[1], 49.2412, -123.0298);
+  if ((distToCommercial_friend + distToCommercial_user) / 2 < (distToJoyce_friend + distToJoyce_user) / 2) {
+    // take 99 B-Line
+    var recommendedBus = "99";
+  }
+  else {
+    var recommendedBus = "R4";
+  }
+
+  planTransitTrip(locationOfOrigin_user, locationOfFirstEvent, new Date(timeOfFirstEvent), recommendedBus).then((trip) => {
+    console.log("initRoute(): returned trip: " + trip + " " + trip.routes[0].legs[0].steps[0].travel_mode);
+    /* fields for object to be returned to frontend */
+    var id = '';
+    var leaveTime = '';
+    var type = '';
+    var more = {};
+    var curStep = {}; // maybe properly define this object later
+    var returnList = [];
+
+    more.distance = trip.routes[0].legs[0].distance.text;
+    more.duration = trip.routes[0].legs[0].duration.text;
+    more.arrival_time = trip.routes[0].legs[0].arrival_time.text;
+    more.departure_time = trip.routes[0].legs[0].departure_time.text;
+    more.steps = [];
+
+    trip.routes[0].legs[0].steps.forEach((step, stepIndex) => {
+      travelMode = step.travel_mode;
+
+      if (travelMode == "TRANSIT") {
+        switch(step.transit_details.line.vehicle.name) {
+          case("Bus"):
+            type = "Bus";
+            id = step.transit_details.line.short_name;
+            leaveTime = step.transit_details.departure_time.text;  
+            leaveTimeNum = step.transit_details.departure_time.value;
+            break;
+          case("Subway"):
+            type = "SkyTrain";
+            id = step.transit_details.line.name;
+            leaveTime = step.transit_details.departure_time.text; 
+            leaveTimeNum = step.transit_details.departure_time.value;
+            break;
+          default:
+            type = "default";
+            id = "default";
+            break;
+        }
+      }
+      else {
+        type = "Walk";
+        id = "Walk";
+        leaveTime = step.duration.text; 
+        leaveTimeNum = step.duration.value;
+      }
+      
+      more.steps.push(step.html_instructions);
+      console.log("initRoute(): adding curStep to returnList " + id + " | " + leaveTime + " | " + type);
+      curStep = {_id: id, _leaveTime: leaveTime, _leaveTimeNum: leaveTimeNum, _type: type};
+      returnList.push(curStep);
+    });
+    returnList.push(more);
+
+    /* Directions API doesn't include leaveTime in "WALKING" steps, so we need to calculate ourselves */
+    for (var i = 0; i < returnList.length - 1; i++) {
+      if (i == 0 && returnList[i]._type == "Walk") { 
+        returnList[i]._leaveTime = returnList[returnList.length - 1].departure_time;
+        returnList[i]._leaveTimeNum = timeToTimestamp(returnList[returnList.length - 1].departure_time);
+      }
+      else if ((i == returnList.length - 2) && returnList[i]._type == "Walk") { 
+        returnList[i]._leaveTime = returnList[returnList.length - 1].arrival_time;
+        returnList[i]._leaveTimeNum = timeToTimestamp(returnList[returnList.length - 2].arrival_time);
+      }
+      else if (returnList[i]._type == "Walk") { // assumes 'type' for next array entry is either "Bus" or "SkyTrain"
+        returnList[i]._leaveTime = timestampToTime(returnList[i + 1]._leaveTimeNum - returnList[i]._leaveTimeNum);
+        returnList[i]._leaveTimeNum = returnList[i + 1]._leaveTimeNum - returnList[i]._leaveTimeNum;
+      }
+      console.log("updated leavetime: " + returnList[i]._leaveTime);
+    }
+  }).catch(error => {
+    console.log(error);
+  });
+}
 
 function getLatLong(address) {
   return new Promise((resolve, reject) => {
@@ -657,6 +839,7 @@ function getLatLong(address) {
       resolve(coords);
     }).catch(error => {
       console.log(error);
+      reject(error);
     });
   });
 }
@@ -714,25 +897,32 @@ async function getNearestBuses(address) {
   });
 }
 
-async function planTransitTrip(origin, destination, arriveTime) {
+async function planTransitTrip(origin, destination, arriveTime, recommendedBus) {
   return new Promise((resolve, reject) => {
     const apiUrl = 'https://maps.googleapis.com/maps/api/directions/json';
     const apiKey = 'AIzaSyBVsUyKxBvRjE0XdooMuoDrpAfu1KO_2mM';
-    // var origin = '7746 Berkley Street, Burnaby, BC'; // joyce collingwood
-    // var destination = 'UBC Exchange Bus Loop'; // ubc exhcange r4
-  
-    // determine whether to take 99 B-Line or R4 based on address. unused for now
-    // var addressCoords = getLatLong(origin);
-    // var distToCommercial = calcDist(addressCoords[0], addressCoords[1], 49.2624, -123.0698);
-    // var distToJoyce = calcDist(addressCoords[0], addressCoords[1], 49.2412, -123.0298);
 
-    const params = new URLSearchParams({
-      origin: origin,
-      destination: destination,
-      mode: 'transit',
-      arrival_time: Math.floor(arriveTime.getTime() / 1000),
-      key: apiKey,
-    });
+    if (recommendedBus == 'none') {
+      const params = new URLSearchParams({
+        origin: origin,
+        destination: destination,
+        mode: 'transit',
+        arrival_time: Math.floor(arriveTime.getTime() / 1000),
+        key: apiKey,
+      });
+    }
+    else {
+      const params = new URLSearchParams({
+        origin: origin,
+        destination: destination,
+        mode: 'transit',
+        arrival_time: Math.floor(arriveTime.getTime() / 1000),
+        key: apiKey,
+        transit_mode: 'bus',
+        transit_route: recommendedBus
+      });
+    }
+
   
     const url = `${apiUrl}?${params.toString()}`;
 
@@ -834,6 +1024,5 @@ function compareTimeStrings(timeStr1, timeStr2) {
   const formattedTimeStr1 = timeStr1.toLowerCase().replace(/\s/g, '');
   const formattedTimeStr2 = timeStr2.toLowerCase().replace(/\s/g, '');
 
-  // Compare the formatted strings
   return formattedTimeStr1 === formattedTimeStr2;
 }

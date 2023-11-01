@@ -84,6 +84,19 @@ app.put(
 
 app.delete('/api/schedulelist/:email/', schedule.deleteSchedule);
 
+// Find commute buddy
+app.get('/api/findMatchingUsers/:userEmail', async (req, res) => {
+  const userEmail = req.params.userEmail;
+
+  try {
+      const matchingUsers = await commuters.findMatchingUsers(userEmail);
+      res.json({ matchingUsers });
+  } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 // RecommendationFinder
 
 // app.get('/api/recommendation/routes/:email/:date', async (req, res) => {

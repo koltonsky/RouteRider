@@ -2,6 +2,7 @@ const { MongoClient, ObjectId } = require('mongodb');
 const uri = 'mongodb://0.0.0.0:27017'; // Replace with your MongoDB connection string
 const client = new MongoClient(uri);
 
+// ChatGPT usage: Yes
 const createNewSchedule = async (req, res) => {
   try {
     // Extract user data from the request body
@@ -35,6 +36,7 @@ const createNewSchedule = async (req, res) => {
   }
 };
 
+// ChatGPT usage: Yes
 const getScheduleByEmail = async (req, res) => {
   try {
     // Extract the user's email from the request parameters
@@ -61,6 +63,7 @@ const getScheduleByEmail = async (req, res) => {
   }
 };
 
+// ChatGPT usage: Yes
 const updateSchedule = async (req, res) => {
   try {
     // Extract the email from the URL parameter
@@ -262,6 +265,7 @@ const editEventByID = async (req, res) => {
 };
 */
 
+// ChatGPT usage: Yes
 const addEvent = async (req, res) => {
   try {
     const userEmail = req.params.email;
@@ -606,6 +610,7 @@ const addEvent = async (req, res) => {
   };
   */
 
+  // ChatGPT usage: Yes
 const editEventGeolocation = async (req, res) => {
   try {
     const userEmail = req.params.email;
@@ -649,6 +654,7 @@ const editEventGeolocation = async (req, res) => {
   }
 };
 
+// ChatGPT usage: Yes
 const getCalendarID = async (req, res) => {
   try {
     const userEmail = req.params.email;
@@ -761,6 +767,7 @@ const getCalendarID = async (req, res) => {
   };
   */
 
+  // ChatGPT usage: Yes
 const deleteEventByID = async (req, res) => {
   try {
     const eventId = req.params.id; // Change 'email' to 'id'
@@ -803,6 +810,7 @@ const deleteEventByID = async (req, res) => {
   }
 };
 
+// ChatGPT usage: Yes
 const deleteSchedule = async (req, res) => {
   try {
     const email = req.params.email; // Get the email from the URL parameter

@@ -54,6 +54,7 @@ async function findUsers(userEmail) {
  * 7. Returns an object containing the array of reversed first events.
  * 8. In case of an error, it returns an object with an empty events array.
  */
+// ChatGPT usage: Yes
 async function getFirstEventsOfEachDay(userEmail) {
     try {
 
@@ -114,6 +115,7 @@ async function getFirstEventsOfEachDay(userEmail) {
  * 5. Returns an array of email addresses.
  * 6. In case of an error, it returns an empty array.
  */
+// ChatGPT usage: Yes
   async function findOtherEmails(userEmail) {
     try {
 
@@ -160,7 +162,7 @@ async function getFirstEventsOfEachDay(userEmail) {
  * 5. Returns the Set of unique email addresses of users with matching events.
  * 6. In case of an error, it returns an empty array.
  */
-
+// ChatGPT usage: Yes
 async function findMatchingUsers(userEmail) {
     try {
 

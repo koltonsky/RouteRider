@@ -5,6 +5,7 @@ const {MongoClient, ObjectId} = require('mongodb');
 const uri = 'mongodb://0.0.0.0:27017'; // Replace with your MongoDB connection string
 const client = new MongoClient(uri);
 
+// ChatGPT usage: Yes
 const createNewUser = async (req, res) => {
   try {
     // Extract user data from the request body
@@ -39,7 +40,7 @@ const createNewUser = async (req, res) => {
   }
 };
 
-
+// ChatGPT usage: Yes
 const updateAddress = async (req, res) => {
   try {
     const email = req.params.email; // Get the email from the URL parameter
@@ -65,6 +66,7 @@ const updateAddress = async (req, res) => {
   }
   };
 
+  // ChatGPT usage: Yes
 const getUserByEmail = async (req, res) => {
     try {
       // Extract the user's email from the request parameters
@@ -92,6 +94,7 @@ const getUserByEmail = async (req, res) => {
     }
   };
 
+  // ChatGPT usage: Yes
   const getUserName = async (req, res) => {
     try {
       // Extract the user's email from the request parameters
@@ -116,6 +119,7 @@ const getUserByEmail = async (req, res) => {
     }
   };
 
+  // ChatGPT usage: Yes
   const getUserAddress = async (req, res) => {
     try {
       // Extract the user's email from the request parameters
@@ -141,7 +145,8 @@ const getUserByEmail = async (req, res) => {
   };
 
 
-// Function to get a user's friend list from MongoDB
+// Function to get a user's friend list from 
+// ChatGPT usage: Yes
 const getFriendList = async (req, res) => {
     try {
       const userEmail = req.params.email; // User ID whose friend list needs to be retrieved
@@ -164,6 +169,7 @@ const getFriendList = async (req, res) => {
     }
   };
 
+  // ChatGPT usage: Yes
 const getFriendListWithNames = async (req, res) => {
   try {
     const userEmail = req.params.email; // User email whose friend list needs to be retrieved
@@ -231,7 +237,7 @@ const getFriendListWithNames = async (req, res) => {
 
   
 
-
+// ChatGPT usage: Yes
   const addFriend = async (req, res) => {
     try {
       const userEmail = req.params.email; // User's email for whom the friend list needs to be updated
@@ -286,7 +292,7 @@ const getFriendListWithNames = async (req, res) => {
     }
   };
   
-
+// ChatGPT usage: Yes
   const deleteFriend = async (req, res) => {
     try {
       const userEmail = req.params.email; // User's email for whom the friend list needs to be updated
@@ -329,7 +335,7 @@ const getFriendListWithNames = async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   };
-  
+  // ChatGPT usage: Yes
   const sendFriendRequest = async (req, res) => {
     try {
       const userEmail = req.params.email; // User's email
@@ -385,6 +391,7 @@ const getFriendListWithNames = async (req, res) => {
       return res.status(500).json({ error: 'Internal server error' });
     }
   };
+  // ChatGPT usage: Yes
   const acceptFriendRequest = async (req, res) => {
     try {
       const userEmail = req.params.email; // User's email
@@ -435,7 +442,7 @@ const getFriendListWithNames = async (req, res) => {
       return res.status(500).json({ error: 'Internal server error' });
     }
   };
-
+// ChatGPT usage: Yes
   const declineFriendRequest = async (req, res) => {
     try {
       const userEmail = req.params.email; // User's email
@@ -525,6 +532,7 @@ const updateFriendList = async (req, res) => {
 */
 
   // Function to update a user's information in MongoDB
+  // ChatGPT usage: Yes
 const updateUser = async (req, res) => {
     try {
       const userEmail = req.params.email; // User email whose information needs to be updated
@@ -611,7 +619,7 @@ const updateFriendList = async (req, res) => {
     }
   };
 */
-
+// ChatGPT usage: Yes
 const deleteUser = async (req, res) => {
   try {
     const email = req.params.email; // Get the email from the URL parameter

@@ -16,6 +16,7 @@ const axios = require('axios');
 
 const user = require('./routes/user.js');
 const schedule = require('./routes/schedule.js');
+const commuters = require('./commuter_match.js');
 const { get } = require('http');
 const { time } = require('console');
 
@@ -243,10 +244,23 @@ sslServer.listen(port, () => console.log('Secure server :) on port ' + port));
 //     console.log('inserted user');
 //   });
 
-// var dummy = initRoute('koltonluu@gmail.com', '2023-11-01');
-// console.log('here');
-// console.log(dummy);
-// var dummy = initReminders('koltonluu@gmail.com');
+// CODE TO FIND COMMUTE BUDDIES
+/*
+commuters.findMatchingUsers("koltonluu@gmail.com").then(result => {
+  console.log('Schedule for other users:');
+  console.log(result);
+});
+*/
+
+// client.db('ScheduleDB').collection('schedulelist').insertOne(dummy_schedule).then((result) => {
+//   console.log("inserted schedule");
+// });
+// client.db('UserDB').collection('userlist').insertOne(dummy_user).then((result) => {
+//   console.log("inserted user");
+// });
+
+// var dummy = initRoute("koltonluu@gmail.com", "2023-11-01");
+var dummy = initReminders('koltonluu@gmail.com');
 /**
  * Function returns an array of objects containing the following fields:
  *    _id: bus number/Skytrain line name (e.g. 99, R4, Expo Line, etc.)

@@ -145,7 +145,7 @@ public class ScheduleFragment extends Fragment {
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(requireContext());
             alertDialogBuilder.setTitle("Add Event");
 
-// Inflate the custom view for the dialog
+            // Inflate the custom view for the dialog
             LayoutInflater dialogInflater = LayoutInflater.from(requireContext());
             View dialogView = dialogInflater.inflate(R.layout.add_event_dialog, null);
             alertDialogBuilder.setView(dialogView);
@@ -192,6 +192,7 @@ public class ScheduleFragment extends Fragment {
                     apiCall.APICall("api/schedulelist/" + account.getEmail(), jsonUpdateEvent, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
                         @Override
                         public void onResponse(String responseBody) {
+                            System.out.println("new event added to db");
                             System.out.println("BODY: " + responseBody);
 //                                eventName.setText(newEvent.getTitle());
 //                                eventLocation.setText(newEvent.getLocation());
@@ -274,6 +275,7 @@ public class ScheduleFragment extends Fragment {
             return false;
         }
     }
+
 
     private static boolean isTimeValid(String time) {
         String timePattern = "([01]\\d|2[0-3]):[0-5]\\d";
@@ -405,11 +407,13 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
             }
 
             Map<String, Object> test = new HashMap<>();
-            test.put("email", "koltonluu@gmail.com");
+            test.put("email", account.getEmail());
             test.put("events", eventList);
             String jsonSchedule = new Gson().toJson(test);
 
             System.out.println(jsonSchedule);
+            System.out.println("avbout to get schedule");
+
 
             apiCall.APICall("api/schedulelist/" + account.getEmail(), "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
                 @Override
@@ -447,6 +451,21 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
                 @Override
                 public void onError(String errorMessage) {
                     System.out.println("Error " + errorMessage);
+                    System.out.println(errorMessage.split(",")[0]);
+                    if( (errorMessage.split(",")[0]).equals("Error: 404")){
+                        System.out.println("schedule not found, creating schedule using Google Calendar data");
+                        apiCall.APICall("api/schedulelist/", jsonSchedule, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
+                            @Override
+                            public void onResponse(String responseBodyPost) {
+                                System.out.println("Created schedule: " + responseBodyPost);
+                            }
+
+                            @Override
+                            public void onError(String errorMessage) {
+                                System.out.println("Error: " + errorMessage);
+                            }
+                        });
+                    }
                 }
             });
         } catch (IOException e) {
@@ -488,21 +507,7 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
         }
 
         LayoutInflater inflater = LayoutInflater.from(scheduleContext);
-//        for (ScheduleItem item: dayList) {
-//            eventListView = scheduleView.findViewById(R.id.scheduleView);
-//            View view  = inflater.inflate(R.layout.view_event, eventListView, false);
-//            // set item content in view
-//            TextView eventName = view.findViewById(R.id.eventName);
-//            eventName.setText(item.getTitle());
-//            TextView eventLocation = view.findViewById(R.id.eventLocation);
-//            eventLocation.setText(item.getLocation());
-//            TextView startTime = view.findViewById(R.id.startTime);
-//            startTime.setText(item.getStartTime().substring(11,16));
-//            TextView endTime = view.findViewById(R.id.endTime);
-//            endTime.setText(item.getEndTime().substring(24));
-//            System.out.println(item);
-//            eventListView.addView(view);
-//        }
+
         SimpleDateFormat fullDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
 

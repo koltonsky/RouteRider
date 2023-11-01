@@ -20,10 +20,19 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.example.routerider.APICaller;
+import com.example.routerider.HelperFunc;
 import com.example.routerider.R;
 import com.example.routerider.RouteItem;
 import com.example.routerider.ScheduleItem;
 import com.example.routerider.TransitItem;
+import com.example.routerider.User;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.gson.Gson;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -79,7 +88,63 @@ public class RoutesFragment extends Fragment {
     }
 
     private void fetchRoutes(Date day) {
-        // api get calls
+        GoogleSignInAccount account = User.getCurrentAccount();
+        System.out.println("called fetchroutes");
+        APICaller apiCall = new APICaller();
+        System.out.println("called apicaller");
+        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+
+
+
+        apiCall.APICall("api/recommendation/routes/" + account.getEmail() + "/" + formatter.format(day), "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
+            @Override
+            public void onResponse(final String responseBody) {
+                System.out.println("HEREEEEE");
+                getActivity().runOnUiThread(() -> {
+                    System.out.println("BODY: " + responseBody);
+                    try {
+                        JSONObject json = new JSONObject(responseBody);
+                        JSONArray routes =  json.getJSONArray("routes");
+                        System.out.println(routes);
+                        dayRoutes = new ArrayList<>();
+                        List<TransitItem> transitItemList = new ArrayList<>();
+                        List<String> stepsList = new ArrayList<>();
+                        for (int i = 0; i < routes.length(); i++) {
+                            JSONObject item = (JSONObject) routes.get(i);
+                            if ( item.has("_id")) {
+                                System.out.println("logging transit item");
+                                String id = item.getString("_id");
+                                String type = item.getString("_type");
+                                String leaveTime = item.getString("_leaveTime");
+                                TransitItem transitItem = new TransitItem(id, type, leaveTime);
+                                transitItemList.add(transitItem);
+                            } else {
+                                System.out.println("logging step");
+                                JSONArray steps = item.getJSONArray("steps");
+                                for (int j = 0; j < steps.length(); j++) {
+                                    String element = steps.getString(j);
+                                    stepsList.add(element);
+                                }
+
+                            }
+
+                        }
+                        RouteItem routeItem = new RouteItem(transitItemList, stepsList, "0", "0");
+                        dayRoutes.add(routeItem);
+                        System.out.println("dayroutes:");
+                        System.out.println(dayRoutes);
+                        // address.setText("Address: " + json.getString("address"));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                System.out.println("Error " + errorMessage);
+            }
+        });
     }
 
     private void mockRoutes() {
@@ -103,6 +168,9 @@ public class RoutesFragment extends Fragment {
         routesView = view.findViewById(R.id.routesView);
         routesView.removeAllViewsInLayout();
         LayoutInflater inflater = LayoutInflater.from(context);
+        if (dayRoutes == null || dayRoutes.isEmpty()){
+            return;
+        }
         for (RouteItem item: dayRoutes) {
             View singleRouteView  = inflater.inflate(R.layout.view_route, routesView, false);
             ImageButton expandButton = singleRouteView.findViewById(R.id.expandButton);
@@ -132,11 +200,11 @@ public class RoutesFragment extends Fragment {
             LinearLayout transitIdsView = singleRouteView.findViewById(R.id.transitIds);
             for (TransitItem transitItem: item.getTransitItems()){
                 View transitChipView;
-                if (transitItem.getType().equals("bus")){
+                if (transitItem.getType().toLowerCase().equals("bus")){
                     transitChipView  = inflater.inflate(R.layout.bus_chip, transitIdsView, false);
                     TextView busIdText = transitChipView.findViewById(R.id.busId);
                     busIdText.setText(transitItem.getId());
-                } else if (transitItem.getType().equals("train")){
+                } else if (transitItem.getType().toLowerCase().equals("skytrain")){
                     transitChipView  = inflater.inflate(R.layout.train_chip, transitIdsView, false);
                     TextView busIdText = transitChipView.findViewById(R.id.trainId);
                     busIdText.setText(transitItem.getId());
@@ -194,7 +262,7 @@ public class RoutesFragment extends Fragment {
             calendar.add( java.util.Calendar.DAY_OF_YEAR, -1); // Subtract 1 day to get the previous day
             Date previousDay = calendar.getTime();
             changeDay(previousDay);
-            // fetchRoutes(previousDay);
+            fetchRoutes(previousDay);
             displayRoutes(view,this.getContext());
         });
 
@@ -204,11 +272,12 @@ public class RoutesFragment extends Fragment {
             calendar.add( java.util.Calendar.DAY_OF_YEAR, 1); // Add 1 day to get the next day
             Date nextDay = calendar.getTime();
             changeDay(nextDay);
-            // fetchRoutes(nextDay);
+            fetchRoutes(nextDay);
             displayRoutes(view,this.getContext());
         });
 
-        mockRoutes();
+        fetchRoutes(new Date());
+
         displayRoutes(view,this.getContext());
         return view;
     }

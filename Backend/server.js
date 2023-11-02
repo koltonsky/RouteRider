@@ -57,7 +57,7 @@ app.get('/api/userlist/:email/name', user.getUserName);
 app.get('/api/userlist/:email/address', user.getUserAddress);
 app.get('/api/userlist/:email/friends', user.getFriendListWithNames);
 
-app.put('/api/userlist/:email/', user.updateAddress);
+app.put('/api/userlist/:email/address', user.updateAddress);
 
 app.post('/api/userlist/:email/friends', user.addFriend);
 app.delete('/api/userlist/:email/friends', user.deleteFriend);
@@ -73,7 +73,7 @@ app.delete(
   user.declineFriendRequest
 );
 
-app.put('/api/userlist/:email', user.updateUser);
+app.put('/api/userlist/:email/user', user.updateUser);
 
 // test/db purposes only
 app.delete('/api/userlist/:email', user.deleteUser);

@@ -55,9 +55,9 @@ app.post('/api/userlist', user.createNewUser);
 app.get('/api/userlist/:email', user.getUserByEmail);
 app.get('/api/userlist/:email/name', user.getUserName);
 app.get('/api/userlist/:email/address', user.getUserAddress);
-app.get('/api/userlist/:email/friends', user.getFriendList);
+app.get('/api/userlist/:email/friends', user.getFriendListWithNames);
 
-app.put('/api/userlist/:email/', user.updateAddress);
+app.put('/api/userlist/:email/address', user.updateAddress);
 
 app.post('/api/userlist/:email/friends', user.addFriend);
 app.delete('/api/userlist/:email/friends', user.deleteFriend);
@@ -97,6 +97,9 @@ app.put(
 
 app.delete('/api/schedulelist/:email/', schedule.deleteSchedule);
 
+/**
+ * ChatGPT usage: Partial
+ */
 app.post('/api/store_token', (req, res) => {
   const token = req.body.token;
   const email = req.body.email;
@@ -127,6 +130,9 @@ app.post('/api/store_token', (req, res) => {
   });
 });
 
+/**
+ * ChatGPT usage: Partial
+ */
 app.post('/api/send-friend-notification', (req, res) => {
   const senderName = req.body.senderName;
   const receiverEmail = req.body.receiverEmail;
@@ -160,6 +166,9 @@ app.post('/api/send-friend-notification', (req, res) => {
   });
 });
 
+/**
+ * ChatGPT usage: None
+ */
 app.post('/api/initReminders', (req, res) => {
   console.log("*****called initReminders api endpoint*****");
   initReminders(req).then(() => {
@@ -196,6 +205,9 @@ app.get('/api/findMatchingUsers/:userEmail', async (req, res) => {
 //   });
 // });
 
+/**
+ * ChatGPT usage: None
+ */
 const getRecommendedRoutesWithFriends = async (req, res) => {
   try {
     const email = req.params.email;
@@ -244,6 +256,18 @@ app.get('/api/recommendation/timegap/:addr1/:addr2', getTimeGapRecommendations);
 
 // could split this into two functions, one for checking and one for sending notifs
 // checkLiveTransitTime("xxx", '123', '51439', "xxx");
+/**
+ * Compares a specific bus's expected leave time with the scheduled leave time and sends a 
+ * notification to the user if the bus is off schedule.
+ * 
+ * @param {*} userEmail 
+ * @param {*} busNumber 
+ * @param {*} stopNumber 
+ * @param {*} scheduledLeaveTime 
+ * @returns true/false, indicating whether a notification was sent
+ * 
+ * ChatGPT usage: Partial
+ */
 async function checkLiveTransitTime(userEmail, busNumber, stopNumber, scheduledLeaveTime) {
   return new Promise((resolve, reject) => {
     console.log("its time!");
@@ -317,41 +341,41 @@ async function checkLiveTransitTime(userEmail, busNumber, stopNumber, scheduledL
   });
 }
 
-function test() {
-  console.log("test");
-  const scheduledReminders = {
-    email: "koltonluu@gmail.com",
-    date: "123",
-    reminders: []
-  }
-  client.db("ReminderDB").collection("reminderlist").findOne({email: "koltonluu@gmail.com", date: "123"}).then((existingReminders) => {
-    if (existingReminders != null) {
-      console.log("removing reminders for " + existingReminders.date);
-      existingReminders.reminders.forEach((existingReminder) => {
-        existingReminder.stop(); // DEBUG: this line is prob the issue, might need to use chatgpt implementation involving checking for an 'active' field
-      });
-    }
-  });
-  for (var i = 1; i < 6; i++) {
-    var currentDate = new Date();
-    var futureDate = new Date(currentDate.getTime() + i*5000);
-    var isoTimestamp = futureDate.toISOString();
-    cronTime = isoToCron(isoTimestamp, 0);
-    console.log("time: " + cronTime + " " + isoTimestamp);
-    scheduledReminders.reminders[i - 1] = cron.schedule(cronTime, () => {
-      checkLiveTransitTime("koltonluu@gmail.com", '123', '51408', "9:20pm").then((ret) => {
-        if(ret) {
-          scheduledReminders.reminders.forEach(element => {
-            element.stop();
-          });
-        }
-      });
-    });
-  }
-  client.db("ReminderDB").collection("reminderlist").insertOne(scheduledReminders).then((result) => {    
-    console.log("planned reminders for " + scheduledReminders.date);
-  });
-}
+// function test() {
+//   console.log("test");
+//   const scheduledReminders = {
+//     email: "koltonluu@gmail.com",
+//     date: "123",
+//     reminders: []
+//   }
+//   client.db("ReminderDB").collection("reminderlist").findOne({email: "koltonluu@gmail.com", date: "123"}).then((existingReminders) => {
+//     if (existingReminders != null) {
+//       console.log("removing reminders for " + existingReminders.date);
+//       existingReminders.reminders.forEach((existingReminder) => {
+//         existingReminder.stop(); // DEBUG: this line is prob the issue, might need to use chatgpt implementation involving checking for an 'active' field
+//       });
+//     }
+//   });
+//   for (var i = 1; i < 6; i++) {
+//     var currentDate = new Date();
+//     var futureDate = new Date(currentDate.getTime() + i*5000);
+//     var isoTimestamp = futureDate.toISOString();
+//     cronTime = isoToCron(isoTimestamp, 0);
+//     console.log("time: " + cronTime + " " + isoTimestamp);
+//     scheduledReminders.reminders[i - 1] = cron.schedule(cronTime, () => {
+//       checkLiveTransitTime("koltonluu@gmail.com", '123', '51408', "9:20pm").then((ret) => {
+//         if(ret) {
+//           scheduledReminders.reminders.forEach(element => {
+//             element.stop();
+//           });
+//         }
+//       });
+//     });
+//   }
+//   client.db("ReminderDB").collection("reminderlist").insertOne(scheduledReminders).then((result) => {    
+//     console.log("planned reminders for " + scheduledReminders.date);
+//   });
+// }
 //test();
 /*
 app.get('/api/userlist', async (req, res) => {
@@ -461,6 +485,45 @@ sslServer.listen(port, () => console.log('Secure server :) on port ' + port));
 //   friends: ['friend1@example.com', 'friend2@example.com'],
 // };
 
+// var dummy_schedule2 = {
+//   email: 'leonguo@gmail.com',
+//   events: [
+//     {
+//       address: 'UBC MacLeod, Room 4006',
+//       calendarID: 'leonguo@gmail.com',
+//       endTime: '2023-11-01T15:00:00.000-07:00',
+//       eventName: 'CPEN 321 L1B',
+//       geolocation: { latitude: 0, longitude: 0 },
+//       id: '_64p36d1h6osjgchm6cp3gchk68r62oj3cgp3ge9h6krg_20231101T200000Z',
+//       startTime: '2023-11-01T13:00:00.000-07:00',
+//     },
+//     {
+//       address: 'UBC MacMillan, Room 360',
+//       calendarID: 'leonguo@gmail.com',
+//       endTime: '2023-11-01T17:00:00.000-07:00',
+//       eventName: 'CPEN 321 101',
+//       geolocation: { latitude: 0, longitude: 0 },
+//       id: '_64p36d1h6osjgchm6cp3gchk68r62oj3cgpj4d1m64rg_20231101T223000Z',
+//       startTime: '2023-11-01T15:30:00.000-07:00',
+//     },
+//     {
+//       address: 'UBC Nest Building, Room 360',
+//       calendarID: 'leonguo@gmail.com',
+//       endTime: '2023-11-03T17:00:00.000-07:00',
+//       eventName: 'Club Meeting',
+//       geolocation: { latitude: 0, longitude: 0 },
+//       id: '_64p36d1h6osjgchm6cp3gchk68r62oj3cgpj4d1m64tr_20231101T223000Z',
+//       startTime: '2023-11-03T14:30:00.000-07:00',
+//     },
+//   ],
+// };
+// var dummy_user2 = {
+//   email: 'leonguo@gmail.com', // fake email, wont work with google authentication
+//   name: 'Leon Guo',
+//   address: '7746 Berkley Street, Burnaby, BC',
+//   friends: ['friend1@example.com', 'friend2@example.com'],
+// };
+
 // client
 //   .db('ScheduleDB')
 //   .collection('schedulelist')
@@ -500,17 +563,24 @@ commuters.findMatchingUsers("koltonluu@gmail.com").then(result => {
  *    _leaveTimeNum: time to leave in number format
  *    _type: type of transportation (Bus, SkyTrain, Walk)
  * The array represents the transit route the user should take to arrive at their destination on time.
+ * 
+ * The final object in the returned array contains the following fields:
+ *    distance: distance of the trip
+ *    duration: duration of the trip
+ *    arrival_time: arrival time at destination
+ *    departure_time: departure time from origin
+ *    steps: an array of strings containing the directions for the trip
  *
  * For local testing, connect to a mongoDB instance and run commented client.db commands above. They should initialize the database with dummy data.
  *
  * Translink Open API Key: crj9j8Kj97pbPkkc61dX
- * Geocoding API key: AAPK3c726265cc41485bb57c5512e98cf912OLoJQtidjOlcqjdpa0Pl773UqNoOYfwApr6ORYd8Lina8_K0sEbdcyXsNfHFqLKE if error 498 invalid token, create a new key
- * HERE Location services API key (unused): S3186X1u-4DFckek542dcP9gxZeLI3uHQl_IkwZnJb4
- *                        App ID  (unused):  cOIE7nteY1IGtsu8BGpr
+ * Geocoding API key: AAPK3c726265cc41485bb57c5512e98cf912OLoJQtidjOlcqjdpa0Pl773UqNoOYfwApr6ORYd8Lina8_K0sEbdcyXsNfHFqLKE
  * Google Direction API ($200 credit): AIzaSyBVsUyKxBvRjE0XdooMuoDrpAfu1KO_2mM
  *
- * @param {*} userEmail
- * @param {*} date
+ * @param {*} userEmail the email of the client that's being served
+ * @param {*} date      the date of the commute
+ * 
+ * ChatGPT usage: Partial
  */
 async function initRoute(userEmail, date) {
   console.log('called initRoute()');
@@ -668,11 +738,12 @@ async function initRoute(userEmail, date) {
 // }
 // initReminders(xdd);
 /**
- * Pretty much same logic as initRoute, but we only care about time to leave for the first step of each trip (when to leave the house)
- * The time to leave determined by initRoute and initReminders should be the same 
+ * Function initializes reminders for a user's schedule. 
  * 
- * @param email
- * @returns an array of objects that contain info on when to send notifications (time and date)
+ * @param req a JSON request body containing the user's email
+ * @returns none
+ * 
+ * ChatGPT usage: Partial
  */
 async function initReminders(req) {
   console.log("called initReminders()");
@@ -767,9 +838,9 @@ async function initReminders(req) {
   // for (var i = 0; i < returnList.length; i++) {
   //   console.log("initReminders(): returned returnList: " + returnList[i].date + " " + returnList[i].leaveTime);
   // }
-  client.db('TripDB').collection('triplist').insertOne({email: req.body.email, trips: returnList}).then((result) => {
-    console.log("planned trips for whole schedule");
-  });
+  // client.db('TripDB').collection('triplist').insertOne({email: req.body.email, trips: returnList}).then((result) => {
+  //   console.log("planned trips for whole schedule");
+  // });
 
   var cronTasks = [];
   for (var i = 0; i < returnList.length; i++) {
@@ -797,6 +868,17 @@ async function initReminders(req) {
 //   }
 // }
 // initRouteWithFriends(xdding);
+
+/**
+ * Generates a commute route that can be shared by a user and their friend.
+ * 
+ * @param {*} userEmail 
+ * @param {*} friendEmail 
+ * @param {*} date 
+ * @returns An array of object formatted identically to the array returned by initRoute()
+ * 
+ * ChatGPT usage: Partial
+ */
 async function initRouteWithFriends(userEmail, friendEmail, date) {
   // var userEmail = req.body.userEmail;
   // var friendEmail = req.body.friendEmail;
@@ -804,12 +886,21 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
 
   var user = await client.db('UserDB').collection('userlist').findOne({email: userEmail});
   if (user == null) {
-    console.log("initRouteWithFriends(): no matching email exists in user database");
+    console.log("initRouteWithFriends(): no matching user email exists in user database");
   }
   var friend = await client.db('UserDB').collection('userlist').findOne({email: friendEmail});
+  if (friend == null) {
+    console.log("initRouteWithFriends(): no matching friend email exists in user database");
+  }
 
   var schedule_user = await client.db('ScheduleDB').collection('schedulelist').findOne({email: userEmail});
+  if (schedule_user == null) {
+    console.log("initRouteWithFriends(): no matching user email exists in schedule database");
+  }
   var schedule_friend = await client.db('ScheduleDB').collection('schedulelist').findOne({email: friendEmail});
+  if (schedule_friend == null) {
+    console.log("initRouteWithFriends(): no matching friend email exists in schedule database");
+  }
 
   // determine when to arrive to campus
   var timeOfFirstEvent_user = "";
@@ -828,6 +919,10 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
       break;
     }
   }
+  if (timeOfFirstEvent_user == "") {
+    console.log("initRouteWithFriends(): no matching date exists in user schedule");
+  }
+
   for (var i = 0; i < schedule_friend.events.length; i++) { // assumes events are sorted by date
     // console.log("initRoute(): " + schedule.events[i].startTime + " " + date);
     if (schedule_friend.events[i].startTime.split('T')[0] == req.body.date) { 
@@ -837,6 +932,9 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
       locationOfFirstEvent_friend = locationOfFirstEvent_friend.split(',')[0];
       break;
     }
+  }
+  if (timeOfFirstEvent_user == "") {
+    console.log("initRouteWithFriends(): no matching date exists in friend schedule");
   }
 
   if (new Date(timeOfFirstEvent_user < new Date(timeOfFirstEvent_friend))) {
@@ -849,7 +947,7 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
   }
   console.log("initRouteWithFriends(): timeOfFirstEvent: " + timeOfFirstEvent);
   
-  // determine whether to take 99 B-Line or R4 based on address. unused for now
+  // determine whether to take 99 B-Line or R4 based on address
   var addressCoords_user = getLatLong(locationOfOrigin_user);
   var addressCoords_friend = getLatLong(locationOfOrigin_friend);
   var distToCommercial_user = calcDist(addressCoords_user[0], addressCoords_user[1], 49.2624, -123.0698);
@@ -857,7 +955,6 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
   var distToCommercial_friend = calcDist(addressCoords_friend[0], addressCoords_friend[1], 49.2624, -123.0698);
   var distToJoyce_friend = calcDist(addressCoords_friend[0], addressCoords_friend[1], 49.2412, -123.0298);
   if ((distToCommercial_friend + distToCommercial_user) / 2 < (distToJoyce_friend + distToJoyce_user) / 2) {
-    // take 99 B-Line
     var meetingPoint = "Commercial Broadway Station";
   }
   else {
@@ -962,6 +1059,14 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
   });
 }
 
+/**
+ * Calculates the latitude and logitude coordinates of an address
+ * 
+ * @param address 
+ * @returns an array of coordinates [latitude, longitude]. The coordinates have a maximum of 5 digits after the decimal.
+ * 
+ * ChatGPT usage: Partial
+ */
 function getLatLong(address) {
   return new Promise((resolve, reject) => {
     var lat = 0; // default value
@@ -993,6 +1098,14 @@ function getLatLong(address) {
   });
 }
 
+/** 
+ * Finds the nearest bus stops within a 500m radius to a given address.
+ * 
+ * @param address
+ * @returns a list of bus stops 
+ * 
+ * ChatGPT usage: Partial
+ */
 async function getNearestBuses(address) {
   return new Promise((resolve, reject) => {
     lat = 0;
@@ -1049,6 +1162,16 @@ async function getNearestBuses(address) {
   });
 }
 
+/**
+ * Generates a commute route using Google's Directions API
+ * 
+ * @param {*} origin      address where the commute starts
+ * @param {*} destination address where the commute ends 
+ * @param {*} arriveTime  time at which the commute should end
+ * @returns               JSON response from Google Directions API
+ * 
+ * ChatGPT usage: Partial
+ */
 async function planTransitTrip(origin, destination, arriveTime) {
   return new Promise((resolve, reject) => {
     const apiUrl = 'https://maps.googleapis.com/maps/api/directions/json';
@@ -1108,6 +1231,7 @@ async function planTransitTrip(origin, destination, arriveTime) {
   });
 }
 
+// ChatGPT usage: Yes
 function calcDist(x1, y1, x2, y2) {
   var a = x1 - x2;
   var b = y1 - y2;
@@ -1115,11 +1239,13 @@ function calcDist(x1, y1, x2, y2) {
   return Math.sqrt(a * a + b * b);
 }
 
+// ChatGPT usage: Yes
 function timeToTimestamp(timeString) {
   const date = new Date(timeString);
   return Math.floor(date.getTime() / 1000);
 }
 
+// ChatGPT usage: Yes
 function timestampToTime(timestamp) {
   const date = new Date(timestamp * 1000);
   return date.toLocaleTimeString('en-US', {
@@ -1128,6 +1254,7 @@ function timestampToTime(timestamp) {
   });
 }
 
+// ChatGPT usage: Yes
 function combineDateAndTime(dateString, timeString) {
   // Convert the time to 24-hour format and add seconds
   // console.log("inputs: " + dateString + " " + timeString);
@@ -1158,12 +1285,14 @@ function combineDateAndTime(dateString, timeString) {
   return date.toISOString();
 }
 
+// ChatGPT usage: Yes
 function isoToCron(isoString, minutesBefore) {
   const date = new Date(isoString);
   const cronString = `${date.getSeconds()} ${date.getMinutes() - minutesBefore} ${date.getHours()} ${date.getDate()} ${date.getMonth() + 1} *`;
   return cronString;
 }
 
+// ChatGPT usage: Yes
 function compareTimeStrings(timeStr1, timeStr2) {
   // Convert both strings to lowercase and remove spaces
   const formattedTimeStr1 = timeStr1.toLowerCase().replace(/\s/g, '');

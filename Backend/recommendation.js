@@ -12,6 +12,7 @@ let suggestions = [];
 const API_KEY = 'AIzaSyADWClq31r1vS21EWOcBnpOayxFOIDd-YQ';
 
 const recommendation = async (addr1, addr2) => {
+  suggestions = [];
   return new Promise(async (resolve, reject) => {
     // const timeGap = event2.start - event1.end;
     const client = new Client();
@@ -37,6 +38,10 @@ const recommendation = async (addr1, addr2) => {
         client.geocode(geocodeRequest1),
         client.geocode(geocodeRequest2),
       ]);
+      console.log('response1');
+      console.log(response1);
+      console.log('response2');
+      console.log(response2);
 
       if (response1.data.status === Status.OK) {
         coords1 = response1.data.results[0].geometry.location;
@@ -65,6 +70,7 @@ const recommendation = async (addr1, addr2) => {
 
       const response = await client.placesNearby(placesRequest);
       if (response.data.status === Status.OK) {
+        const results = response.data.results;
         for (let i = 0; i < results.length; i++) {
           suggestions.push(results[i]);
         }

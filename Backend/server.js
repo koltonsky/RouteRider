@@ -491,6 +491,7 @@ async function initReminders(userEmail) {
       firstEvents[i].locationOfFirstEvent,
       new Date(firstEvents[i].timeOfFirstEvent)
     );
+    if (trip.routes.length === 0) return;
     console.log(
       'initReminders(): returned trip: ' +
         trip +
@@ -665,6 +666,7 @@ async function planTransitTrip(origin, destination, arriveTime) {
           });
         } else {
           console.log('No routes found.');
+          reject('No routes found.');
         }
         console.log('--------------------------------------------------------');
         // console.log(data);
@@ -675,6 +677,7 @@ async function planTransitTrip(origin, destination, arriveTime) {
     });
     request.on('error', (err) => {
       console.log('Error: ' + err.message);
+      reject('Error: ' + err.message);
     });
   });
 }

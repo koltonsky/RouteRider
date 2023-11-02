@@ -30,6 +30,7 @@ import com.google.gson.Gson;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -84,8 +85,10 @@ public class ProfileFragment extends Fragment {
 
         TextView userPreferences = view.findViewById(R.id.preferences);
         userPreferences.setOnClickListener(v -> {
-            Intent intent = new Intent(requireContext(), PreferencesActivity.class);
-            startActivity(intent);
+//            Intent intent = new Intent(requireContext(), PreferencesActivity.class);
+//            startActivity(intent);
+            // System.out.println("fetching routes");
+            // HomeActivity.fetchRoutes(new Date());
         });
 
         TextView name = view.findViewById(R.id.name_text);

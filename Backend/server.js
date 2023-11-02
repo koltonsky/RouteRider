@@ -55,7 +55,7 @@ app.post('/api/userlist', user.createNewUser);
 app.get('/api/userlist/:email', user.getUserByEmail);
 app.get('/api/userlist/:email/name', user.getUserName);
 app.get('/api/userlist/:email/address', user.getUserAddress);
-app.get('/api/userlist/:email/friends', user.getFriendList);
+app.get('/api/userlist/:email/friends', user.getFriendListWithNames);
 
 app.put('/api/userlist/:email/', user.updateAddress);
 

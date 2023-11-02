@@ -221,11 +221,12 @@ async function findMatchingUsers(userEmail) {
   //console.log(emailsExcludingUser);
   //const findScheduleReturn = findSchedule(userEmail, emailsExcludingUser);
 
-  
+/*
 findMatchingUsers(userEmail).then(result => {
     console.log('Schedule for other users:');
     console.log(result);
 });
+*/
 
   //findMatchingCommuters("koltonluu@gmail.com");
   //findUsers("koltonluu")

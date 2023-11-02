@@ -73,7 +73,7 @@ app.delete(
   user.declineFriendRequest
 );
 
-app.put('/api/userlist/:email/user', user.updateUser);
+app.put('/api/userlist/:email', user.updateUser);
 
 // test/db purposes only
 app.delete('/api/userlist/:email', user.deleteUser);

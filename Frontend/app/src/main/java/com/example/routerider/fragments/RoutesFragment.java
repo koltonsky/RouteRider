@@ -5,6 +5,7 @@ import static androidx.core.content.ContextCompat.startActivity;
 import static com.example.routerider.HomeActivity.dayRoutes;
 import static com.example.routerider.HomeActivity.fetchRoutes;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -27,6 +28,7 @@ import android.widget.Toast;
 
 import com.example.routerider.APICaller;
 import com.example.routerider.FetchRoutesCallback;
+import com.example.routerider.FriendsActivity;
 import com.example.routerider.HelperFunc;
 import com.example.routerider.HomeActivity;
 import com.example.routerider.R;
@@ -57,6 +59,8 @@ public class RoutesFragment extends Fragment {
     private Button getNextDay;
     private TextView currentDayText;
     private DateFormat formatter;
+
+    private Button transitFriendButton;
 
     public RoutesFragment() {
         // Required empty public constructor
@@ -131,18 +135,23 @@ public class RoutesFragment extends Fragment {
 //    }
 
     private void displayRoutes(View view, Context context) {
+
         LayoutInflater inflater = LayoutInflater.from(context);
         System.out.println("displaying routes");
         System.out.println(dayRoutes);
         routesView = view.findViewById(R.id.routesView);
+        transitFriendButton = view.findViewById(R.id.transitFriendButton);
+
         if (dayRoutes == null || dayRoutes.isEmpty()){
             System.out.println("ROUTE CALLS ##########");
             System.out.println(dayRoutes);
             TextView emptyRoutes = new TextView(context);
             emptyRoutes.setText("There are no routes for this day");
             routesView.addView(emptyRoutes);
+            transitFriendButton.setEnabled(false);
             return;
         }
+        transitFriendButton.setEnabled(true);
         for (RouteItem item: dayRoutes) {
             View singleRouteView  = inflater.inflate(R.layout.view_route, routesView, false);
             ImageButton expandButton = singleRouteView.findViewById(R.id.expandButton);
@@ -221,6 +230,115 @@ public class RoutesFragment extends Fragment {
         currentDayText = view.findViewById(R.id.currentDayText);
         currentDayText.setText(formatter.format(currentDay));
 
+        transitFriendButton = view.findViewById(R.id.transitFriendButton);
+
+        JSONArray friendsList = FriendsActivity.getFriendList();
+        transitFriendButton.setOnClickListener(v -> {
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(requireContext());
+            alertDialogBuilder.setTitle("Friend List");
+
+            String[] friendNames = {"Kolton (koltonluu@gmail.com)"};
+            for (int i = 0; i < friendsList.length(); i++) {
+                try {
+                    JSONObject friend = friendsList.getJSONObject(i);
+
+                    String email = friend.getString("email");
+                    String name = friend.getString("name");
+                    friendNames[i] = name + " (" + email + ")";
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            // Set the item list and a click listener
+            alertDialogBuilder.setItems(friendNames, (dialog, which) -> {
+                String selectedFriend = friendNames[which];
+                String selectedFriendEmail = "";
+
+                int start = selectedFriend.indexOf('(');
+                int end = selectedFriend.indexOf(')');
+
+                if (start != -1 && end != -1 && start < end) {
+                    selectedFriendEmail = selectedFriend.substring(start + 1, end);
+                }
+                APICaller apiCall = new APICaller();
+                // Perform actions with the selected friend
+
+                GoogleSignInAccount account = User.getCurrentAccount();
+
+                DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+
+                apiCall.APICall("api/recommendation/routesWithFriends/" + account.getEmail() + "/" + selectedFriendEmail + "/" + formatter.format(currentDay), "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
+                    @Override
+                    public void onResponse(String responseBody) {
+                        try {
+                            System.out.println("ROUTESWITHFRIENDS RESPONSE");
+                            System.out.println("BODY: " + responseBody);
+                            getActivity().runOnUiThread(() -> {
+                                try {
+                                    JSONObject json = new JSONObject(responseBody);
+                                    JSONArray routes = json.getJSONArray("routes");
+                                    System.out.println(routes);
+                                    dayRoutes = new ArrayList<>();
+                                    List<TransitItem> transitItemList = new ArrayList<>();
+                                    List<String> stepsList = new ArrayList<>();
+                                    for (int i = 0; i < routes.length(); i++) {
+                                        JSONObject item = (JSONObject) routes.get(i);
+                                        if (item.has("_id")) {
+                                            String id = item.getString("_id");
+                                            String type = item.getString("_type");
+                                            String leaveTime = item.getString("_leaveTime");
+                                            TransitItem transitItem = new TransitItem(id, type, leaveTime);
+                                            transitItemList.add(transitItem);
+                                        } else {
+                                            JSONArray steps = item.getJSONArray("steps");
+                                            for (int j = 0; j < steps.length(); j++) {
+                                                String element = steps.getString(j);
+                                                stepsList.add(element);
+                                            }
+                                        }
+                                    }
+                                    RouteItem routeItem = new RouteItem(transitItemList, stepsList, "0", "0");
+                                    System.out.println("DAYROUTES WITH FRIEND");
+                                    dayRoutes.add(routeItem);
+                                    routesView = view.findViewById(R.id.routesView);
+                                    routesView.removeAllViewsInLayout();
+                                    TextView friendText = new TextView(getContext());
+                                    friendText.setText("With " + selectedFriend);
+                                    routesView.addView(friendText);
+                                    displayRoutes(view, getContext());
+                                } catch (JSONException e) {
+                                    Toast errorToast = new Toast(getContext());
+                                    errorToast.setText("Error finding a matching route:" + e.getMessage());
+                                    errorToast.show();
+                                    e.printStackTrace();
+                                }
+                            });
+                        } catch (Exception e){
+                            Toast errorToast = new Toast(getContext());
+                            errorToast.setText("Error finding a matching route:" + e.getMessage());
+                            errorToast.show();
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+                        Toast errorToast = new Toast(getContext());
+                        errorToast.setText("Error finding a matching route:" + errorMessage);
+                        errorToast.show();
+                        System.out.println("Error " + errorMessage);
+                    }
+                });
+            });
+
+            // Create and show the AlertDialog
+            AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.show();
+
+        });
+
+
         fetchRoutes(new Date(), new FetchRoutesCallback() {
             @Override
             public void onResponse(RouteItem routeItem) {
@@ -237,6 +355,7 @@ public class RoutesFragment extends Fragment {
                 getActivity().runOnUiThread(() -> {
                     TextView emptyRoutes = new TextView(getContext());
                     emptyRoutes.setText("There are no routes for this day");
+                    transitFriendButton.setEnabled(false);
                     routesView = view.findViewById(R.id.routesView);
                     routesView.removeAllViewsInLayout();
                     routesView.addView(emptyRoutes);
@@ -266,6 +385,7 @@ public class RoutesFragment extends Fragment {
                     getActivity().runOnUiThread(() -> {
                         TextView emptyRoutes = new TextView(getContext());
                         emptyRoutes.setText("There are no routes for this day");
+                        transitFriendButton.setEnabled(false);
                         routesView = view.findViewById(R.id.routesView);
                         routesView.removeAllViewsInLayout();
                         routesView.addView(emptyRoutes);
@@ -298,6 +418,7 @@ public class RoutesFragment extends Fragment {
                     getActivity().runOnUiThread(() -> {
                         TextView emptyRoutes = new TextView(getContext());
                         emptyRoutes.setText("There are no routes for this day");
+                        transitFriendButton.setEnabled(false);
                         routesView = view.findViewById(R.id.routesView);
                         routesView.removeAllViewsInLayout();
                         routesView.addView(emptyRoutes);

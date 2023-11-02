@@ -90,7 +90,6 @@ public class ScheduleFragment extends Fragment {
     private DateFormat formatter;
     private Button getPreviousDay;
     private Button getNextDay;
-    private Button transitFriend;
     private FloatingActionButton addEvent;
 
     @Override
@@ -109,7 +108,6 @@ public class ScheduleFragment extends Fragment {
         currentDayText.setText(formatter.format(currentDay));
         scheduleView = view.findViewById(R.id.scheduleView);
         addEvent = view.findViewById(R.id.floatingActionButton);
-        transitFriend = view.findViewById(R.id.transitFriendButton);
 
         APICaller apiCall = new APICaller();
         GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(

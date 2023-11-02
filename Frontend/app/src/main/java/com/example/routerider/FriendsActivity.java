@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -23,10 +24,18 @@ import java.util.Map;
 
 public class FriendsActivity extends AppCompatActivity {
 
-    private JSONArray friendList;
+    public static JSONArray friendList;
     private JSONArray friendRequestList;
     private LinearLayout friendListDisplay;
     private LinearLayout friendRequestDisplay;
+
+    public static JSONArray getFriendList() {
+        if (friendList != null) {
+            return friendList;
+        } else {
+            return new JSONArray();
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +48,6 @@ public class FriendsActivity extends AppCompatActivity {
         friendListDisplay = findViewById(R.id.friendList);
         friendRequestDisplay = findViewById(R.id.friendRequestList);
         APICaller apiCall = new APICaller();
-
         apiCall.APICall("api/userlist/" + account.getEmail() + "/friends", "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
             @Override
             public void onResponse(final String responseBody) throws JSONException {

@@ -1,8 +1,8 @@
-
-const {MongoClient, ObjectId} = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 const uri = 'mongodb://0.0.0.0:27017'; // Replace with your MongoDB connection string
 const client = new MongoClient(uri);
 
+// ChatGPT usage: Yes
 const createNewSchedule = async (req, res) => {
   try {
     // Extract user data from the request body
@@ -12,7 +12,9 @@ const createNewSchedule = async (req, res) => {
     const collection = client.db('ScheduleDB').collection('schedulelist');
 
     // Check if a user with a specific identifier (e.g., email) already exists
-    const existingSchedule = await collection.findOne({ email: scheduleData.email });
+    const existingSchedule = await collection.findOne({
+      email: scheduleData.email,
+    });
 
     if (existingSchedule) {
       // If a user with the same email exists, return an error message
@@ -28,74 +30,76 @@ const createNewSchedule = async (req, res) => {
       res.set('Content-Length', successMessageLength);
       res.status(201).json({ message: successMessage });
     }
-
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
 
+// ChatGPT usage: Yes
+const getScheduleByEmail = async (req, res) => {
+  try {
+    // Extract the user's email from the request parameters
+    const userEmail = req.params.email;
 
-  const getScheduleByEmail = async (req, res) => {
-    try {
-      // Extract the user's email from the request parameters
-      const userEmail = req.params.email;
-  
-      // Assuming you have already connected to the MongoDB client
-      const collection = client.db('ScheduleDB').collection('schedulelist');
+    // Assuming you have already connected to the MongoDB client
+    const collection = client.db('ScheduleDB').collection('schedulelist');
 
-      console.log(userEmail);
-  
-      // Find the schedule by their email
-      const schedule = await collection.findOne({ email: userEmail });
-  
-      if (schedule) {
-        // User found, send user information as a response
-        res.status(200).json("Schedule found");
-        
-      } else {
-        // User not found
-        res.status(404).json({ error: 'Schedule not found' });
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      res.status(500).json({ error: 'Internal server error' });
+    console.log(userEmail);
+
+    // Find the schedule by their email
+    const schedule = await collection.findOne({ email: userEmail });
+
+    if (schedule) {
+      // User found, send user information as a response
+      res.status(200).json('Schedule found');
+    } else {
+      // User not found
+      res.status(404).json({ error: 'Schedule not found' });
     }
-  };
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
 
-  const updateSchedule = async (req, res) => {
-    try {
-      // Extract the email from the URL parameter
-      const email = req.params.email;
-  
-      // Extract the updated schedule data from the request body
-      const updatedScheduleData = req.body;
-  
-      // Assuming you have already connected to the MongoDB client
-      const collection = client.db('ScheduleDB').collection('schedulelist');
-  
-      // Check if a schedule with the specified email exists
-      const existingSchedule = await collection.findOne({ email });
-  
-      if (!existingSchedule) {
-        // If a schedule with the specified email doesn't exist, return an error message
-        res.status(404).json({ message: 'Schedule not found' });
+// ChatGPT usage: Yes
+const updateSchedule = async (req, res) => {
+  try {
+    // Extract the email from the URL parameter
+    const email = req.params.email;
+
+    // Extract the updated schedule data from the request body
+    const updatedScheduleData = req.body;
+
+    // Assuming you have already connected to the MongoDB client
+    const collection = client.db('ScheduleDB').collection('schedulelist');
+
+    // Check if a schedule with the specified email exists
+    const existingSchedule = await collection.findOne({ email });
+
+    if (!existingSchedule) {
+      // If a schedule with the specified email doesn't exist, return an error message
+      res.status(404).json({ message: 'Schedule not found' });
+    } else {
+      // Update the schedule document in the collection
+      const updateResult = await collection.updateOne(
+        { email },
+        { $set: updatedScheduleData }
+      );
+
+      if (updateResult.modifiedCount > 0) {
+        res.status(200).json({ message: 'Schedule updated successfully' });
       } else {
-        // Update the schedule document in the collection
-        const updateResult = await collection.updateOne({ email }, { $set: updatedScheduleData });
-  
-        if (updateResult.modifiedCount > 0) {
-          res.status(200).json({ message: 'Schedule updated successfully' });
-        } else {
-          res.status(204).json({ message: 'No changes made to the schedule' });
-        }
+        res.status(204).json({ message: 'No changes made to the schedule' });
       }
-    } catch (error) {
-      console.error('Error:', error);
-      res.status(500).json({ error: 'Internal server error' });
     }
-  };
-  
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 /*
   const editEventByID = async (req, res) => {
     try {
@@ -261,50 +265,79 @@ const editEventByID = async (req, res) => {
 };
 */
 
+// ChatGPT usage: Yes
+const addEvent = async (req, res) => {
+  try {
+    const userEmail = req.params.email;
+    const newEvent = req.body; // Assuming the new event data is sent in the request body
 
+    const collection = client.db('ScheduleDB').collection('schedulelist');
+    const schedule = await collection.findOne({ email: userEmail });
 
-
-
-
-  const addEvent = async (req, res) => {
-    try {
-      const userEmail = req.params.email;
-      const newEvent = req.body; // Assuming the new event data is sent in the request body
-  
-      const collection = client.db('ScheduleDB').collection('schedulelist');
-      const schedule = await collection.findOne({ email: userEmail });
-  
-      if (!schedule) {
-        res.status(404).json({ error: 'Schedule not found' });
-        return;
-      }
-  
-      // Function to compare events based on their start times
-      function compareEvents(event1, event2) {
-        return new Date(event1.startTime) - new Date(event2.startTime);
-      }
-  
-      // Add the new event to the events array and sort by start time
-      schedule.events.push(newEvent);
-      schedule.events.sort(compareEvents);
-  
-      const updateResult = await collection.updateOne(
-        { _id: schedule._id },
-        { $set: { events: schedule.events } }
-      );
-  
-      if (updateResult.modifiedCount > 0) {
-        res.status(200).json({ message: 'Event added successfully' });
-      } else {
-        res.status(500).json({ error: 'Failed to add event' });
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      res.status(500).json({ error: 'Internal server error' });
+    if (!schedule) {
+      res.status(404).json({ error: 'Schedule not found' });
+      return;
     }
-  };
-  
-  
+
+    // Validate startTime and endTime
+    const newEventStart = new Date(newEvent.startTime);
+    const newEventEnd = new Date(newEvent.endTime);
+
+    if (isNaN(newEventStart) || isNaN(newEventEnd) || newEventStart >= newEventEnd) {
+      res.status(400).json({ error: 'Invalid startTime or endTime' });
+      return;
+    }
+
+    // Calculate event duration
+    const eventDuration = newEventEnd - newEventStart;
+
+    if (eventDuration <= 0) {
+      res.status(400).json({ error: 'Event duration must be greater than 0' });
+      return;
+    }
+
+    // Check if the new event overlaps with existing events
+    const isOverlap = schedule.events.some((event) => {
+      const eventStart = new Date(event.startTime);
+      const eventEnd = new Date(event.endTime);
+
+      return (
+        (newEventStart >= eventStart && newEventStart < eventEnd) ||
+        (newEventEnd > eventStart && newEventEnd <= eventEnd) ||
+        (newEventStart <= eventStart && newEventEnd >= eventEnd)
+      );
+    });
+
+    if (isOverlap) {
+      res.status(400).json({ error: 'Event overlaps with existing events' });
+      return;
+    }
+
+    // Function to compare events based on their start times
+    function compareEvents(event1, event2) {
+      return new Date(event1.startTime) - new Date(event2.startTime);
+    }
+
+    // Add the new event to the events array and sort by start time
+    schedule.events.push(newEvent);
+    schedule.events.sort(compareEvents);
+
+    const updateResult = await collection.updateOne(
+      { _id: schedule._id },
+      { $set: { events: schedule.events } }
+    );
+
+    if (updateResult.modifiedCount > 0) {
+      res.status(200).json({ message: 'Event added successfully' });
+    } else {
+      res.status(500).json({ error: 'Failed to add event' });
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 /*
   const addEvent = async (req, res) => {
     try {
@@ -338,8 +371,8 @@ const editEventByID = async (req, res) => {
     }
   };
   */
-  
-  /*
+
+/*
   const insertEventAtIndex = async (req, res) => {
     try {
       const userEmail = req.params.email;
@@ -416,10 +449,8 @@ const editEventByID = async (req, res) => {
     }
   };
   */
-  
-  
 
-  /*
+/*
   const editEventByIndex = async (req, res) => {
     try {
       // Extract user's email, event index, and updated event data from the request
@@ -465,7 +496,7 @@ const editEventByID = async (req, res) => {
   };
   */
 
-  /*
+/*
   const editEventName = async (req, res) => {
     try {
       const userEmail = req.params.email;
@@ -579,83 +610,86 @@ const editEventByID = async (req, res) => {
   };
   */
 
+  // ChatGPT usage: Yes
+const editEventGeolocation = async (req, res) => {
+  try {
+    const userEmail = req.params.email;
+    const eventIndex = parseInt(req.params.index);
+    const updatedGeolocation = req.body.geolocation; // Assuming the updated geolocation is sent as an array in the request body
 
-  const editEventGeolocation = async (req, res) => {
-    try {
-      const userEmail = req.params.email;
-      const eventIndex = parseInt(req.params.index);
-      const updatedGeolocation = req.body.geolocation; // Assuming the updated geolocation is sent as an array in the request body
-  
-      const collection = client.db('ScheduleDB').collection('schedulelist');
-      const schedule = await collection.findOne({ email: userEmail });
-  
-      if (!schedule) {
-        res.status(404).json({ error: 'User not found' });
-        return;
-      }
-  
-      if (eventIndex < 0 || eventIndex >= schedule.events.length) {
-        res.status(400).json({ error: 'Invalid event index' });
-        return;
-      }
-  
-      if (Array.isArray(updatedGeolocation) && updatedGeolocation.length === 2) {
-        schedule.events[eventIndex].geolocation = updatedGeolocation;
-  
-        const updateResult = await collection.updateOne(
-          { _id: schedule._id },
-          { $set: { events: schedule.events } }
-        );
-  
-        if (updateResult.modifiedCount > 0) {
-          res.status(200).json({ message: 'Event geolocation updated successfully' });
-        } else {
-          res.status(500).json({ error: 'Failed to update event geolocation' });
-        }
-      } else {
-        res.status(400).json({ error: 'Invalid geolocation format' });
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      res.status(500).json({ error: 'Internal server error' });
-    }
-  };
+    const collection = client.db('ScheduleDB').collection('schedulelist');
+    const schedule = await collection.findOne({ email: userEmail });
 
-  const getCalendarID = async (req, res) => {
-    try {
-      const userEmail = req.params.email;
-      const eventId = req.params.id; // Event ID
-  
-      const collection = client.db('ScheduleDB').collection('schedulelist');
-      const schedule = await collection.findOne({ email: userEmail });
-  
-      if (!schedule) {
-        res.status(404).json({ error: 'Schedule not found' });
-        return;
-      }
-  
-      // Find the event in the user's schedule based on the event ID
-      const event = schedule.events.find(event => event.id === eventId);
-  
-      if (!event) {
-        res.status(404).json({ error: 'Event not found in the schedule' });
-        return;
-      }
-  
-      // Assuming the event has a calendar ID property, you can access it like this
-      const calendarID = event.calendarID;
-  
-      if (calendarID) {
-        res.status(200).json({ calendarID: calendarID });
-      } else {
-        res.status(404).json({ error: 'Calendar ID not found for the event' });
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      res.status(500).json({ error: 'Internal server error' });
+    if (!schedule) {
+      res.status(404).json({ error: 'User not found' });
+      return;
     }
-  };
-  
+
+    if (eventIndex < 0 || eventIndex >= schedule.events.length) {
+      res.status(400).json({ error: 'Invalid event index' });
+      return;
+    }
+
+    if (Array.isArray(updatedGeolocation) && updatedGeolocation.length === 2) {
+      schedule.events[eventIndex].geolocation = updatedGeolocation;
+
+      const updateResult = await collection.updateOne(
+        { _id: schedule._id },
+        { $set: { events: schedule.events } }
+      );
+
+      if (updateResult.modifiedCount > 0) {
+        res
+          .status(200)
+          .json({ message: 'Event geolocation updated successfully' });
+      } else {
+        res.status(500).json({ error: 'Failed to update event geolocation' });
+      }
+    } else {
+      res.status(400).json({ error: 'Invalid geolocation format' });
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// ChatGPT usage: Yes
+const getCalendarID = async (req, res) => {
+  try {
+    const userEmail = req.params.email;
+    const eventId = req.params.id; // Event ID
+
+    const collection = client.db('ScheduleDB').collection('schedulelist');
+    const schedule = await collection.findOne({ email: userEmail });
+
+    if (!schedule) {
+      res.status(404).json({ error: 'Schedule not found' });
+      return;
+    }
+
+    // Find the event in the user's schedule based on the event ID
+    const event = schedule.events.find((event) => event.id === eventId);
+
+    if (!event) {
+      res.status(404).json({ error: 'Event not found in the schedule' });
+      return;
+    }
+
+    // Assuming the event has a calendar ID property, you can access it like this
+    const calendarID = event.calendarID;
+
+    if (calendarID) {
+      res.status(200).json({ calendarID: calendarID });
+    } else {
+      res.status(404).json({ error: 'Calendar ID not found for the event' });
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 /*
   const editEventStartTime = async (req, res) => {
     try {
@@ -733,89 +767,85 @@ const editEventByID = async (req, res) => {
   };
   */
 
-  const deleteEventByID = async (req, res) => {
-    try {
-      const eventId = req.params.id; // Change 'email' to 'id'
-  
-      const collection = client.db('ScheduleDB').collection('schedulelist');
-      const schedule = await collection.findOne({ events: { $elemMatch: { id: eventId } } });
-  
-      if (!schedule) {
-        res.status(404).json({ error: 'Event not found' });
-        return;
-      }
-  
-      const eventIndex = schedule.events.findIndex(event => event.id === eventId);
-  
-      if (eventIndex === -1) {
-        res.status(400).json({ error: 'Event not found in user schedule' });
-        return;
-      }
-  
-      // Remove the event at the specified index
-      schedule.events.splice(eventIndex, 1);
-  
-      const updateResult = await collection.updateOne(
-        { _id: schedule._id },
-        { $set: { events: schedule.events } }
-      );
-  
-      if (updateResult.modifiedCount > 0) {
-        res.status(200).json({ message: 'Event deleted successfully' });
-      } else {
-        res.status(500).json({ error: 'Failed to delete event' });
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      res.status(500).json({ error: 'Internal server error' });
+  // ChatGPT usage: Yes
+const deleteEventByID = async (req, res) => {
+  try {
+    const eventId = req.params.id; // Change 'email' to 'id'
+
+    const collection = client.db('ScheduleDB').collection('schedulelist');
+    const schedule = await collection.findOne({
+      events: { $elemMatch: { id: eventId } },
+    });
+
+    if (!schedule) {
+      res.status(404).json({ error: 'Event not found' });
+      return;
     }
-  };
-  
 
+    const eventIndex = schedule.events.findIndex(
+      (event) => event.id === eventId
+    );
 
-  const deleteSchedule = async (req, res) => {
-    try {
-      const email = req.params.email; // Get the email from the URL parameter
-  
-      // Delete the user based on their email
-      const collection = client.db('ScheduleDB').collection('schedulelist');
-      const result = await collection.deleteOne({ email: email });
-  
+    if (eventIndex === -1) {
+      res.status(400).json({ error: 'Event not found in user schedule' });
+      return;
+    }
+
+    // Remove the event at the specified index
+    schedule.events.splice(eventIndex, 1);
+
+    const updateResult = await collection.updateOne(
+      { _id: schedule._id },
+      { $set: { events: schedule.events } }
+    );
+
+    if (updateResult.modifiedCount > 0) {
+      res.status(200).json({ message: 'Event deleted successfully' });
+    } else {
+      res.status(500).json({ error: 'Failed to delete event' });
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// ChatGPT usage: Yes
+const deleteSchedule = async (req, res) => {
+  try {
+    const email = req.params.email; // Get the email from the URL parameter
+
+    // Delete the user based on their email
+    const collection = client.db('ScheduleDB').collection('schedulelist');
+    const result = await collection.deleteOne({ email: email });
+
     if (result.deletedCount === 1) {
-        res.status(200).json({ message: 'Schedule deleted successfully' });
-      } else {
-        res.status(404).json({ error: 'Schedule not found' });
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      res.status(200).json({ message: 'Schedule deleted successfully' });
+    } else {
+      res.status(404).json({ error: 'Schedule not found' });
     }
-  };
-  
-  
-  
-  module.exports = {
-    createNewSchedule,
-    getScheduleByEmail,
-    //insertEventAtIndex,
-    //editEventName,
-    //editEventAddress,
-    //editEventDate,
-    editEventGeolocation,
-    //editEventStartTime,
-    //editEventEndTime,
-    //deleteEventAtIndex,
-    deleteSchedule,
-    //editEventAtIndex,
-    updateSchedule,
-    deleteEventByID,
-    //editEventByID,
-    addEvent,
-    getCalendarID,
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
 
-
-
-
-
-  };
-  
+module.exports = {
+  createNewSchedule,
+  getScheduleByEmail,
+  //insertEventAtIndex,
+  //editEventName,
+  //editEventAddress,
+  //editEventDate,
+  editEventGeolocation,
+  //editEventStartTime,
+  //editEventEndTime,
+  //deleteEventAtIndex,
+  deleteSchedule,
+  //editEventAtIndex,
+  updateSchedule,
+  deleteEventByID,
+  //editEventByID,
+  addEvent,
+  getCalendarID,
+};

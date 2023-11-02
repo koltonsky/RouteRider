@@ -1,7 +1,9 @@
 package com.example.routerider.fragments;
 
+import static android.app.PendingIntent.getActivity;
 import static androidx.core.content.ContextCompat.startActivity;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -39,8 +41,10 @@ import android.widget.Toast;
 import com.example.routerider.APICaller;
 import com.example.routerider.HelperFunc;
 import com.example.routerider.R;
+import com.example.routerider.RouteItem;
 import com.example.routerider.ScheduleItem;
 import com.example.routerider.TimeGapRecommendation;
+import com.example.routerider.TransitItem;
 import com.example.routerider.User;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -122,7 +126,7 @@ public class ScheduleFragment extends Fragment {
             throw new RuntimeException(e);
         }
 
-        calendarAsyncTask = (CalendarAsyncTask) new CalendarAsyncTask(this.getContext(), view, account).execute(service);
+        calendarAsyncTask = (CalendarAsyncTask) new CalendarAsyncTask(this.getActivity(), this.getContext(), view, account).execute(service);
 
 
         getPreviousDay.setOnClickListener(v -> {
@@ -145,7 +149,7 @@ public class ScheduleFragment extends Fragment {
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(requireContext());
             alertDialogBuilder.setTitle("Add Event");
 
-// Inflate the custom view for the dialog
+            // Inflate the custom view for the dialog
             LayoutInflater dialogInflater = LayoutInflater.from(requireContext());
             View dialogView = dialogInflater.inflate(R.layout.add_event_dialog, null);
             alertDialogBuilder.setView(dialogView);
@@ -192,6 +196,7 @@ public class ScheduleFragment extends Fragment {
                     apiCall.APICall("api/schedulelist/" + account.getEmail(), jsonUpdateEvent, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
                         @Override
                         public void onResponse(String responseBody) {
+                            System.out.println("new event added to db");
                             System.out.println("BODY: " + responseBody);
 //                                eventName.setText(newEvent.getTitle());
 //                                eventLocation.setText(newEvent.getLocation());
@@ -275,6 +280,7 @@ public class ScheduleFragment extends Fragment {
         }
     }
 
+
     private static boolean isTimeValid(String time) {
         String timePattern = "([01]\\d|2[0-3]):[0-5]\\d";
         return time.matches(timePattern);
@@ -307,9 +313,11 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
     private Calendar service;
 
     private Context scheduleContext;
+    private Activity scheduleActivity;
     private View scheduleView;
-    CalendarAsyncTask(Context context, View view,
+    CalendarAsyncTask(Activity activity, Context context, View view,
                       GoogleSignInAccount account){
+        this.scheduleActivity = activity;
         this.scheduleContext = context;
         this.scheduleView = view;
         this.account = account;
@@ -405,11 +413,13 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
             }
 
             Map<String, Object> test = new HashMap<>();
-            test.put("email", "koltonluu@gmail.com");
+            test.put("email", account.getEmail());
             test.put("events", eventList);
             String jsonSchedule = new Gson().toJson(test);
 
             System.out.println(jsonSchedule);
+            System.out.println("avbout to get schedule");
+
 
             apiCall.APICall("api/schedulelist/" + account.getEmail(), "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
                 @Override
@@ -447,6 +457,21 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
                 @Override
                 public void onError(String errorMessage) {
                     System.out.println("Error " + errorMessage);
+                    System.out.println(errorMessage.split(",")[0]);
+                    if( (errorMessage.split(",")[0]).equals("Error: 404")){
+                        System.out.println("schedule not found, creating schedule using Google Calendar data");
+                        apiCall.APICall("api/schedulelist/", jsonSchedule, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
+                            @Override
+                            public void onResponse(String responseBodyPost) {
+                                System.out.println("Created schedule: " + responseBodyPost);
+                            }
+
+                            @Override
+                            public void onError(String errorMessage) {
+                                System.out.println("Error: " + errorMessage);
+                            }
+                        });
+                    }
                 }
             });
         } catch (IOException e) {
@@ -488,21 +513,7 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
         }
 
         LayoutInflater inflater = LayoutInflater.from(scheduleContext);
-//        for (ScheduleItem item: dayList) {
-//            eventListView = scheduleView.findViewById(R.id.scheduleView);
-//            View view  = inflater.inflate(R.layout.view_event, eventListView, false);
-//            // set item content in view
-//            TextView eventName = view.findViewById(R.id.eventName);
-//            eventName.setText(item.getTitle());
-//            TextView eventLocation = view.findViewById(R.id.eventLocation);
-//            eventLocation.setText(item.getLocation());
-//            TextView startTime = view.findViewById(R.id.startTime);
-//            startTime.setText(item.getStartTime().substring(11,16));
-//            TextView endTime = view.findViewById(R.id.endTime);
-//            endTime.setText(item.getEndTime().substring(24));
-//            System.out.println(item);
-//            eventListView.addView(view);
-//        }
+
         SimpleDateFormat fullDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
 
@@ -540,46 +551,88 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
                         CardView cardView = timeGapView.findViewById(R.id.base_cardview);
                         Button viewRecommendationsButton = timeGapView.findViewById(R.id.viewRecommendationsButton);
                         viewRecommendationsButton.setOnClickListener(v -> {
-                            ArrayList<TimeGapRecommendation> recs = new ArrayList<>();
-                            for (int i = 0; i<5; i++){
-                                TimeGapRecommendation rec1 = new TimeGapRecommendation("cafe", "Starbucks", "123 Main St H2Z 0D4 Vancouver BC Canada");
-                                TimeGapRecommendation rec2 = new TimeGapRecommendation("library", "Irving K Barber Library", "123 Main St H2Z 0D4 Vancouver BC Canada");
-                                TimeGapRecommendation rec3 = new TimeGapRecommendation("restaurant", "Cactus Club Cafe", "123 Main St H2Z 0D4 Vancouver BC Canada");
-                                recs.add(rec1);
-                                recs.add(rec2);
-                                recs.add(rec3);
-                            }
-                            for (TimeGapRecommendation rec: recs) {
-                                View timeGapRecView;
-                                if (rec.getType() == "cafe") {
-                                    timeGapRecView = inflater.inflate(R.layout.cafe_chip, hiddenView, false);
-                                } else if (rec.getType() == "library") {
-                                    timeGapRecView = inflater.inflate(R.layout.library_chip, hiddenView, false);
+//                            for (int i = 0; i<5; i++){
+//                                TimeGapRecommendation rec1 = new TimeGapRecommendation("cafe", "Starbucks", "123 Main St H2Z 0D4 Vancouver BC Canada");
+//                                TimeGapRecommendation rec2 = new TimeGapRecommendation("library", "Irving K Barber Library", "123 Main St H2Z 0D4 Vancouver BC Canada");
+//                                TimeGapRecommendation rec3 = new TimeGapRecommendation("restaurant", "Cactus Club Cafe", "123 Main St H2Z 0D4 Vancouver BC Canada");
+//                                recs.add(rec1);
+//                                recs.add(rec2);
+//                                recs.add(rec3);
+//                            }
 
-                                } else {
-                                    timeGapRecView = inflater.inflate(R.layout.restaurant_chip, hiddenView, false);
-                                }
-                                TextView recNameText = timeGapRecView.findViewById(R.id.recName);
-                                recNameText.setText(rec.getName());
-                                TextView recAddressText = timeGapRecView.findViewById(R.id.recAddress);
-                                recAddressText.setText(rec.getAddress());
-                                ImageButton recMapsButton = timeGapRecView.findViewById(R.id.mapsButton);
-                                recMapsButton.setOnClickListener(v2 -> {
-                                    Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
-                                            Uri.parse("google.navigation:q="+ rec.getAddress()));
-                                    startActivity(scheduleContext,intent,null);
-                                });
-                                hiddenView.addView(timeGapRecView);
-                            }
+
                             if (hiddenView.getVisibility() == View.VISIBLE) {
                                 TransitionManager.beginDelayedTransition(cardView, new AutoTransition());
                                 hiddenView.setVisibility(View.GONE);
                                 viewRecommendationsButton.setText("Show Recommendations");
                             }
                             else {
-                                TransitionManager.beginDelayedTransition(cardView, new AutoTransition());
-                                hiddenView.setVisibility(View.VISIBLE);
-                                viewRecommendationsButton.setText("Hide Recommendations");
+                                ArrayList<TimeGapRecommendation> recs = new ArrayList<>();
+                                hiddenView.removeAllViewsInLayout();
+                                APICaller apiCall = new APICaller();
+                                apiCall.APICall("api/recommendation/timegap/" + item.getLocation() + "/" + dayList.get(dayList.indexOf(item) - 1).getLocation(), "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
+
+                                    @Override
+                                    public void onResponse(String responseBody) throws JSONException {
+                                        scheduleActivity.runOnUiThread(() -> {
+                                            System.out.println("BODY: " + responseBody);
+                                            try {
+                                                JSONObject json = new JSONObject(responseBody);
+                                                JSONArray recOutput = json.getJSONArray("suggestions");
+                                                System.out.println(recOutput);
+                                                for (int i = 0; i < recOutput.length(); i++) {
+                                                    JSONObject item = (JSONObject) recOutput.get(i);
+                                                    System.out.println(item);
+                                                    JSONArray types = item.getJSONArray("types");
+                                                    String type = "";
+                                                    for (int j = 0; j < types.length(); j++) {
+                                                        String element = types.getString(j);
+                                                        if (element.equals("restaurant") || element.equals("cafe") || element.equals("library")) {
+                                                            type = element;
+                                                            break; // You can exit the loop early if you find a match
+                                                        }
+                                                    }
+
+                                                    String name = item.getString("name");
+                                                    String address = item.getString("vicinity");
+                                                    TimeGapRecommendation timeGapRecommendation = new TimeGapRecommendation(type, name, address);
+                                                    recs.add(timeGapRecommendation);
+                                                }
+                                                for (TimeGapRecommendation rec : recs) {
+                                                    View timeGapRecView;
+                                                    if (rec.getType() == "cafe") {
+                                                        timeGapRecView = inflater.inflate(R.layout.cafe_chip, hiddenView, false);
+                                                    } else if (rec.getType() == "library") {
+                                                        timeGapRecView = inflater.inflate(R.layout.library_chip, hiddenView, false);
+                                                    } else {
+                                                        timeGapRecView = inflater.inflate(R.layout.restaurant_chip, hiddenView, false);
+                                                    }
+                                                    TextView recNameText = timeGapRecView.findViewById(R.id.recName);
+                                                    recNameText.setText(rec.getName());
+                                                    TextView recAddressText = timeGapRecView.findViewById(R.id.recAddress);
+                                                    recAddressText.setText(rec.getAddress());
+                                                    ImageButton recMapsButton = timeGapRecView.findViewById(R.id.mapsButton);
+                                                    recMapsButton.setOnClickListener(v2 -> {
+                                                        Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
+                                                                Uri.parse("google.navigation:q=" + rec.getAddress()));
+                                                        startActivity(scheduleContext, intent, null);
+                                                    });
+                                                    hiddenView.addView(timeGapRecView);
+                                                }
+                                                TransitionManager.beginDelayedTransition(cardView, new AutoTransition());
+                                                hiddenView.setVisibility(View.VISIBLE);
+                                                viewRecommendationsButton.setText("Hide Recommendations");
+                                            } catch (JSONException e) {
+                                                e.printStackTrace();
+                                            }
+                                        });
+                                    }
+
+                                    @Override
+                                    public void onError(String errorMessage) {
+                                        System.out.println("Error " + errorMessage);
+                                    }
+                                });
                             }
                         });
 

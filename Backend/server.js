@@ -344,19 +344,8 @@ const sslServer = https.createServer({
 connectToDatabase();
 sslServer.listen(port, () => console.log('Secure server :) on port ' + port))
 
-
-/**
- * TODO: display route map on frontend
- * 
- * time to arrive 
- * 
- * origin
- * destination
- */
-
-
 var dummy_schedule = {
-  email: 'koltonluu@gmail.com',
+  email: 'leonguo@gmail.com',
   events: [
     {
       address: 'UBC MacLeod, Room 4006',
@@ -383,14 +372,14 @@ var dummy_schedule = {
       eventName: 'Club Meeting',
       geolocation: { latitude: 0, longitude: 0 },
       id: '_64p36d1h6osjgchm6cp3gchk68r62oj3cgpj4d1m64tr_20231101T223000Z',
-      startTime: '2023-11-03T15:30:00.000-07:00'
+      startTime: '2023-11-03T14:30:00.000-07:00'
     }
   ]
 }
 var dummy_user = {
-  email: "koltonluu@gmail.com",
-  name: "John Doe",
-  address: "5870 Rumble Street, Burnaby, BC",
+  email: "leonguo@gmail.com",
+  name: "leon doe",
+  address: "7746 Berkley Street, Burnaby, BC",
   friends: [
     "friend1@example.com",
     "friend2@example.com"
@@ -466,6 +455,7 @@ async function initRoute(req, res) {
     /* fields for object to be returned to frontend */
     var id = '';
     var leaveTime = '';
+    var leaveTimeNum = '';
     var type = '';
     var more = {};
     var curStep = {}; // maybe properly define this object later
@@ -534,11 +524,11 @@ async function initRoute(req, res) {
     return returnList;
   });
 }
-const xdd = {
-  body: {
-    email: "koltonluu@gmail.com"
-  }
-}
+// const xdd = {
+//   body: {
+//     email: "koltonluu@gmail.com"
+//   }
+// }
 // initReminders(xdd);
 /**
  * Pretty much same logic as initRoute, but we only care about time to leave for the first step of each trip (when to leave the house)
@@ -643,50 +633,45 @@ async function initReminders(req) {
     console.log("planned trips for whole schedule");
   });
 
-  const scheduledReminders = {
-    email: req.body.email,
-    date: date,
-    reminders: []
-  }
+  var cronTasks = [];
   for (var i = 0; i < returnList.length; i++) {
-    if (returnList[i].firstBus.type == "Bus") { // RTTI API doesnt support skytrains, so we only need to check for buses
-      // check for existing scheduled reminders before setting new ones
-      existingReminders = await client.db("ReminderDB").collection("reminderlist").findOne({email: req.body.email, date: returnList[i].date}); 
-      if (existingReminders != null) {
-        console.log("removing reminders for " + existingReminders.date);
-        existingReminders.reminders.forEach((existingReminder) => {
-          existingReminder.stop(); // DEBUG: this line is prob the issue, might need to use chatgpt implementation involving checking for an 'active' field
-        });
-      }
+    if (returnList[i].firstBus.type == "Bus") { // make this cleaner by changing case statement to only look for buses (RTTI API doesnt support skytrains)
       for(var k = 1; k < 6; k++) {
-        reminderTimek = isoToCron(returnList[i].leaveTime_iso, k);
-        scheduledReminders.reminders[k - 1] = cron.schedule(reminderTimek, () => {
+        cronTimek = isoToCron(returnList[i].leaveTime_iso, k);
+        cronTasks[k - 1] = cron.schedule(cronTimek, () => {
           checkLiveTransitTime(req.body.email, returnList[i].firstBus.id, returnList[i].firstBus.stopNumber, returnList[i].firstBus.leaveTime).then((ret) => {
             if (ret) {
-              scheduledReminders.reminders.forEach(scheduledReminder => {
-                scheduledReminder.stop();
+              cronTasks.forEach(task => {
+                task.stop();
               });
             }
           });
         });
       }
-      client.db("ReminderDB").collection("reminderlist").insertOne(scheduledReminders).then((result) => {    
-        console.log("planned reminders for " + scheduledReminders.date);
-      });
     }
   }
 }
-
+// const xdding = {  
+//   body: {
+//     userEmail: "leonguo@gmail.com",
+//     friendEmail: "koltonluu@gmail.com",
+//     date: "2023-11-03"
+//   }
+// }
+// initRouteWithFriends(xdding);
 async function initRouteWithFriends(req) {
   var userEmail = req.body.userEmail;
   var friendEmail = req.body.friendEmail;
   var date = req.body.date;
 
-  var user = client.db('UserDB').collection('userlist').findOne({email: userEmail});
-  var friend = client.db('UserDB').collection('userlist').findOne({email: friendEmail});
+  var user = await client.db('UserDB').collection('userlist').findOne({email: userEmail});
+  if (user == null) {
+    console.log("initRouteWithFriends(): no matching email exists in user database");
+  }
+  var friend = await client.db('UserDB').collection('userlist').findOne({email: friendEmail});
 
-  var schedule_user = client.db('ScheduleDB').collection('schedulelist').findOne({email: userEmail});
-  var schedule_friend = client.db('ScheduleDB').collection('schedulelist').findOne({email: friendEmail});
+  var schedule_user = await client.db('ScheduleDB').collection('schedulelist').findOne({email: userEmail});
+  var schedule_friend = await client.db('ScheduleDB').collection('schedulelist').findOne({email: friendEmail});
 
   // determine when to arrive to campus
   var timeOfFirstEvent_user = "";
@@ -724,6 +709,7 @@ async function initRouteWithFriends(req) {
     var timeOfFirstEvent = timeOfFirstEvent_friend;
     var locationOfFirstEvent = locationOfFirstEvent_friend;
   }
+  console.log("initRouteWithFriends(): timeOfFirstEvent: " + timeOfFirstEvent);
   
   // determine whether to take 99 B-Line or R4 based on address. unused for now
   var addressCoords_user = getLatLong(locationOfOrigin_user);
@@ -734,83 +720,103 @@ async function initRouteWithFriends(req) {
   var distToJoyce_friend = calcDist(addressCoords_friend[0], addressCoords_friend[1], 49.2412, -123.0298);
   if ((distToCommercial_friend + distToCommercial_user) / 2 < (distToJoyce_friend + distToJoyce_user) / 2) {
     // take 99 B-Line
-    var recommendedBus = "99";
+    var meetingPoint = "Commercial Broadway Station";
   }
   else {
-    var recommendedBus = "R4";
+    var meetingPoint = "Joyce-Collingwood Station";
   }
+  console.log("initRouteWithFriends(): meetingPoint: " + meetingPoint);
 
-  planTransitTrip(locationOfOrigin_user, locationOfFirstEvent, new Date(timeOfFirstEvent), recommendedBus).then((trip) => {
-    console.log("initRoute(): returned trip: " + trip + " " + trip.routes[0].legs[0].steps[0].travel_mode);
-    /* fields for object to be returned to frontend */
-    var id = '';
-    var leaveTime = '';
-    var type = '';
-    var more = {};
-    var curStep = {}; // maybe properly define this object later
-    var returnList = [];
+  planTransitTrip(meetingPoint, locationOfFirstEvent, new Date(timeOfFirstEvent), 'none').then((trip) => {
+    var departureTimeFromStation = trip.routes[0].legs[0].departure_time.text;
+    var departureTimeFromStation_iso = combineDateAndTime(date, departureTimeFromStation);
+    console.log("initRouteWithFriends(): departureTimeFromStation: " + departureTimeFromStation_iso);
 
-    more.distance = trip.routes[0].legs[0].distance.text;
-    more.duration = trip.routes[0].legs[0].duration.text;
-    more.arrival_time = trip.routes[0].legs[0].arrival_time.text;
-    more.departure_time = trip.routes[0].legs[0].departure_time.text;
-    more.steps = [];
+    var busId = trip.routes[0].legs[0].steps[1].transit_details.line.short_name;
+    var busLeaveTime = trip.routes[0].legs[0].steps[1].transit_details.departure_time.text;  
+    var busLeaveTimeNum = trip.routes[0].legs[0].steps[1].transit_details.departure_time.value;
+    var arrive_time_ubc = trip.routes[0].legs[0].arrival_time.text;
+    var curStep1 = {_id: "Walk", _leaveTime: trip.routes[0].legs[0].steps[0].duration.text, _leaveTimeNum: trip.routes[0].legs[0].steps[0].duration.value, _type: "Walk"};
+    var curStep2 = {_id: busId, _leaveTime: busLeaveTime, _leaveTimeNum: busLeaveTimeNum, _type: "Bus"};
 
-    trip.routes[0].legs[0].steps.forEach((step, stepIndex) => {
-      travelMode = step.travel_mode;
-
-      if (travelMode == "TRANSIT") {
-        switch(step.transit_details.line.vehicle.name) {
-          case("Bus"):
-            type = "Bus";
-            id = step.transit_details.line.short_name;
-            leaveTime = step.transit_details.departure_time.text;  
-            leaveTimeNum = step.transit_details.departure_time.value;
-            break;
-          case("Subway"):
-            type = "SkyTrain";
-            id = step.transit_details.line.name;
-            leaveTime = step.transit_details.departure_time.text; 
-            leaveTimeNum = step.transit_details.departure_time.value;
-            break;
-          default:
-            type = "default";
-            id = "default";
-            break;
+    planTransitTrip(locationOfOrigin_user, meetingPoint, new Date(departureTimeFromStation_iso)).then((trip) => {
+      console.log("initRoute(): returned trip: " + trip + " " + trip.routes[0].legs[0].steps[0].travel_mode);
+      /* fields for object to be returned to frontend */
+      var id = '';
+      var leaveTime = '';
+      var leaveTimeNum = '';
+      var type = '';
+      var more = {};
+      var curStep = {}; // maybe properly define this object later
+      var returnList = [];
+  
+      more.distance = trip.routes[0].legs[0].distance.text;
+      more.duration = trip.routes[0].legs[0].duration.text;
+      more.arrival_time = arrive_time_ubc;
+      more.departure_time = trip.routes[0].legs[0].departure_time.text;
+      more.steps = [];
+  
+      trip.routes[0].legs[0].steps.forEach((step, stepIndex) => {
+        travelMode = step.travel_mode;
+  
+        if (travelMode == "TRANSIT") {
+          switch(step.transit_details.line.vehicle.name) {
+            case("Bus"):
+              type = "Bus";
+              id = step.transit_details.line.short_name;
+              leaveTime = step.transit_details.departure_time.text;  
+              leaveTimeNum = step.transit_details.departure_time.value;
+              break;
+            case("Subway"):
+              type = "SkyTrain";
+              id = step.transit_details.line.name;
+              leaveTime = step.transit_details.departure_time.text; 
+              leaveTimeNum = step.transit_details.departure_time.value;
+              break;
+            default:
+              type = "default";
+              id = "default";
+              break;
+          }
         }
+        else {
+          type = "Walk";
+          id = "Walk";
+          leaveTime = step.duration.text; 
+          leaveTimeNum = step.duration.value;
+        }
+        
+        more.steps.push(step.html_instructions);
+        console.log("initRoute(): adding curStep to returnList " + id + " | " + leaveTime + " | " + type);
+        curStep = {_id: id, _leaveTime: leaveTime, _leaveTimeNum: leaveTimeNum, _type: type};
+        returnList.push(curStep);
+      });
+      returnList.push(curStep1);
+      returnList.push(curStep2);
+      // returnList.forEach(element => {
+      //   console.log("initRouteWithFriends(): returnList: " + element._id + " " + element._leaveTime + " " + element._type);
+      // });
+      returnList.push(more);
+  
+      /* Directions API doesn't include leaveTime in "WALKING" steps, so we need to calculate ourselves */
+      for (var i = 0; i < returnList.length - 1; i++) {
+        if (i == 0 && returnList[i]._type == "Walk") { 
+          returnList[i]._leaveTime = returnList[returnList.length - 1].departure_time;
+          returnList[i]._leaveTimeNum = timeToTimestamp(returnList[returnList.length - 1].departure_time);
+        }
+        else if ((i == returnList.length - 2) && returnList[i]._type == "Walk") { 
+          returnList[i]._leaveTime = returnList[returnList.length - 1].arrival_time;
+          returnList[i]._leaveTimeNum = timeToTimestamp(returnList[returnList.length - 2].arrival_time);
+        }
+        else if (returnList[i]._type == "Walk") { // assumes 'type' for next array entry is either "Bus" or "SkyTrain"
+          returnList[i]._leaveTime = timestampToTime(returnList[i + 1]._leaveTimeNum - returnList[i]._leaveTimeNum);
+          returnList[i]._leaveTimeNum = returnList[i + 1]._leaveTimeNum - returnList[i]._leaveTimeNum;
+        }
+        console.log("updated leavetime: " + returnList[i]._leaveTime);
       }
-      else {
-        type = "Walk";
-        id = "Walk";
-        leaveTime = step.duration.text; 
-        leaveTimeNum = step.duration.value;
-      }
-      
-      more.steps.push(step.html_instructions);
-      console.log("initRoute(): adding curStep to returnList " + id + " | " + leaveTime + " | " + type);
-      curStep = {_id: id, _leaveTime: leaveTime, _leaveTimeNum: leaveTimeNum, _type: type};
-      returnList.push(curStep);
+    }).catch(error => {
+      console.log(error);
     });
-    returnList.push(more);
-
-    /* Directions API doesn't include leaveTime in "WALKING" steps, so we need to calculate ourselves */
-    for (var i = 0; i < returnList.length - 1; i++) {
-      if (i == 0 && returnList[i]._type == "Walk") { 
-        returnList[i]._leaveTime = returnList[returnList.length - 1].departure_time;
-        returnList[i]._leaveTimeNum = timeToTimestamp(returnList[returnList.length - 1].departure_time);
-      }
-      else if ((i == returnList.length - 2) && returnList[i]._type == "Walk") { 
-        returnList[i]._leaveTime = returnList[returnList.length - 1].arrival_time;
-        returnList[i]._leaveTimeNum = timeToTimestamp(returnList[returnList.length - 2].arrival_time);
-      }
-      else if (returnList[i]._type == "Walk") { // assumes 'type' for next array entry is either "Bus" or "SkyTrain"
-        returnList[i]._leaveTime = timestampToTime(returnList[i + 1]._leaveTimeNum - returnList[i]._leaveTimeNum);
-        returnList[i]._leaveTimeNum = returnList[i + 1]._leaveTimeNum - returnList[i]._leaveTimeNum;
-      }
-      console.log("updated leavetime: " + returnList[i]._leaveTime);
-    }
-  }).catch(error => {
-    console.log(error);
   });
 }
 
@@ -897,33 +903,19 @@ async function getNearestBuses(address) {
   });
 }
 
-async function planTransitTrip(origin, destination, arriveTime, recommendedBus) {
+async function planTransitTrip(origin, destination, arriveTime) {
   return new Promise((resolve, reject) => {
     const apiUrl = 'https://maps.googleapis.com/maps/api/directions/json';
     const apiKey = 'AIzaSyBVsUyKxBvRjE0XdooMuoDrpAfu1KO_2mM';
 
-    if (recommendedBus == 'none') {
-      const params = new URLSearchParams({
-        origin: origin,
-        destination: destination,
-        mode: 'transit',
-        arrival_time: Math.floor(arriveTime.getTime() / 1000),
-        key: apiKey,
-      });
-    }
-    else {
-      const params = new URLSearchParams({
-        origin: origin,
-        destination: destination,
-        mode: 'transit',
-        arrival_time: Math.floor(arriveTime.getTime() / 1000),
-        key: apiKey,
-        transit_mode: 'bus',
-        transit_route: recommendedBus
-      });
-    }
-
-  
+    const params = new URLSearchParams({
+      origin: origin,
+      destination: destination,
+      mode: 'transit',
+      arrival_time: Math.floor(arriveTime.getTime() / 1000),
+      key: apiKey,
+    });
+    
     const url = `${apiUrl}?${params.toString()}`;
 
     const request = https.get(url, (response) => {

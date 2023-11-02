@@ -866,7 +866,7 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
   console.log("initRouteWithFriends(): meetingPoint: " + meetingPoint);
 
   return new Promise((resolve, reject) => {
-    planTransitTrip(meetingPoint, locationOfFirstEvent, new Date(timeOfFirstEvent), 'none').then((trip) => {
+    planTransitTrip(meetingPoint, locationOfFirstEvent, new Date(timeOfFirstEvent)).then((trip) => {
       var departureTimeFromStation = trip.routes[0].legs[0].departure_time.text;
       var departureTimeFromStation_iso = combineDateAndTime(date, departureTimeFromStation);
       console.log("initRouteWithFriends(): departureTimeFromStation: " + departureTimeFromStation_iso);

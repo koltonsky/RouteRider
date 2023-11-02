@@ -9,6 +9,7 @@ import android.os.Bundle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +22,7 @@ import com.example.routerider.APICaller;
 import com.example.routerider.FriendsActivity;
 import com.example.routerider.HomeActivity;
 import com.example.routerider.PreferencesActivity;
+import com.example.routerider.PushNotificationService;
 import com.example.routerider.R;
 import com.example.routerider.User;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;

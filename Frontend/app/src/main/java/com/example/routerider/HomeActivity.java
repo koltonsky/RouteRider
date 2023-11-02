@@ -101,11 +101,30 @@ public class HomeActivity extends AppCompatActivity {
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && task.getResult() != null) {
                         String token = task.getResult();
+                        Log.d("NOTIFICATION TAG", "SUCCESS: " + token);
                         pushNotificationService.sendRegistrationToServer(token);
                     } else {
                         // Handle the case where token retrieval fails
+                        Log.d("NOTIFICATION TAG", "FAILED");
                     }
                 });
+
+        GoogleSignInAccount account = User.getCurrentAccount();
+        Map<String, Object> requestMap = new HashMap<>();
+        requestMap.put("email", account.getEmail());
+        String requestJson = new Gson().toJson(requestMap);
+        APICaller apiCall = new APICaller();
+        apiCall.APICall("api/initReminders", requestJson, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
+            @Override
+            public void onResponse(String responseBody) {
+                System.out.println("BODY: " + responseBody);
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                System.out.println("Error: " + errorMessage);
+            }
+        });
 
         // Set up the ViewPager with the sections adapter.
         tabLayout = findViewById(R.id.tab_layout);

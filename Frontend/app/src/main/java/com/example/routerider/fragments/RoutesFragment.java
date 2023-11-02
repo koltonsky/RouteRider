@@ -2,6 +2,9 @@ package com.example.routerider.fragments;
 
 import static androidx.core.content.ContextCompat.startActivity;
 
+import static com.example.routerider.HomeActivity.dayRoutes;
+import static com.example.routerider.HomeActivity.fetchRoutes;
+
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -23,7 +26,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.routerider.APICaller;
+import com.example.routerider.FetchRoutesCallback;
 import com.example.routerider.HelperFunc;
+import com.example.routerider.HomeActivity;
 import com.example.routerider.R;
 import com.example.routerider.RouteItem;
 import com.example.routerider.ScheduleItem;
@@ -43,24 +48,10 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link RoutesFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+
 public class RoutesFragment extends Fragment {
-
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
     private Date currentDay;
     private List<RouteItem> dayRoutes;
-
     private LinearLayout routesView;
     private Button getPreviousDay;
     private Button getNextDay;
@@ -71,99 +62,82 @@ public class RoutesFragment extends Fragment {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment MapFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static RoutesFragment newInstance(String param1, String param2) {
-        RoutesFragment fragment = new RoutesFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    private void fetchRoutes(View view, Date day) {
-        GoogleSignInAccount account = User.getCurrentAccount();
-        APICaller apiCall = new APICaller();
-        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-
-//        // Create a Handler to implement the timeout
-//        Handler handler = new Handler();
+//    private void fetchRoutes(View view, Date day) {
+//        GoogleSignInAccount account = User.getCurrentAccount();
+//        APICaller apiCall = new APICaller();
+//        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 //
-//        // Define a timeout duration in milliseconds (2 seconds)
-//        int timeoutDuration = 500;
+////        // Create a Handler to implement the timeout
+////        Handler handler = new Handler();
+////
+////        // Define a timeout duration in milliseconds (2 seconds)
+////        int timeoutDuration = 500;
+////
+////        // Start a timer when you make the API call
+////        handler.postDelayed(() -> {
+////            // This code will run after the timeout duration (2 seconds)
+////            // You can cancel the API call and handle the timeout here
+////            // apiCall.wait(); // Assuming there is a method to cancel the API call
+////            displayRoutes(view,getContext());
+////            // Handle the timeout, e.g., show an error message or perform any other action
+////            // For example, you can display a Toast message:
+////            getActivity().runOnUiThread(() -> {
+////                Toast.makeText(getContext(), "API call timed out", Toast.LENGTH_SHORT).show();
+////            });
+////        }, timeoutDuration);
 //
-//        // Start a timer when you make the API call
-//        handler.postDelayed(() -> {
-//            // This code will run after the timeout duration (2 seconds)
-//            // You can cancel the API call and handle the timeout here
-//            // apiCall.wait(); // Assuming there is a method to cancel the API call
-//            displayRoutes(view,getContext());
-//            // Handle the timeout, e.g., show an error message or perform any other action
-//            // For example, you can display a Toast message:
-//            getActivity().runOnUiThread(() -> {
-//                Toast.makeText(getContext(), "API call timed out", Toast.LENGTH_SHORT).show();
-//            });
-//        }, timeoutDuration);
-
-        apiCall.APICall("api/recommendation/routes/" + account.getEmail() + "/" + formatter.format(day), "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
-            @Override
-            public void onResponse(final String responseBody) {
-                // handler.removeCallbacksAndMessages(null);
-                getActivity().runOnUiThread(() -> {
-                    System.out.println("BODY: " + responseBody);
-                    try {
-                        JSONObject json = new JSONObject(responseBody);
-                        JSONArray routes =  json.getJSONArray("routes");
-                        System.out.println(routes);
-                        dayRoutes = new ArrayList<>();
-                        List<TransitItem> transitItemList = new ArrayList<>();
-                        List<String> stepsList = new ArrayList<>();
-                        for (int i = 0; i < routes.length(); i++) {
-                            JSONObject item = (JSONObject) routes.get(i);
-                            if ( item.has("_id")) {
-                                String id = item.getString("_id");
-                                String type = item.getString("_type");
-                                String leaveTime = item.getString("_leaveTime");
-                                TransitItem transitItem = new TransitItem(id, type, leaveTime);
-                                transitItemList.add(transitItem);
-                            } else {
-                                JSONArray steps = item.getJSONArray("steps");
-                                for (int j = 0; j < steps.length(); j++) {
-                                    String element = steps.getString(j);
-                                    stepsList.add(element);
-                                }
-                            }
-                        }
-                        RouteItem routeItem = new RouteItem(transitItemList, stepsList, "0", "0");
-                        dayRoutes.add(routeItem);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                });
-            }
-
-            @Override
-            public void onError(String errorMessage) {
-                System.out.println("Error " + errorMessage);
-            }
-        });
-    }
+//        apiCall.APICall("api/recommendation/routes/" + account.getEmail() + "/" + formatter.format(day), "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
+//            @Override
+//            public void onResponse(final String responseBody) {
+//                // handler.removeCallbacksAndMessages(null);
+//                getActivity().runOnUiThread(() -> {
+//                    System.out.println("BODY: " + responseBody);
+//                    try {
+//                        JSONObject json = new JSONObject(responseBody);
+//                        JSONArray routes =  json.getJSONArray("routes");
+//                        System.out.println(routes);
+//                        dayRoutes = new ArrayList<>();
+//                        List<TransitItem> transitItemList = new ArrayList<>();
+//                        List<String> stepsList = new ArrayList<>();
+//                        for (int i = 0; i < routes.length(); i++) {
+//                            JSONObject item = (JSONObject) routes.get(i);
+//                            if ( item.has("_id")) {
+//                                String id = item.getString("_id");
+//                                String type = item.getString("_type");
+//                                String leaveTime = item.getString("_leaveTime");
+//                                TransitItem transitItem = new TransitItem(id, type, leaveTime);
+//                                transitItemList.add(transitItem);
+//                            } else {
+//                                JSONArray steps = item.getJSONArray("steps");
+//                                for (int j = 0; j < steps.length(); j++) {
+//                                    String element = steps.getString(j);
+//                                    stepsList.add(element);
+//                                }
+//                            }
+//                        }
+//                        RouteItem routeItem = new RouteItem(transitItemList, stepsList, "0", "0");
+//                        dayRoutes.add(routeItem);
+//                    } catch (JSONException e) {
+//                        e.printStackTrace();
+//                    }
+//                });
+//            }
+//
+//            @Override
+//            public void onError(String errorMessage) {
+//                System.out.println("Error " + errorMessage);
+//            }
+//        });
+//    }
 
     private void displayRoutes(View view, Context context) {
-        routesView = view.findViewById(R.id.routesView);
-        routesView.removeAllViewsInLayout();
         LayoutInflater inflater = LayoutInflater.from(context);
         System.out.println("displaying routes");
         System.out.println(dayRoutes);
+        routesView = view.findViewById(R.id.routesView);
         if (dayRoutes == null || dayRoutes.isEmpty()){
+            System.out.println("ROUTE CALLS ##########");
+            System.out.println(dayRoutes);
             TextView emptyRoutes = new TextView(context);
             emptyRoutes.setText("There are no routes for this day");
             routesView.addView(emptyRoutes);
@@ -247,14 +221,58 @@ public class RoutesFragment extends Fragment {
         currentDayText = view.findViewById(R.id.currentDayText);
         currentDayText.setText(formatter.format(currentDay));
 
+        fetchRoutes(new Date(), new FetchRoutesCallback() {
+            @Override
+            public void onResponse(RouteItem routeItem) {
+                getActivity().runOnUiThread(() -> {
+                    dayRoutes = new ArrayList<>();
+                    dayRoutes.add(routeItem);
+                    routesView = view.findViewById(R.id.routesView);
+                    routesView.removeAllViewsInLayout();
+                    displayRoutes(view,getContext());
+                });
+            }
+            @Override
+            public void onError() {
+                getActivity().runOnUiThread(() -> {
+                    TextView emptyRoutes = new TextView(getContext());
+                    emptyRoutes.setText("There are no routes for this day");
+                    routesView = view.findViewById(R.id.routesView);
+                    routesView.removeAllViewsInLayout();
+                    routesView.addView(emptyRoutes);
+                });
+            }
+        });
+
         getPreviousDay.setOnClickListener(v -> {
             java.util.Calendar calendar =  java.util.Calendar.getInstance();
             calendar.setTime(currentDay);
             calendar.add( java.util.Calendar.DAY_OF_YEAR, -1); // Subtract 1 day to get the previous day
             Date previousDay = calendar.getTime();
             changeDay(previousDay);
-            fetchRoutes(view, previousDay);
-            displayRoutes(view, getContext());
+            fetchRoutes(previousDay, new FetchRoutesCallback() {
+                @Override
+                public void onResponse(RouteItem routeItem) {
+                    getActivity().runOnUiThread(() -> {
+                        dayRoutes = new ArrayList<>();
+                        dayRoutes.add(routeItem);
+                        routesView = view.findViewById(R.id.routesView);
+                        routesView.removeAllViewsInLayout();
+                        displayRoutes(view, getContext());
+                    });
+                }
+                @Override
+                public void onError() {
+                    getActivity().runOnUiThread(() -> {
+                        TextView emptyRoutes = new TextView(getContext());
+                        emptyRoutes.setText("There are no routes for this day");
+                        routesView = view.findViewById(R.id.routesView);
+                        routesView.removeAllViewsInLayout();
+                        routesView.addView(emptyRoutes);
+                    });
+                }
+            });
+
         });
 
         getNextDay.setOnClickListener(v -> {
@@ -263,12 +281,33 @@ public class RoutesFragment extends Fragment {
             calendar.add( java.util.Calendar.DAY_OF_YEAR, 1); // Add 1 day to get the next day
             Date nextDay = calendar.getTime();
             changeDay(nextDay);
-            fetchRoutes(view, nextDay);
-            displayRoutes(view, getContext());
+            fetchRoutes(nextDay, new FetchRoutesCallback() {
+                @Override
+                public void onResponse(RouteItem routeItem) {
+                    getActivity().runOnUiThread(() -> {
+
+                        dayRoutes = new ArrayList<>();
+                        dayRoutes.add(routeItem);
+                        routesView = view.findViewById(R.id.routesView);
+                        routesView.removeAllViewsInLayout();
+                        displayRoutes(view, getContext());
+                    });
+                }
+                @Override
+                public void onError() {
+                    getActivity().runOnUiThread(() -> {
+                        TextView emptyRoutes = new TextView(getContext());
+                        emptyRoutes.setText("There are no routes for this day");
+                        routesView = view.findViewById(R.id.routesView);
+                        routesView.removeAllViewsInLayout();
+                        routesView.addView(emptyRoutes);
+                    });
+                }
+            });
 
         });
 
-        fetchRoutes(view, new Date());
+        // fetchRoutes(new Date());
         displayRoutes(view, getContext());
 
 

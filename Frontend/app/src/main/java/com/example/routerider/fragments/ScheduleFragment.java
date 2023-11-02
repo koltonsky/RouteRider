@@ -1,7 +1,9 @@
 package com.example.routerider.fragments;
 
+import static android.app.PendingIntent.getActivity;
 import static androidx.core.content.ContextCompat.startActivity;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -39,8 +41,10 @@ import android.widget.Toast;
 import com.example.routerider.APICaller;
 import com.example.routerider.HelperFunc;
 import com.example.routerider.R;
+import com.example.routerider.RouteItem;
 import com.example.routerider.ScheduleItem;
 import com.example.routerider.TimeGapRecommendation;
+import com.example.routerider.TransitItem;
 import com.example.routerider.User;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -122,7 +126,7 @@ public class ScheduleFragment extends Fragment {
             throw new RuntimeException(e);
         }
 
-        calendarAsyncTask = (CalendarAsyncTask) new CalendarAsyncTask(this.getContext(), view, account).execute(service);
+        calendarAsyncTask = (CalendarAsyncTask) new CalendarAsyncTask(this.getActivity(), this.getContext(), view, account).execute(service);
 
 
         getPreviousDay.setOnClickListener(v -> {
@@ -309,9 +313,11 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
     private Calendar service;
 
     private Context scheduleContext;
+    private Activity scheduleActivity;
     private View scheduleView;
-    CalendarAsyncTask(Context context, View view,
+    CalendarAsyncTask(Activity activity, Context context, View view,
                       GoogleSignInAccount account){
+        this.scheduleActivity = activity;
         this.scheduleContext = context;
         this.scheduleView = view;
         this.account = account;
@@ -545,46 +551,88 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
                         CardView cardView = timeGapView.findViewById(R.id.base_cardview);
                         Button viewRecommendationsButton = timeGapView.findViewById(R.id.viewRecommendationsButton);
                         viewRecommendationsButton.setOnClickListener(v -> {
-                            ArrayList<TimeGapRecommendation> recs = new ArrayList<>();
-                            for (int i = 0; i<5; i++){
-                                TimeGapRecommendation rec1 = new TimeGapRecommendation("cafe", "Starbucks", "123 Main St H2Z 0D4 Vancouver BC Canada");
-                                TimeGapRecommendation rec2 = new TimeGapRecommendation("library", "Irving K Barber Library", "123 Main St H2Z 0D4 Vancouver BC Canada");
-                                TimeGapRecommendation rec3 = new TimeGapRecommendation("restaurant", "Cactus Club Cafe", "123 Main St H2Z 0D4 Vancouver BC Canada");
-                                recs.add(rec1);
-                                recs.add(rec2);
-                                recs.add(rec3);
-                            }
-                            for (TimeGapRecommendation rec: recs) {
-                                View timeGapRecView;
-                                if (rec.getType() == "cafe") {
-                                    timeGapRecView = inflater.inflate(R.layout.cafe_chip, hiddenView, false);
-                                } else if (rec.getType() == "library") {
-                                    timeGapRecView = inflater.inflate(R.layout.library_chip, hiddenView, false);
+//                            for (int i = 0; i<5; i++){
+//                                TimeGapRecommendation rec1 = new TimeGapRecommendation("cafe", "Starbucks", "123 Main St H2Z 0D4 Vancouver BC Canada");
+//                                TimeGapRecommendation rec2 = new TimeGapRecommendation("library", "Irving K Barber Library", "123 Main St H2Z 0D4 Vancouver BC Canada");
+//                                TimeGapRecommendation rec3 = new TimeGapRecommendation("restaurant", "Cactus Club Cafe", "123 Main St H2Z 0D4 Vancouver BC Canada");
+//                                recs.add(rec1);
+//                                recs.add(rec2);
+//                                recs.add(rec3);
+//                            }
 
-                                } else {
-                                    timeGapRecView = inflater.inflate(R.layout.restaurant_chip, hiddenView, false);
-                                }
-                                TextView recNameText = timeGapRecView.findViewById(R.id.recName);
-                                recNameText.setText(rec.getName());
-                                TextView recAddressText = timeGapRecView.findViewById(R.id.recAddress);
-                                recAddressText.setText(rec.getAddress());
-                                ImageButton recMapsButton = timeGapRecView.findViewById(R.id.mapsButton);
-                                recMapsButton.setOnClickListener(v2 -> {
-                                    Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
-                                            Uri.parse("google.navigation:q="+ rec.getAddress()));
-                                    startActivity(scheduleContext,intent,null);
-                                });
-                                hiddenView.addView(timeGapRecView);
-                            }
+
                             if (hiddenView.getVisibility() == View.VISIBLE) {
                                 TransitionManager.beginDelayedTransition(cardView, new AutoTransition());
                                 hiddenView.setVisibility(View.GONE);
                                 viewRecommendationsButton.setText("Show Recommendations");
                             }
                             else {
-                                TransitionManager.beginDelayedTransition(cardView, new AutoTransition());
-                                hiddenView.setVisibility(View.VISIBLE);
-                                viewRecommendationsButton.setText("Hide Recommendations");
+                                ArrayList<TimeGapRecommendation> recs = new ArrayList<>();
+                                hiddenView.removeAllViewsInLayout();
+                                APICaller apiCall = new APICaller();
+                                apiCall.APICall("api/recommendation/timegap/" + item.getLocation() + "/" + dayList.get(dayList.indexOf(item) - 1).getLocation(), "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
+
+                                    @Override
+                                    public void onResponse(String responseBody) throws JSONException {
+                                        scheduleActivity.runOnUiThread(() -> {
+                                            System.out.println("BODY: " + responseBody);
+                                            try {
+                                                JSONObject json = new JSONObject(responseBody);
+                                                JSONArray recOutput = json.getJSONArray("suggestions");
+                                                System.out.println(recOutput);
+                                                for (int i = 0; i < recOutput.length(); i++) {
+                                                    JSONObject item = (JSONObject) recOutput.get(i);
+                                                    System.out.println(item);
+                                                    JSONArray types = item.getJSONArray("types");
+                                                    String type = "";
+                                                    for (int j = 0; j < types.length(); j++) {
+                                                        String element = types.getString(j);
+                                                        if (element.equals("restaurant") || element.equals("cafe") || element.equals("library")) {
+                                                            type = element;
+                                                            break; // You can exit the loop early if you find a match
+                                                        }
+                                                    }
+
+                                                    String name = item.getString("name");
+                                                    String address = item.getString("vicinity");
+                                                    TimeGapRecommendation timeGapRecommendation = new TimeGapRecommendation(type, name, address);
+                                                    recs.add(timeGapRecommendation);
+                                                }
+                                                for (TimeGapRecommendation rec : recs) {
+                                                    View timeGapRecView;
+                                                    if (rec.getType() == "cafe") {
+                                                        timeGapRecView = inflater.inflate(R.layout.cafe_chip, hiddenView, false);
+                                                    } else if (rec.getType() == "library") {
+                                                        timeGapRecView = inflater.inflate(R.layout.library_chip, hiddenView, false);
+                                                    } else {
+                                                        timeGapRecView = inflater.inflate(R.layout.restaurant_chip, hiddenView, false);
+                                                    }
+                                                    TextView recNameText = timeGapRecView.findViewById(R.id.recName);
+                                                    recNameText.setText(rec.getName());
+                                                    TextView recAddressText = timeGapRecView.findViewById(R.id.recAddress);
+                                                    recAddressText.setText(rec.getAddress());
+                                                    ImageButton recMapsButton = timeGapRecView.findViewById(R.id.mapsButton);
+                                                    recMapsButton.setOnClickListener(v2 -> {
+                                                        Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
+                                                                Uri.parse("google.navigation:q=" + rec.getAddress()));
+                                                        startActivity(scheduleContext, intent, null);
+                                                    });
+                                                    hiddenView.addView(timeGapRecView);
+                                                }
+                                                TransitionManager.beginDelayedTransition(cardView, new AutoTransition());
+                                                hiddenView.setVisibility(View.VISIBLE);
+                                                viewRecommendationsButton.setText("Hide Recommendations");
+                                            } catch (JSONException e) {
+                                                e.printStackTrace();
+                                            }
+                                        });
+                                    }
+
+                                    @Override
+                                    public void onError(String errorMessage) {
+                                        System.out.println("Error " + errorMessage);
+                                    }
+                                });
                             }
                         });
 

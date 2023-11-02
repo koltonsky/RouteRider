@@ -288,13 +288,13 @@ var dummy = initReminders('koltonluu@gmail.com');
  * For local testing, connect to a mongoDB instance and run commented client.db commands above. They should initialize the database with dummy data.
  *
  * Translink Open API Key: crj9j8Kj97pbPkkc61dX
- * Geocoding API key: AAPK3c726265cc41485bb57c5512e98cf912OLoJQtidjOlcqjdpa0Pl773UqNoOYfwApr6ORYd8Lina8_K0sEbdcyXsNfHFqLKE if error 498 invalid token, create a new key
- * HERE Location services API key (unused): S3186X1u-4DFckek542dcP9gxZeLI3uHQl_IkwZnJb4
- *                        App ID  (unused):  cOIE7nteY1IGtsu8BGpr
+ * Geocoding API key: AAPK3c726265cc41485bb57c5512e98cf912OLoJQtidjOlcqjdpa0Pl773UqNoOYfwApr6ORYd8Lina8_K0sEbdcyXsNfHFqLKE
  * Google Direction API ($200 credit): AIzaSyBVsUyKxBvRjE0XdooMuoDrpAfu1KO_2mM
  *
- * @param {*} userEmail
- * @param {*} date
+ * @param {*} userEmail the email of the client that's being served
+ * @param {*} date      the date of the commute
+ * 
+ * ChatGPT usage: Partial
  */
 async function initRoute(userEmail, date) {
   console.log('called initRoute()');
@@ -452,6 +452,8 @@ async function initRoute(userEmail, date) {
  *
  * @param userEmail
  * @returns an array of objects that contain info on when to send notifications (time and date)
+ * 
+ * ChatGPT usage: Partial
  */
 async function initReminders(userEmail) {
   console.log('called initReminders()');
@@ -522,6 +524,14 @@ async function initReminders(userEmail) {
 //   console.log(buses[0].StopNo + " " + buses.length);
 // });
 
+/**
+ * Calculates the latitude and logitude coordinates of an address
+ * 
+ * @param address 
+ * @returns an array of coordinates [latitude, longitude]. The coordinates have a maximum of 5 digits after the decimal.
+ * 
+ * ChatGPT usage: Partial
+ */
 function getLatLong(address) {
   return new Promise((resolve, reject) => {
     var lat = 0; // default value
@@ -560,6 +570,10 @@ function getLatLong(address) {
   });
 }
 
+/** 
+ * 
+ * 
+ */
 async function getNearestBuses(address) {
   return new Promise((resolve, reject) => {
     lat = 0;

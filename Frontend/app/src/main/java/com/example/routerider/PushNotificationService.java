@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PushNotificationService extends FirebaseMessagingService {
+    // YES CHATGPT
     @Override
     public void onNewToken(String token) {
         // Get the updated FCM registration token
@@ -27,6 +28,7 @@ public class PushNotificationService extends FirebaseMessagingService {
         sendRegistrationToServer(token);
     }
 
+    // YES CHATGPT
     public void sendRegistrationToServer(String token) {
         GoogleSignInAccount account = User.getCurrentAccount();
         APICaller apiCall = new APICaller();

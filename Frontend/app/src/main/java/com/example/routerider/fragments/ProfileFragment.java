@@ -9,7 +9,6 @@ import android.os.Bundle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,22 +19,17 @@ import android.widget.Toast;
 
 import com.example.routerider.APICaller;
 import com.example.routerider.FriendsActivity;
-import com.example.routerider.HomeActivity;
-import com.example.routerider.PreferencesActivity;
-import com.example.routerider.PushNotificationService;
 import com.example.routerider.R;
 import com.example.routerider.User;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 public class ProfileFragment extends Fragment {
 
@@ -45,7 +39,10 @@ public class ProfileFragment extends Fragment {
     }
 
     String response;
+    public static JSONArray friendList = new JSONArray();
+    public static JSONArray friendRequestList = new JSONArray();
 
+    // NO CHATGPT
     @SuppressLint("SetTextI18n")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -78,6 +75,45 @@ public class ProfileFragment extends Fragment {
             }
         });
 
+        apiCall.APICall("api/userlist/" + account.getEmail() + "/friends", "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
+            @Override
+            public void onResponse(final String responseBody) throws JSONException {
+                System.out.println("BODY: " + responseBody);
+                try {
+                    JSONObject json = new JSONObject(responseBody);
+
+                    // Check if the "friendsWithNames" and "friendRequestsWithNames" keys exist in the JSON
+                    if (json.has("friendsWithNames") && json.has("friendRequestsWithNames")) {
+                        friendList = json.getJSONArray("friendsWithNames");
+                        friendRequestList = json.getJSONArray("friendRequestsWithNames");
+
+                        // Check if the arrays are empty
+                        if (friendList.length() > 0) {
+                            System.out.println(friendList);
+                        } else {
+                            System.out.println("Friend list is empty.");
+                        }
+
+                        if (friendRequestList.length() > 0) {
+                            System.out.println(friendRequestList);
+                        } else {
+                            System.out.println("Friend request list is empty.");
+                        }
+
+                    } else {
+                        System.out.println("The JSON object doesn't contain the expected keys.");
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                System.out.println("Error " + errorMessage);
+            }
+        });
+
 
         TextView friends = view.findViewById(R.id.friendList);
         friends.setOnClickListener(v -> {
@@ -85,13 +121,6 @@ public class ProfileFragment extends Fragment {
             startActivity(intent);
         });
 
-        TextView userPreferences = view.findViewById(R.id.preferences);
-        userPreferences.setOnClickListener(v -> {
-//            Intent intent = new Intent(requireContext(), PreferencesActivity.class);
-//            startActivity(intent);
-            // System.out.println("fetching routes");
-            // HomeActivity.fetchRoutes(new Date());
-        });
 
         TextView name = view.findViewById(R.id.name_text);
         name.setText("Name: " + account.getDisplayName());

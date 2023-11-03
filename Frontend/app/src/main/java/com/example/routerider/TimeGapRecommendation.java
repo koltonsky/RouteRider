@@ -1,5 +1,6 @@
 package com.example.routerider;
 
+// NO CHATGPT
 public class TimeGapRecommendation {
     private String type;
     private String address;

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+// NO CHATGPT
 public class RouteItem {
     private List<TransitItem> transitItems;
     private List<String> steps;

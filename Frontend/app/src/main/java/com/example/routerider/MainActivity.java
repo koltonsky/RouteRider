@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
         googleSignIn(false);
     }
 
+    // NO CHATGPT
     private void googleSignIn(boolean autoSignIn) {
         SharedPreferences pref = getSharedPreferences("routeRider", Context.MODE_PRIVATE);
         if(pref.getBoolean("isLoggedIn", false) && autoSignIn) {
@@ -89,11 +90,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // NO CHATGPT
     private void signIn() {
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
+    // NO CHATGPT
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -108,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // NO CHATGPT
     private void handleSignInSuccess(GoogleSignInAccount account) {
         APICaller apiCall = new APICaller();
         User.updateGoogleAccount(account);

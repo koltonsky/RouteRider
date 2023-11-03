@@ -12,6 +12,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.example.routerider.fragments.ProfileFragment;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.gson.Gson;
 
@@ -24,19 +25,11 @@ import java.util.Map;
 
 public class FriendsActivity extends AppCompatActivity {
 
-    public static JSONArray friendList;
-    private JSONArray friendRequestList;
+
     private LinearLayout friendListDisplay;
     private LinearLayout friendRequestDisplay;
 
-    public static JSONArray getFriendList() {
-        if (friendList != null) {
-            return friendList;
-        } else {
-            return new JSONArray();
-        }
-    }
-
+    // NO CHATGPT
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,49 +41,9 @@ public class FriendsActivity extends AppCompatActivity {
         friendListDisplay = findViewById(R.id.friendList);
         friendRequestDisplay = findViewById(R.id.friendRequestList);
         APICaller apiCall = new APICaller();
-        apiCall.APICall("api/userlist/" + account.getEmail() + "/friends", "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
-            @Override
-            public void onResponse(final String responseBody) throws JSONException {
-                System.out.println("BODY: " + responseBody);
-                try {
-                    JSONObject json = new JSONObject(responseBody);
 
-                    // Check if the "friendsWithNames" and "friendRequestsWithNames" keys exist in the JSON
-                    if (json.has("friendsWithNames") && json.has("friendRequestsWithNames")) {
-                        JSONArray friendList = json.getJSONArray("friendsWithNames");
-                        JSONArray friendRequestList = json.getJSONArray("friendRequestsWithNames");
-
-                        // Check if the arrays are empty
-                        if (friendList.length() > 0) {
-                            System.out.println(friendList);
-                        } else {
-                            System.out.println("Friend list is empty.");
-                        }
-
-                        if (friendRequestList.length() > 0) {
-                            System.out.println(friendRequestList);
-                        } else {
-                            System.out.println("Friend request list is empty.");
-                        }
-
-                        runOnUiThread(() -> {
-                            generateFriendList(friendList);
-                            generateFriendRequestList();
-                        });
-                    } else {
-                        System.out.println("The JSON object doesn't contain the expected keys.");
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onError(String errorMessage) {
-                System.out.println("Error " + errorMessage);
-            }
-        });
-
+        generateFriendList();
+        generateFriendRequestList();
 
         addFriend.setOnClickListener(v -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -144,20 +97,17 @@ public class FriendsActivity extends AppCompatActivity {
         });
     }
 
-    public void generateFriendList(JSONArray newFriendList) {
-        System.out.println("here");
-        System.out.println(newFriendList);
+    // NO CHATGPT
+    public void generateFriendList() {
         friendListDisplay.removeAllViews();
-        if (newFriendList != null) {
+        if (ProfileFragment.friendList != null) {
             try {
-                for (int i = 0; i < newFriendList.length(); i++) {
-                    JSONObject friend = newFriendList.getJSONObject(i);
+                for (int i = 0; i < ProfileFragment.friendList.length(); i++) {
+                    JSONObject friend = ProfileFragment.friendList.getJSONObject(i);
 
                     String email = friend.getString("email");
                     String name = friend.getString("name");
                     TextView friendTextView = new TextView(this);
-                    System.out.println("displaying friend");
-                    System.out.println ( "Name: " + name + " | "+ "Email: " + email);
                     friendTextView.setText("Name: " + name + " | "+ "Email: " + email);
 
                     friendListDisplay.addView(friendTextView);
@@ -168,13 +118,14 @@ public class FriendsActivity extends AppCompatActivity {
         }
     }
 
+    // NO CHATGPT
     public void generateFriendRequestList() {
         APICaller apiCall = new APICaller();
         friendRequestDisplay.removeAllViews();
-        if (friendList != null) {
+        if (ProfileFragment.friendList != null) {
             try {
-                for (int i = 0; i < friendRequestList.length(); i++) {
-                    JSONObject friend = friendRequestList.getJSONObject(i);
+                for (int i = 0; i < ProfileFragment.friendRequestList.length(); i++) {
+                    JSONObject friend = ProfileFragment.friendRequestList.getJSONObject(i);
                     final String email = friend.getString("email");
                     final String name = friend.getString("name");
 
@@ -192,12 +143,12 @@ public class FriendsActivity extends AppCompatActivity {
                         try {
                             friendObject.put("name", name);
                             friendObject.put("email", email);
-                            friendList.put(friendObject);
+                            ProfileFragment.friendList.put(friendObject);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
                         friendRequestDisplay.removeView(friendLayout);
-                        generateFriendList(friendList);
+                        generateFriendList();
                         GoogleSignInAccount account = User.getCurrentAccount();
 
                         apiCall.APICall("api/userlist/" + account.getEmail() + "/" + email + "/accept", "", APICaller.HttpMethod.POST, new APICaller.ApiCallback() {

@@ -92,6 +92,7 @@ public class ScheduleFragment extends Fragment {
     private Button getNextDay;
     private FloatingActionButton addEvent;
 
+    // YES CHATGPT
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -221,6 +222,7 @@ public class ScheduleFragment extends Fragment {
         return view;
     }
 
+    // NO CHATGPT
     private void changeDay(Date day){
         Date today = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -234,6 +236,7 @@ public class ScheduleFragment extends Fragment {
         calendarAsyncTask.updateDisplay(day);
     }
 
+    // YES CHATGPT
     public interface EventInputListener {
         static boolean onEventInput(String eventName, String eventAddress, String eventDate, String eventStartTime, String eventEndTime) {
             if(validateInputs(eventName, eventAddress, eventDate, eventStartTime, eventEndTime)) {
@@ -244,13 +247,14 @@ public class ScheduleFragment extends Fragment {
         }
     }
 
+    // YES CHATGPT
     private static boolean validateInputs(String eventName, String eventAddress, String eventDate, String eventStartTime, String eventEndTime) {
         if (eventName.isEmpty() || eventAddress.isEmpty() || eventDate.isEmpty() || eventStartTime.isEmpty() || eventEndTime.isEmpty()) {
             // Check if any field is empty
             return false;
         }
 
-        if (!isDateValid(eventDate) || !isTimeValid(eventStartTime) || !isTimeValid(eventEndTime)) {
+        if (!isDateValid((eventDate + " " + eventStartTime)) || !isTimeValid(eventStartTime) || !isTimeValid(eventEndTime)) {
             // Check if date and time formats are valid
             return false;
         }
@@ -262,16 +266,17 @@ public class ScheduleFragment extends Fragment {
         return true;
     }
 
+    // YES CHATGPT
     private static boolean isDateValid(String date) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         dateFormat.setLenient(false); // Set lenient to false to enforce strict date validation
 
         try {
             Date parsedDate = dateFormat.parse(date);
-            Date currentDate = new Date(); // Get the current date
+            Date currentDate = new Date(); // Get the current date and time
 
             assert parsedDate != null;
-            return parsedDate.after(currentDate); // Date is valid and ahead of the current date
+            return parsedDate.after(currentDate); // Date is valid and ahead of the current date and time
         } catch (java.text.ParseException e) {
             // Parsing failed, the date is not valid
             return false;
@@ -279,11 +284,13 @@ public class ScheduleFragment extends Fragment {
     }
 
 
+    // YES CHATGPT
     private static boolean isTimeValid(String time) {
         String timePattern = "([01]\\d|2[0-3]):[0-5]\\d";
         return time.matches(timePattern);
     }
 
+    // YES CHATGPT
     private static boolean isStartTimeBeforeEndTime(String startTime, String endTime) {
         SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
         timeFormat.setLenient(false);
@@ -303,7 +310,7 @@ public class ScheduleFragment extends Fragment {
 }
 
 
-
+// YES CHATGPT
 class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
     private List<ScheduleItem> eventList;
     private List<ScheduleItem> dayList;
@@ -345,7 +352,7 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
 //                        System.out.println();
 
                     // List events for the calendar
-                    long sevenDaysInMillis = 3L * 24 * 60 * 60 * 1000;
+                    long sevenDaysInMillis = 30L * 24 * 60 * 60 * 1000;
                     Events events = service.events().list(calendarId)
                             .setSingleEvents(true)
                             .setTimeMin(new DateTime(System.currentTimeMillis()))
@@ -480,6 +487,7 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
     }
 
 
+    // NO CHATGPT
     @Override
     protected void onPostExecute(Void result) {
         System.out.println(eventList.size());
@@ -490,7 +498,7 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
     }
 
 
-
+    // YES CHATGPT
     public void updateDisplay(Date day) {
         dayList = new ArrayList<>();
         LinearLayout eventListView = scheduleView.findViewById(R.id.scheduleView);
@@ -784,11 +792,7 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
 
     }
 
-    private void mockRecs(ArrayList<TimeGapRecommendation> recs) {
-
-    }
-
-    // Helper method to format the time difference as HH:mm
+    // YES CHATGPT
     private String formatTimeDifference(long timeDifference) {
         long minutes = (timeDifference / (1000 * 60)) % 60;
         long hours = (timeDifference / (1000 * 60 * 60)) % 24;
@@ -796,6 +800,7 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
     }
 }
 
+// NO CHATGPT
 class UpdateEventTask extends AsyncTask<Void, Void, Event> {
     private Calendar service;
     private ScheduleItem newEvent;
@@ -843,6 +848,7 @@ class UpdateEventTask extends AsyncTask<Void, Void, Event> {
     }
 }
 
+// NO CHATGPT
 class CreateEventTask extends AsyncTask<Void, Void, Event> {
     private Calendar service;
     private final String eventName;
@@ -863,17 +869,12 @@ class CreateEventTask extends AsyncTask<Void, Void, Event> {
     @Override
     protected Event doInBackground(Void... voids) {
         try {
-            // Initialize the Google Calendar service
-            // Create an event
             Event event = new Event()
                     .setSummary(eventName)
                     .setLocation(eventAddress);
 
-            // Define the time zone
             String timeZone = "America/Denver"; // UTC-7 (Mountain Daylight Time)
 
-            // Set the start time    2023-11-01T15:00:00.000-07:00
-            //                       2023-12-1T12:00:00.000-07:00
             DateTime startDateTime = new DateTime(eventDate + "T" + eventStartTime + ":00.000-07:00");
             EventDateTime start = new EventDateTime()
                     .setDateTime(startDateTime)
@@ -887,8 +888,7 @@ class CreateEventTask extends AsyncTask<Void, Void, Event> {
                     .setTimeZone(timeZone);
             event.setEnd(end);
 
-            // Insert the event into the calendar
-            String calendarId = "primary"; // Use "primary" for the user's primary calendar
+            String calendarId = "primary";
             event = service.events().insert(calendarId, event).execute();
             return event;
         } catch (IOException e) {
@@ -907,6 +907,7 @@ class CreateEventTask extends AsyncTask<Void, Void, Event> {
     }
 }
 
+// NO CHATGPT
 class DeleteEventTask extends AsyncTask<Void, Void, Event> {
     private Calendar service;
     private ScheduleItem item;

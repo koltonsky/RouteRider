@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.routerider.fragments.ProfileFragment;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -36,6 +37,7 @@ public class HomeActivity extends AppCompatActivity {
 
     public static List<RouteItem> dayRoutes;
 
+    // YES CHATGPT
     public static void fetchRoutes(Date day, FetchRoutesCallback callback) {
         GoogleSignInAccount account = User.getCurrentAccount();
         APICaller apiCall = new APICaller();
@@ -87,89 +89,7 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 
-    public static void fetchRoutesWithFriends(Date day, FetchRoutesCallback callback) {
-        GoogleSignInAccount account = User.getCurrentAccount();
-        APICaller apiCall = new APICaller();
-        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        apiCall.APICall("api/recommendation/routes/" + account.getEmail() + "/" + formatter.format(day), "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
-            @Override
-            public void onResponse(final String responseBody) {
-                System.out.println("BODY ROUTES: " + responseBody);
-                try {
-                    JSONObject json = new JSONObject(responseBody);
-                    JSONArray routes =  json.getJSONArray("routes");
-                    System.out.println(routes);
-                    dayRoutes = new ArrayList<>();
-                    List<TransitItem> transitItemList = new ArrayList<>();
-                    List<String> stepsList = new ArrayList<>();
-                    for (int i = 0; i < routes.length(); i++) {
-                        JSONObject item = (JSONObject) routes.get(i);
-                        if ( item.has("_id")) {
-                            String id = item.getString("_id");
-                            String type = item.getString("_type");
-                            String leaveTime = item.getString("_leaveTime");
-                            TransitItem transitItem = new TransitItem(id, type, leaveTime);
-                            transitItemList.add(transitItem);
-                        } else {
-                            JSONArray steps = item.getJSONArray("steps");
-                            for (int j = 0; j < steps.length(); j++) {
-                                String element = steps.getString(j);
-                                stepsList.add(element);
-                            }
-                        }
-                    }
-                    RouteItem routeItem = new RouteItem(transitItemList, stepsList, "0", "0");
-                    callback.onResponse(routeItem);
-                    // dayRoutes.add(routeItem);
-                    //Log.d("DAY ROUTES", "ADDED DAY ROUTE");
-                    //System.out.println(dayRoutes);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    callback.onError();
-                }
-            }
-
-            @Override
-            public void onError(String errorMessage) {
-                System.out.println("Error " + errorMessage);
-                callback.onError();
-            }
-        });
-
-        //cAPICaller apiCall = new APICaller();
-        apiCall.APICall("api/userlist/" + account.getEmail() + "/friends", "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
-            @Override
-            public void onResponse(final String responseBody) throws JSONException {
-                System.out.println("BODY: " + responseBody);
-                try {
-                    JSONObject json = new JSONObject(responseBody);
-
-                    // Check if the "friendsWithNames" and "friendRequestsWithNames" keys exist in the JSON
-                    if (json.has("friendsWithNames") && json.has("friendRequestsWithNames")) {
-                        FriendsActivity.friendList = json.getJSONArray("friendsWithNames");
-
-                        // Check if the arrays are empty
-                        if (FriendsActivity.friendList.length() > 0) {
-                            System.out.println(FriendsActivity.friendList);
-                        } else {
-                            System.out.println("Friend list is empty.");
-                        }
-                    } else {
-                        System.out.println("The JSON object doesn't contain the expected keys.");
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onError(String errorMessage) {
-                System.out.println("Error " + errorMessage);
-            }
-        });
-    }
-
-
+    // NO CHATGPT
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -232,6 +152,7 @@ public class HomeActivity extends AppCompatActivity {
         viewPager.setUserInputEnabled(false);
     }
 
+    // NO CHATGPT
     private long backPressedTime;
     @Override
     public void onBackPressed() {

@@ -55,15 +55,6 @@
             android:text="Friends"
             app:drawableEndCompat="@drawable/right_arrow" />
 
-        <TextView
-            android:id="@+id/preferences"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginTop="14dp"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:text="Preferences"
-            app:drawableEndCompat="@drawable/right_arrow" />
     </LinearLayout>
 
 

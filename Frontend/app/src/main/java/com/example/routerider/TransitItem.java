@@ -1,5 +1,6 @@
 package com.example.routerider;
 
+// NO CHATGPT
 public class TransitItem {
     private String id;
     private String type;

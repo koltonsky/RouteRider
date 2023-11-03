@@ -67,74 +67,7 @@ public class RoutesFragment extends Fragment {
         // Required empty public constructor
     }
 
-//    private void fetchRoutes(View view, Date day) {
-//        GoogleSignInAccount account = User.getCurrentAccount();
-//        APICaller apiCall = new APICaller();
-//        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-//
-////        // Create a Handler to implement the timeout
-////        Handler handler = new Handler();
-////
-////        // Define a timeout duration in milliseconds (2 seconds)
-////        int timeoutDuration = 500;
-////
-////        // Start a timer when you make the API call
-////        handler.postDelayed(() -> {
-////            // This code will run after the timeout duration (2 seconds)
-////            // You can cancel the API call and handle the timeout here
-////            // apiCall.wait(); // Assuming there is a method to cancel the API call
-////            displayRoutes(view,getContext());
-////            // Handle the timeout, e.g., show an error message or perform any other action
-////            // For example, you can display a Toast message:
-////            getActivity().runOnUiThread(() -> {
-////                Toast.makeText(getContext(), "API call timed out", Toast.LENGTH_SHORT).show();
-////            });
-////        }, timeoutDuration);
-//
-//        apiCall.APICall("api/recommendation/routes/" + account.getEmail() + "/" + formatter.format(day), "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
-//            @Override
-//            public void onResponse(final String responseBody) {
-//                // handler.removeCallbacksAndMessages(null);
-//                getActivity().runOnUiThread(() -> {
-//                    System.out.println("BODY: " + responseBody);
-//                    try {
-//                        JSONObject json = new JSONObject(responseBody);
-//                        JSONArray routes =  json.getJSONArray("routes");
-//                        System.out.println(routes);
-//                        dayRoutes = new ArrayList<>();
-//                        List<TransitItem> transitItemList = new ArrayList<>();
-//                        List<String> stepsList = new ArrayList<>();
-//                        for (int i = 0; i < routes.length(); i++) {
-//                            JSONObject item = (JSONObject) routes.get(i);
-//                            if ( item.has("_id")) {
-//                                String id = item.getString("_id");
-//                                String type = item.getString("_type");
-//                                String leaveTime = item.getString("_leaveTime");
-//                                TransitItem transitItem = new TransitItem(id, type, leaveTime);
-//                                transitItemList.add(transitItem);
-//                            } else {
-//                                JSONArray steps = item.getJSONArray("steps");
-//                                for (int j = 0; j < steps.length(); j++) {
-//                                    String element = steps.getString(j);
-//                                    stepsList.add(element);
-//                                }
-//                            }
-//                        }
-//                        RouteItem routeItem = new RouteItem(transitItemList, stepsList, "0", "0");
-//                        dayRoutes.add(routeItem);
-//                    } catch (JSONException e) {
-//                        e.printStackTrace();
-//                    }
-//                });
-//            }
-//
-//            @Override
-//            public void onError(String errorMessage) {
-//                System.out.println("Error " + errorMessage);
-//            }
-//        });
-//    }
-
+    // YES CHATGPT
     private void displayRoutes(View view, Context context) {
 
         LayoutInflater inflater = LayoutInflater.from(context);
@@ -217,6 +150,7 @@ public class RoutesFragment extends Fragment {
 //        mockRoutes();
 //    }
 
+    // YES CHATGPT
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -230,29 +164,71 @@ public class RoutesFragment extends Fragment {
         formatter = new SimpleDateFormat("E, dd MMM");
         currentDayText = view.findViewById(R.id.currentDayText);
         currentDayText.setText(formatter.format(currentDay));
+        GoogleSignInAccount account = User.getCurrentAccount();
 
         transitFriendButton = view.findViewById(R.id.transitFriendButton);
 
-        JSONArray friendsList = FriendsActivity.getFriendList();
         System.out.println("HEREEEE");
-        System.out.println(friendsList);
         transitFriendButton.setOnClickListener(v -> {
+            APICaller apiCall = new APICaller();
+            apiCall.APICall("api/userlist/" + account.getEmail() + "/friends", "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
+                @Override
+                public void onResponse(final String responseBody) throws JSONException {
+                    System.out.println("BODY: " + responseBody);
+                    try {
+                        JSONObject json = new JSONObject(responseBody);
+
+                        // Check if the "friendsWithNames" and "friendRequestsWithNames" keys exist in the JSON
+                        if (json.has("friendsWithNames") && json.has("friendRequestsWithNames")) {
+                            ProfileFragment.friendList = json.getJSONArray("friendsWithNames");
+                            ProfileFragment.friendRequestList = json.getJSONArray("friendRequestsWithNames");
+
+                            // Check if the arrays are empty
+                            if (ProfileFragment.friendList.length() > 0) {
+                                System.out.println(ProfileFragment.friendList);
+                            } else {
+                                System.out.println("Friend list is empty.");
+                            }
+
+                            if (ProfileFragment.friendRequestList.length() > 0) {
+                                System.out.println(ProfileFragment.friendRequestList);
+                            } else {
+                                System.out.println("Friend request list is empty.");
+                            }
+
+                        } else {
+                            System.out.println("The JSON object doesn't contain the expected keys.");
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    System.out.println("Error " + errorMessage);
+                }
+            });
+
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(requireContext());
             alertDialogBuilder.setTitle("Friend List");
 
-            String[] friendNames = {"Kolton (koltonluu@gmail.com)"};
-            for (int i = 0; i < friendsList.length(); i++) {
+            List<String> friendArray  = new ArrayList<String>();
+            for (int i = 0; i < ProfileFragment.friendList.length(); i++) {
                 try {
-                    JSONObject friend = friendsList.getJSONObject(i);
+                    JSONObject friend = ProfileFragment.friendList.getJSONObject(i);
 
                     String email = friend.getString("email");
                     String name = friend.getString("name");
-                    friendNames[i] = name + " (" + email + ")";
+                    friendArray.add(name + " (" + email + ")");
 
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
+
+            String[] friendNames = friendArray.toArray(new String[friendArray.size()]);
+
             // Set the item list and a click listener
             alertDialogBuilder.setItems(friendNames, (dialog, which) -> {
                 String selectedFriend = friendNames[which];
@@ -264,10 +240,6 @@ public class RoutesFragment extends Fragment {
                 if (start != -1 && end != -1 && start < end) {
                     selectedFriendEmail = selectedFriend.substring(start + 1, end);
                 }
-                APICaller apiCall = new APICaller();
-                // Perform actions with the selected friend
-
-                GoogleSignInAccount account = User.getCurrentAccount();
 
                 DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -438,6 +410,7 @@ public class RoutesFragment extends Fragment {
         return view;
     }
 
+    // NO CHATGPT
     private void changeDay(Date day){
         Date today = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");

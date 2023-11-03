@@ -2,6 +2,7 @@ package com.example.routerider;
 
 import java.util.Random;
 
+// YES CHATGPT
 public class HelperFunc {
     public static String generateRandomString(int length) {
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+// NO CHATGPT
 public class ScheduleItem {
     private String eventName;
     private String address;

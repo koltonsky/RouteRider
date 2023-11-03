@@ -10,6 +10,7 @@ import com.example.routerider.fragments.RoutesFragment;
 import com.example.routerider.fragments.ProfileFragment;
 import com.example.routerider.fragments.ScheduleFragment;
 
+// NO CHATGPT
 public class ViewPagerAdapter extends FragmentStateAdapter {
 
     public ViewPagerAdapter(@NonNull FragmentManager fragmentManager, @NonNull Lifecycle lifecycle) {

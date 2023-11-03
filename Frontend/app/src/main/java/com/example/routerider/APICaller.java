@@ -23,6 +23,7 @@ public class APICaller {
         void onError(String errorMessage);
     }
 
+    // NO CHATGPT
     public void APICall(String url, String requestBody, HttpMethod method, ApiCallback callback) {
         OkHttpClient client = new OkHttpClient();
         MediaType JSON = MediaType.parse("application/json; charset=utf-8");

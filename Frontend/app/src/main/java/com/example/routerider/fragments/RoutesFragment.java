@@ -15,6 +15,7 @@ import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 
 import android.os.Handler;
+import android.os.Looper;
 import android.transition.AutoTransition;
 import android.transition.TransitionManager;
 import android.view.LayoutInflater;
@@ -233,6 +234,8 @@ public class RoutesFragment extends Fragment {
         transitFriendButton = view.findViewById(R.id.transitFriendButton);
 
         JSONArray friendsList = FriendsActivity.getFriendList();
+        System.out.println("HEREEEE");
+        System.out.println(friendsList);
         transitFriendButton.setOnClickListener(v -> {
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(requireContext());
             alertDialogBuilder.setTitle("Friend List");
@@ -308,15 +311,15 @@ public class RoutesFragment extends Fragment {
                                     routesView.addView(friendText);
                                     displayRoutes(view, getContext());
                                 } catch (JSONException e) {
-                                    Toast errorToast = new Toast(getContext());
-                                    errorToast.setText("Error finding a matching route:" + e.getMessage());
+                                    Looper.prepare();
+                                    Toast errorToast = Toast.makeText(getContext(), "Error finding a matching route: " + e.getMessage(), Toast.LENGTH_SHORT);
                                     errorToast.show();
                                     e.printStackTrace();
                                 }
                             });
                         } catch (Exception e){
-                            Toast errorToast = new Toast(getContext());
-                            errorToast.setText("Error finding a matching route:" + e.getMessage());
+                            Looper.prepare();
+                            Toast errorToast = Toast.makeText(getContext(), "Error finding a matching route: " + e.getMessage(), Toast.LENGTH_SHORT);
                             errorToast.show();
                             e.printStackTrace();
                         }
@@ -324,8 +327,8 @@ public class RoutesFragment extends Fragment {
 
                     @Override
                     public void onError(String errorMessage) {
-                        Toast errorToast = new Toast(getContext());
-                        errorToast.setText("Error finding a matching route:" + errorMessage);
+                        Looper.prepare();
+                        Toast errorToast = Toast.makeText(getContext(), "Error finding a matching route: " + errorMessage, Toast.LENGTH_SHORT);
                         errorToast.show();
                         System.out.println("Error " + errorMessage);
                     }

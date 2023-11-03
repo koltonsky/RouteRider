@@ -74,7 +74,7 @@ public class FriendsActivity extends AppCompatActivity {
                         }
 
                         runOnUiThread(() -> {
-                            generateFriendList();
+                            generateFriendList(friendList);
                             generateFriendRequestList();
                         });
                     } else {
@@ -144,16 +144,20 @@ public class FriendsActivity extends AppCompatActivity {
         });
     }
 
-    public void generateFriendList() {
+    public void generateFriendList(JSONArray newFriendList) {
+        System.out.println("here");
+        System.out.println(newFriendList);
         friendListDisplay.removeAllViews();
-        if (friendList != null) {
+        if (newFriendList != null) {
             try {
-                for (int i = 0; i < friendList.length(); i++) {
-                    JSONObject friend = friendList.getJSONObject(i);
+                for (int i = 0; i < newFriendList.length(); i++) {
+                    JSONObject friend = newFriendList.getJSONObject(i);
 
                     String email = friend.getString("email");
                     String name = friend.getString("name");
                     TextView friendTextView = new TextView(this);
+                    System.out.println("displaying friend");
+                    System.out.println ( "Name: " + name + " | "+ "Email: " + email);
                     friendTextView.setText("Name: " + name + " | "+ "Email: " + email);
 
                     friendListDisplay.addView(friendTextView);
@@ -193,7 +197,7 @@ public class FriendsActivity extends AppCompatActivity {
                             e.printStackTrace();
                         }
                         friendRequestDisplay.removeView(friendLayout);
-                        generateFriendList();
+                        generateFriendList(friendList);
                         GoogleSignInAccount account = User.getCurrentAccount();
 
                         apiCall.APICall("api/userlist/" + account.getEmail() + "/" + email + "/accept", "", APICaller.HttpMethod.POST, new APICaller.ApiCallback() {

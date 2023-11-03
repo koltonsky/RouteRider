@@ -91,6 +91,7 @@ public class ScheduleFragment extends Fragment {
     private Button getPreviousDay;
     private Button getNextDay;
     private FloatingActionButton addEvent;
+    private List<ScheduleItem> eventList;
 
     // YES CHATGPT
     @Override
@@ -197,6 +198,7 @@ public class ScheduleFragment extends Fragment {
                         public void onResponse(String responseBody) {
                             System.out.println("new event added to db");
                             System.out.println("BODY: " + responseBody);
+                            calendarAsyncTask = (CalendarAsyncTask) new CalendarAsyncTask(getActivity(), getContext(), view, account).execute(service);
 //                                eventName.setText(newEvent.getTitle());
 //                                eventLocation.setText(newEvent.getLocation());
 //                                startTime.setText(newEvent.getStartTime().substring(11,16));

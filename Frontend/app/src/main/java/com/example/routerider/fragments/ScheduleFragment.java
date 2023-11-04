@@ -303,7 +303,7 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
         dayList =  new ArrayList<>();
         service = calendars[0];
         eventList = new ArrayList<>();
-        APICaller apiCall = new APICaller();
+
 
         try {
             CalendarList calendarList = service.calendarList().list().execute();
@@ -355,13 +355,6 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
                         // Format the start and end times as strings (you can customize the format)
                         String startTimeString = (startTime != null) ? startTime.toString() : "N/A";
                         String endTimeString = (endTime != null) ? endTime.toString() : "N/A";
-
-                        System.out.println("Event ID: " + eventId);
-//                            System.out.println("Event Summary: " + eventSummary);
-//                            System.out.println("Event Location: " + eventLocation);
-//                            System.out.println("Start Time: " + startTimeString);
-//                            System.out.println("End Time: " + endTimeString);
-//                            System.out.println();
                         if (eventLocation.contains("Room")) {
                             eventLocation = "UBC " + eventLocation;
                         }
@@ -387,69 +380,70 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
             test.put("email", account.getEmail());
             test.put("events", eventList);
             String jsonSchedule = new Gson().toJson(test);
+            calendarApiCall(jsonSchedule);
 
-            System.out.println(jsonSchedule);
-            System.out.println("avbout to get schedule");
-
-
-            apiCall.APICall("api/schedulelist/" + account.getEmail(), "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
-                @Override
-                public void onResponse(String responseBody) {
-                    System.out.println("BODY: " + responseBody);
-                    if(responseBody.equals("\"Schedule found\"")) {
-                        System.out.println("TRUE");
-                        apiCall.APICall("api/schedulelist/" + account.getEmail(), jsonSchedule, APICaller.HttpMethod.PUT, new APICaller.ApiCallback() {
-                            @Override
-                            public void onResponse(String responseBodyUpdate) {
-                                System.out.println("Update schedule: " + responseBodyUpdate);
-                            }
-
-                            @Override
-                            public void onError(String errorMessage) {
-                                System.out.println("Error: " + errorMessage);
-                            }
-                        });
-                    } else {
-                        System.out.println("TEST");
-                        apiCall.APICall("api/schedulelist/" + account.getEmail(), jsonSchedule, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
-                            @Override
-                            public void onResponse(String responseBodyPost) {
-                                System.out.println("Created schedule: " + responseBodyPost);
-                            }
-
-                            @Override
-                            public void onError(String errorMessage) {
-                                System.out.println("Error: " + errorMessage);
-                            }
-                        });
-                    }
-                }
-
-                @Override
-                public void onError(String errorMessage) {
-                    System.out.println("Error " + errorMessage);
-                    System.out.println(errorMessage.split(",")[0]);
-                    if( (errorMessage.split(",")[0]).equals("Error: 404")){
-                        System.out.println("schedule not found, creating schedule using Google Calendar data");
-                        apiCall.APICall("api/schedulelist/", jsonSchedule, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
-                            @Override
-                            public void onResponse(String responseBodyPost) {
-                                System.out.println("Created schedule: " + responseBodyPost);
-                            }
-
-                            @Override
-                            public void onError(String errorMessage) {
-                                System.out.println("Error: " + errorMessage);
-                            }
-                        });
-                    }
-                }
-            });
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         return null;
+    }
+
+    private void calendarApiCall(String jsonSchedule) {
+        APICaller apiCall = new APICaller();
+        apiCall.APICall("api/schedulelist/" + account.getEmail(), "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
+            @Override
+            public void onResponse(String responseBody) {
+                System.out.println("BODY: " + responseBody);
+                if(responseBody.equals("\"Schedule found\"")) {
+                    System.out.println("TRUE");
+                    apiCall.APICall("api/schedulelist/" + account.getEmail(), jsonSchedule, APICaller.HttpMethod.PUT, new APICaller.ApiCallback() {
+                        @Override
+                        public void onResponse(String responseBodyUpdate) {
+                            System.out.println("Update schedule: " + responseBodyUpdate);
+                        }
+
+                        @Override
+                        public void onError(String errorMessage) {
+                            System.out.println("Error: " + errorMessage);
+                        }
+                    });
+                } else {
+                    System.out.println("TEST");
+                    apiCall.APICall("api/schedulelist/" + account.getEmail(), jsonSchedule, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
+                        @Override
+                        public void onResponse(String responseBodyPost) {
+                            System.out.println("Created schedule: " + responseBodyPost);
+                        }
+
+                        @Override
+                        public void onError(String errorMessage) {
+                            System.out.println("Error: " + errorMessage);
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                System.out.println("Error " + errorMessage);
+                System.out.println(errorMessage.split(",")[0]);
+                if( (errorMessage.split(",")[0]).equals("Error: 404")){
+                    System.out.println("schedule not found, creating schedule using Google Calendar data");
+                    apiCall.APICall("api/schedulelist/", jsonSchedule, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
+                        @Override
+                        public void onResponse(String responseBodyPost) {
+                            System.out.println("Created schedule: " + responseBodyPost);
+                        }
+
+                        @Override
+                        public void onError(String errorMessage) {
+                            System.out.println("Error: " + errorMessage);
+                        }
+                    });
+                }
+            }
+        });
     }
 
 

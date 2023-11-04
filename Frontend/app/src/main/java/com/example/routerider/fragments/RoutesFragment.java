@@ -1,20 +1,10 @@
 package com.example.routerider.fragments;
 
-import static androidx.core.content.ContextCompat.startActivity;
-
-import static com.example.routerider.HomeActivity.dayRoutes;
 import static com.example.routerider.HomeActivity.fetchRoutes;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-
-import androidx.cardview.widget.CardView;
-import androidx.fragment.app.Fragment;
-
-import android.os.Handler;
 import android.os.Looper;
 import android.transition.AutoTransition;
 import android.transition.TransitionManager;
@@ -26,28 +16,21 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import androidx.cardview.widget.CardView;
+import androidx.fragment.app.Fragment;
 import com.example.routerider.APICaller;
 import com.example.routerider.FetchRoutesCallback;
-import com.example.routerider.FriendsActivity;
-import com.example.routerider.HelperFunc;
-import com.example.routerider.HomeActivity;
 import com.example.routerider.R;
 import com.example.routerider.RouteItem;
-import com.example.routerider.ScheduleItem;
 import com.example.routerider.TransitItem;
 import com.example.routerider.User;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.gson.Gson;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -60,12 +43,7 @@ public class RoutesFragment extends Fragment {
     private Button getNextDay;
     private TextView currentDayText;
     private DateFormat formatter;
-
     private Button transitFriendButton;
-
-    public RoutesFragment() {
-        // Required empty public constructor
-    }
 
     // YES CHATGPT
     private void displayRoutes(View view, Context context) {

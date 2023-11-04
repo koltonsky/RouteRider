@@ -7,7 +7,7 @@ const client = new MongoClient(uri);
 
 // ChatGPT usage: Yes
 const createNewUser = async (req, res) => {
-  try {
+  
     // Extract user data from the request body
     const userData = req.body;
 
@@ -33,11 +33,6 @@ const createNewUser = async (req, res) => {
       res.status(201).json({ message: successMessage });
       //console.log("existing user");
     }
-
-  } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
 };
 
 // ChatGPT usage: Yes

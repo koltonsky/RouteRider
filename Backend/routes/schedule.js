@@ -24,7 +24,7 @@ const createNewSchedule = async (req, res) => {
       res.status(109).json({ message: errorMessage });
     } else {
       // If the user doesn't exist, insert the new user document into the collection
-      const insertResult = await collection.insertOne(scheduleData);
+      await collection.insertOne(scheduleData);
       const successMessage = 'Schedule created successfully';
       const successMessageLength = Buffer.byteLength(successMessage, 'utf8');
       res.set('Content-Length', successMessageLength);

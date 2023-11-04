@@ -1,7 +1,7 @@
 // user.js
 
 
-const {MongoClient, ObjectId} = require('mongodb');
+const {MongoClient} = require('mongodb');
 const uri = 'mongodb://0.0.0.0:27017'; // Replace with your MongoDB connection string
 const client = new MongoClient(uri);
 
@@ -26,7 +26,7 @@ const createNewUser = async (req, res) => {
       console.log("existing user");
     } else {
       // If the user doesn't exist, insert the new user document into the collection
-      const insertResult = await collection.insertOne(userData);
+      await collection.insertOne(userData);
       const successMessage = 'User created successfully';
       const successMessageLength = Buffer.byteLength(successMessage, 'utf8');
       res.set('Content-Length', successMessageLength);

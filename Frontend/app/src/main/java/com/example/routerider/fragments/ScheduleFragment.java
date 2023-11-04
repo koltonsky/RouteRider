@@ -27,6 +27,7 @@ import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 
 import com.example.routerider.APICaller;
+import com.example.routerider.CalendarException;
 import com.example.routerider.HelperFunc;
 import com.example.routerider.R;
 import com.example.routerider.ScheduleItem;
@@ -100,7 +101,7 @@ public class ScheduleFragment extends Fragment {
                     .setApplicationName("RouteRider")
                     .build();
         } catch (GeneralSecurityException | IOException gse) {
-            throw new RuntimeException("An error occurred while setting up the calendar service: " + gse.getMessage(), gse);
+            throw new CalendarException("An error occurred while setting up the calendar service", gse);
         }
 
         calendarAsyncTask = (CalendarAsyncTask) new CalendarAsyncTask(this.getActivity(), this.getContext(), view, account).execute(service);

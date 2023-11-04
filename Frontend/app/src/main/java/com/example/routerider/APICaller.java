@@ -66,7 +66,7 @@ public class APICaller {
                     } catch (IOException e) {
                         callback.onError(e.getMessage());
                     } catch (JSONException e) {
-                        throw new RuntimeException(e);
+                        System.out.println("Failed to get body");
                     }
                 } else {
                     callback.onError("Error: " + response.code() + "," + response);

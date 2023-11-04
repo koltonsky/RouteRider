@@ -40,7 +40,6 @@ public class RoutesFragment extends Fragment {
     private List<RouteItem> dayRoutes;
     private LinearLayout routesView;
     private Button getPreviousDay;
-    private Button getNextDay;
     private TextView currentDayText;
     private DateFormat formatter;
     private Button transitFriendButton;
@@ -86,11 +85,11 @@ public class RoutesFragment extends Fragment {
             LinearLayout transitIdsView = singleRouteView.findViewById(R.id.transitIds);
             for (TransitItem transitItem: item.getTransitItems()){
                 View transitChipView;
-                if (transitItem.getType().toLowerCase().equals("bus")){
+                if (transitItem.getType().equalsIgnoreCase("bus")){
                     transitChipView  = inflater.inflate(R.layout.bus_chip, transitIdsView, false);
                     TextView busIdText = transitChipView.findViewById(R.id.busId);
                     busIdText.setText(transitItem.getId());
-                } else if (transitItem.getType().toLowerCase().equals("skytrain")){
+                } else if (transitItem.getType().equalsIgnoreCase("skytrain")){
                     transitChipView  = inflater.inflate(R.layout.train_chip, transitIdsView, false);
                     TextView busIdText = transitChipView.findViewById(R.id.trainId);
                     busIdText.setText(transitItem.getId());
@@ -118,15 +117,6 @@ public class RoutesFragment extends Fragment {
             routesView.addView(singleRouteView);
         }
     }
-//    @Override
-//    public void onCreate(Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//        if (getArguments() != null) {
-//            mParam1 = getArguments().getString(ARG_PARAM1);
-//            mParam2 = getArguments().getString(ARG_PARAM2);
-//        }
-//        mockRoutes();
-//    }
 
     // YES CHATGPT
     @Override
@@ -136,7 +126,7 @@ public class RoutesFragment extends Fragment {
         View view =  inflater.inflate(R.layout.fragment_routes, container, false);
         getPreviousDay = view.findViewById(R.id.previousDay);
         getPreviousDay.setEnabled(false);
-        getNextDay = view.findViewById(R.id.nextDay);
+        Button getNextDay = view.findViewById(R.id.nextDay);
         getNextDay.setEnabled(true);
         currentDay = new Date();
         formatter = new SimpleDateFormat("E, dd MMM");

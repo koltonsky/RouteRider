@@ -1,19 +1,14 @@
 package com.example.routerider;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.viewpager.widget.ViewPager;
-import androidx.viewpager2.widget.ViewPager2;
-
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Toast;
 
-import com.example.routerider.fragments.ProfileFragment;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.viewpager2.widget.ViewPager2;
+
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.material.tabs.TabLayout;
-import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 
@@ -34,7 +29,7 @@ public class HomeActivity extends AppCompatActivity {
 
     TabLayout tabLayout;
     ViewPager2 viewPager;
-
+    private long backPressedTime;
     public static List<RouteItem> dayRoutes;
 
     // YES CHATGPT
@@ -153,7 +148,6 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     // NO CHATGPT
-    private long backPressedTime;
     @Override
     public void onBackPressed() {
         if (backPressedTime + 2000 > System.currentTimeMillis()) {

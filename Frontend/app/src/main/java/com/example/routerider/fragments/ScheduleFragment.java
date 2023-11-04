@@ -1,6 +1,5 @@
 package com.example.routerider.fragments;
 
-import static android.app.PendingIntent.getActivity;
 import static androidx.core.content.ContextCompat.startActivity;
 
 import android.app.Activity;
@@ -9,42 +8,29 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-
-import androidx.cardview.widget.CardView;
-import androidx.fragment.app.Fragment;
-
-import android.transition.AutoTransition;
-import android.transition.TransitionManager;
-import android.app.DatePickerDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.os.AsyncTask;
-import android.os.Bundle;
-
-import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.Fragment;
-
 import android.os.Handler;
 import android.os.Looper;
+import android.transition.AutoTransition;
+import android.transition.TransitionManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.cardview.widget.CardView;
+import androidx.fragment.app.Fragment;
 
 import com.example.routerider.APICaller;
 import com.example.routerider.HelperFunc;
 import com.example.routerider.R;
-import com.example.routerider.RouteItem;
 import com.example.routerider.ScheduleItem;
 import com.example.routerider.TimeGapRecommendation;
-import com.example.routerider.TransitItem;
 import com.example.routerider.User;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -64,23 +50,19 @@ import com.google.gson.Gson;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.sql.Time;
+import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 public class ScheduleFragment extends Fragment {
     private LinearLayout scheduleView;
@@ -181,7 +163,7 @@ public class ScheduleFragment extends Fragment {
                 String eventEndTime = eventEndTimeEditText.getText().toString();
 
                 if (ScheduleFragment.EventInputListener.onEventInput(eventName, eventAddress, eventDate, eventStartTime, eventEndTime)) {
-                    CreateEventTask createTask = (CreateEventTask) new CreateEventTask(service, eventName, eventAddress, eventDate, eventStartTime, eventEndTime).execute();
+                    new CreateEventTask(service, eventName, eventAddress, eventDate, eventStartTime, eventEndTime).execute();
 
                     ScheduleItem newEvent = new ScheduleItem(
                             eventName,
@@ -347,11 +329,6 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
 
                 for (CalendarListEntry calendarEntry : items) {
                     String calendarId = calendarEntry.getId();
-                    String summary = calendarEntry.getSummary();
-
-//                        System.out.println("Calendar ID: " + calendarId);
-//                        System.out.println("Summary: " + summary);
-//                        System.out.println();
 
                     // List events for the calendar
                     long sevenDaysInMillis = 30L * 24 * 60 * 60 * 1000;
@@ -523,7 +500,6 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
         LayoutInflater inflater = LayoutInflater.from(scheduleContext);
 
         SimpleDateFormat fullDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
 
         long fifteenMinutesInMillis = 15 * 60 * 1000; // 15 minutes in milliseconds
         View previousEventView = null;
@@ -621,7 +597,7 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
                                                     recAddressText.setText(rec.getAddress());
                                                     ImageButton recMapsButton = timeGapRecView.findViewById(R.id.mapsButton);
                                                     recMapsButton.setOnClickListener(v2 -> {
-                                                        Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
+                                                        Intent intent = new Intent(Intent.ACTION_VIEW,
                                                                 Uri.parse("google.navigation:q=" + rec.getAddress()));
                                                         startActivity(scheduleContext, intent, null);
                                                     });
@@ -740,7 +716,7 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
                             }
                         });
 
-                        UpdateEventTask calendarAsyncTask = (UpdateEventTask) new UpdateEventTask(service, newEvent).execute();
+                        new UpdateEventTask(service, newEvent).execute();
 
                         dialog.dismiss();
                     } else {
@@ -913,8 +889,6 @@ class CreateEventTask extends AsyncTask<Void, Void, Event> {
 class DeleteEventTask extends AsyncTask<Void, Void, Event> {
     private Calendar service;
     private ScheduleItem item;
-    private LinearLayout eventListView;
-    private View view;
 
     public DeleteEventTask(Calendar service,ScheduleItem item) {
         this.service = service;

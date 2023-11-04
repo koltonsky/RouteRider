@@ -33,12 +33,6 @@ import java.util.Map;
 
 public class ProfileFragment extends Fragment {
 
-
-    public ProfileFragment() {
-        // Required empty public constructor
-    }
-
-    String response;
     public static JSONArray friendList = new JSONArray();
     public static JSONArray friendRequestList = new JSONArray();
 

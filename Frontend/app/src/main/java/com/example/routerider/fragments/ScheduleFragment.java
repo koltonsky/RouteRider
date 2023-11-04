@@ -65,15 +65,11 @@ import java.util.List;
 import java.util.Map;
 
 public class ScheduleFragment extends Fragment {
-    private LinearLayout scheduleView;
     private Date currentDay;
     private TextView currentDayText;
     private CalendarAsyncTask calendarAsyncTask;
     private DateFormat formatter;
     private Button getPreviousDay;
-    private Button getNextDay;
-    private FloatingActionButton addEvent;
-    private List<ScheduleItem> eventList;
 
     // YES CHATGPT
     @Override
@@ -83,15 +79,14 @@ public class ScheduleFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_schedule, container, false);
         getPreviousDay = view.findViewById(R.id.previousDay);
         getPreviousDay.setEnabled(false);
-        getNextDay = view.findViewById(R.id.nextDay);
+        Button getNextDay = view.findViewById(R.id.nextDay);
         getNextDay.setEnabled(false);
         GoogleSignInAccount account = User.getCurrentAccount();
         currentDay = new Date();
         formatter = new SimpleDateFormat("E, dd MMM");
         currentDayText = view.findViewById(R.id.currentDayText);
         currentDayText.setText(formatter.format(currentDay));
-        scheduleView = view.findViewById(R.id.scheduleView);
-        addEvent = view.findViewById(R.id.floatingActionButton);
+        FloatingActionButton addEvent = view.findViewById(R.id.floatingActionButton);
 
         APICaller apiCall = new APICaller();
         GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(
@@ -223,11 +218,7 @@ public class ScheduleFragment extends Fragment {
     // YES CHATGPT
     public interface EventInputListener {
         static boolean onEventInput(String eventName, String eventAddress, String eventDate, String eventStartTime, String eventEndTime) {
-            if(validateInputs(eventName, eventAddress, eventDate, eventStartTime, eventEndTime)) {
-                return true;
-            }
-
-            return false;
+            return validateInputs(eventName, eventAddress, eventDate, eventStartTime, eventEndTime);
         }
     }
 
@@ -243,11 +234,7 @@ public class ScheduleFragment extends Fragment {
             return false;
         }
 
-        if (!isStartTimeBeforeEndTime(eventStartTime, eventEndTime)) {
-            return false;
-        }
-
-        return true;
+        return isStartTimeBeforeEndTime(eventStartTime, eventEndTime);
     }
 
     // YES CHATGPT

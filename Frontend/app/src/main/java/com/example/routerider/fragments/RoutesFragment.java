@@ -251,7 +251,7 @@ public class RoutesFragment extends Fragment {
                                             }
                                         }
                                     }
-                                    RouteItem routeItem = new RouteItem(transitItemList, stepsList, "0", "0");
+                                    RouteItem routeItem = new RouteItem(transitItemList, stepsList);
                                     System.out.println("DAYROUTES WITH FRIEND");
                                     dayRoutes.add(routeItem);
                                     routesView = view.findViewById(R.id.routesView);

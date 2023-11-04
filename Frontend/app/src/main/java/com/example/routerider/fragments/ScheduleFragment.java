@@ -517,16 +517,6 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
                         CardView cardView = timeGapView.findViewById(R.id.base_cardview);
                         Button viewRecommendationsButton = timeGapView.findViewById(R.id.viewRecommendationsButton);
                         viewRecommendationsButton.setOnClickListener(v -> {
-//                            for (int i = 0; i<5; i++){
-//                                TimeGapRecommendation rec1 = new TimeGapRecommendation("cafe", "Starbucks", "123 Main St H2Z 0D4 Vancouver BC Canada");
-//                                TimeGapRecommendation rec2 = new TimeGapRecommendation("library", "Irving K Barber Library", "123 Main St H2Z 0D4 Vancouver BC Canada");
-//                                TimeGapRecommendation rec3 = new TimeGapRecommendation("restaurant", "Cactus Club Cafe", "123 Main St H2Z 0D4 Vancouver BC Canada");
-//                                recs.add(rec1);
-//                                recs.add(rec2);
-//                                recs.add(rec3);
-//                            }
-
-
                             if (hiddenView.getVisibility() == View.VISIBLE) {
                                 TransitionManager.beginDelayedTransition(cardView, new AutoTransition());
                                 hiddenView.setVisibility(View.GONE);
@@ -542,55 +532,7 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
                                     public void onResponse(String responseBody) throws JSONException {
                                         scheduleActivity.runOnUiThread(() -> {
                                             System.out.println("BODY: " + responseBody);
-                                            try {
-                                                JSONObject json = new JSONObject(responseBody);
-                                                JSONArray recOutput = json.getJSONArray("suggestions");
-                                                System.out.println(recOutput);
-                                                for (int i = 0; i < recOutput.length(); i++) {
-                                                    JSONObject item = (JSONObject) recOutput.get(i);
-                                                    System.out.println(item);
-                                                    JSONArray types = item.getJSONArray("types");
-                                                    String type = "";
-                                                    for (int j = 0; j < types.length(); j++) {
-                                                        String element = types.getString(j);
-                                                        if (element.equals("restaurant") || element.equals("cafe") || element.equals("library")) {
-                                                            type = element;
-                                                            break; // You can exit the loop early if you find a match
-                                                        }
-                                                    }
-
-                                                    String name = item.getString("name");
-                                                    String address = item.getString("vicinity");
-                                                    TimeGapRecommendation timeGapRecommendation = new TimeGapRecommendation(type, name, address);
-                                                    recs.add(timeGapRecommendation);
-                                                }
-                                                for (TimeGapRecommendation rec : recs) {
-                                                    View timeGapRecView;
-                                                    if (rec.getType() == "cafe") {
-                                                        timeGapRecView = inflater.inflate(R.layout.cafe_chip, hiddenView, false);
-                                                    } else if (rec.getType() == "library") {
-                                                        timeGapRecView = inflater.inflate(R.layout.library_chip, hiddenView, false);
-                                                    } else {
-                                                        timeGapRecView = inflater.inflate(R.layout.restaurant_chip, hiddenView, false);
-                                                    }
-                                                    TextView recNameText = timeGapRecView.findViewById(R.id.recName);
-                                                    recNameText.setText(rec.getName());
-                                                    TextView recAddressText = timeGapRecView.findViewById(R.id.recAddress);
-                                                    recAddressText.setText(rec.getAddress());
-                                                    ImageButton recMapsButton = timeGapRecView.findViewById(R.id.mapsButton);
-                                                    recMapsButton.setOnClickListener(v2 -> {
-                                                        Intent intent = new Intent(Intent.ACTION_VIEW,
-                                                                Uri.parse("google.navigation:q=" + rec.getAddress()));
-                                                        startActivity(scheduleContext, intent, null);
-                                                    });
-                                                    hiddenView.addView(timeGapRecView);
-                                                }
-                                                TransitionManager.beginDelayedTransition(cardView, new AutoTransition());
-                                                hiddenView.setVisibility(View.VISIBLE);
-                                                viewRecommendationsButton.setText("Hide Recommendations");
-                                            } catch (JSONException e) {
-                                                e.printStackTrace();
-                                            }
+                                            updateRecommendationLayout(responseBody, recs, inflater, viewRecommendationsButton, hiddenView, cardView);
                                         });
                                     }
 
@@ -748,8 +690,58 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
             eventListView.addView(view);
             previousEventView = view;
         }
+    }
 
+    public void updateRecommendationLayout(String responseBody, ArrayList<TimeGapRecommendation> recs, LayoutInflater inflater, Button viewRecommendationsButton, LinearLayout hiddenView, CardView cardView) {
+        try {
+            JSONObject json = new JSONObject(responseBody);
+            JSONArray recOutput = json.getJSONArray("suggestions");
+            System.out.println(recOutput);
+            for (int i = 0; i < recOutput.length(); i++) {
+                JSONObject item = (JSONObject) recOutput.get(i);
+                System.out.println(item);
+                JSONArray types = item.getJSONArray("types");
+                String type = "";
+                for (int j = 0; j < types.length(); j++) {
+                    String element = types.getString(j);
+                    if (element.equals("restaurant") || element.equals("cafe") || element.equals("library")) {
+                        type = element;
+                        break; // You can exit the loop early if you find a match
+                    }
+                }
 
+                String name = item.getString("name");
+                String address = item.getString("vicinity");
+                TimeGapRecommendation timeGapRecommendation = new TimeGapRecommendation(type, name, address);
+                recs.add(timeGapRecommendation);
+            }
+            for (TimeGapRecommendation rec : recs) {
+                View timeGapRecView;
+                if (rec.getType() == "cafe") {
+                    timeGapRecView = inflater.inflate(R.layout.cafe_chip, hiddenView, false);
+                } else if (rec.getType() == "library") {
+                    timeGapRecView = inflater.inflate(R.layout.library_chip, hiddenView, false);
+                } else {
+                    timeGapRecView = inflater.inflate(R.layout.restaurant_chip, hiddenView, false);
+                }
+                TextView recNameText = timeGapRecView.findViewById(R.id.recName);
+                recNameText.setText(rec.getName());
+                TextView recAddressText = timeGapRecView.findViewById(R.id.recAddress);
+                recAddressText.setText(rec.getAddress());
+                ImageButton recMapsButton = timeGapRecView.findViewById(R.id.mapsButton);
+                recMapsButton.setOnClickListener(v2 -> {
+                    Intent intent = new Intent(Intent.ACTION_VIEW,
+                            Uri.parse("google.navigation:q=" + rec.getAddress()));
+                    startActivity(scheduleContext, intent, null);
+                });
+                hiddenView.addView(timeGapRecView);
+            }
+            TransitionManager.beginDelayedTransition(cardView, new AutoTransition());
+            hiddenView.setVisibility(View.VISIBLE);
+            viewRecommendationsButton.setText("Hide Recommendations");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     // YES CHATGPT

@@ -1,4 +1,4 @@
-const { MongoClient, ObjectId } = require('mongodb');
+const { MongoClient} = require('mongodb');
 const uri = 'mongodb://0.0.0.0:27017'; // Replace with your MongoDB connection string
 const client = new MongoClient(uri);
 
@@ -267,6 +267,11 @@ const editEventByID = async (req, res) => {
 
 // ChatGPT usage: Yes
 const addEvent = async (req, res) => {
+  // Function to compare events based on their start times
+  function compareEvents(event1, event2) {
+    return new Date(event1.startTime) - new Date(event2.startTime);
+  }
+
   try {
     const userEmail = req.params.email;
     const newEvent = req.body; // Assuming the new event data is sent in the request body
@@ -313,10 +318,7 @@ const addEvent = async (req, res) => {
       return;
     }
 
-    // Function to compare events based on their start times
-    function compareEvents(event1, event2) {
-      return new Date(event1.startTime) - new Date(event2.startTime);
-    }
+
 
     // Add the new event to the events array and sort by start time
     schedule.events.push(newEvent);
@@ -680,7 +682,7 @@ const getCalendarID = async (req, res) => {
     const calendarID = event.calendarID;
 
     if (calendarID) {
-      res.status(200).json({ calendarID: calendarID });
+      res.status(200).json({ calendarID });
     } else {
       res.status(404).json({ error: 'Calendar ID not found for the event' });
     }
@@ -817,7 +819,7 @@ const deleteSchedule = async (req, res) => {
 
     // Delete the user based on their email
     const collection = client.db('ScheduleDB').collection('schedulelist');
-    const result = await collection.deleteOne({ email: email });
+    const result = await collection.deleteOne({ email });
 
     if (result.deletedCount === 1) {
       res.status(200).json({ message: 'Schedule deleted successfully' });

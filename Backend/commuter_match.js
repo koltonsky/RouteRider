@@ -1,23 +1,11 @@
 const express = require('express');
 const https = require('https');
-const path = require('path');
-const fs = require('fs');
-const queryString = require('querystring');
-const port = 8081;
 // const fetch = require('node-fetch');
 const { MongoClient} = require('mongodb');
 // const ApiKeyManager = require('@esri/arcgis-rest-request');
-const {ApiKeyManager} = require('@esri/arcgis-rest-request');
-const {geocode} = require('@esri/arcgis-rest-geocoding');
 
 const app = express()
 app.use(express.json());
-const axios = require('axios')
-
-const user = require('./routes/user.js')
-const schedule = require('./routes/schedule.js');
-const { get } = require('http');
-const { time } = require('console');
 
 // MongoDB connection setup
 const uri = 'mongodb://0.0.0.0:27017'; // Replace with your MongoDB connection string

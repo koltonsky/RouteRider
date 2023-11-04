@@ -4,7 +4,6 @@ const client = new MongoClient(uri);
 
 // ChatGPT usage: Yes
 const createNewSchedule = async (req, res) => {
-  try {
     // Extract user data from the request body
     const scheduleData = req.body;
 
@@ -24,16 +23,12 @@ const createNewSchedule = async (req, res) => {
       res.status(109).json({ message: errorMessage });
     } else {
       // If the user doesn't exist, insert the new user document into the collection
-      const insertResult = await collection.insertOne(scheduleData);
+      await collection.insertOne(scheduleData);
       const successMessage = 'Schedule created successfully';
       const successMessageLength = Buffer.byteLength(successMessage, 'utf8');
       res.set('Content-Length', successMessageLength);
       res.status(201).json({ message: successMessage });
     }
-  } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
 };
 
 // ChatGPT usage: Yes
@@ -616,7 +611,7 @@ const addEvent = async (req, res) => {
 const editEventGeolocation = async (req, res) => {
   try {
     const userEmail = req.params.email;
-    const eventIndex = parseInt(req.params.index);
+    const eventIndex = parseInt(req.params.index, 10);
     const updatedGeolocation = req.body.geolocation; // Assuming the updated geolocation is sent as an array in the request body
 
     const collection = client.db('ScheduleDB').collection('schedulelist');

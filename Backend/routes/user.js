@@ -51,7 +51,7 @@ const updateAddress = async (req, res) => {
 
     // Update the user's address by their email
     const result = await collection.updateOne(
-      { email: email }, // Use the email to identify the user
+      { email }, // Use the email to identify the user
       { $set: { address: newAddress } } // Set the new address
     );
 
@@ -247,9 +247,11 @@ const getFriendListWithNames = async (req, res) => {
       const collection = client.db('UserDB').collection('userlist');
   
       // Find the user by their email
-      const user = await collection.findOne({ email: userEmail });
-
-
+      // Check if the user or friend doesn't exist in the userlist collection
+      const [user, friend] = await Promise.all([
+        collection.findOne({ email: userEmail }),
+        collection.findOne({ email: friendEmail }),
+      ]);
   
       if (!user) {
         res.status(404).json({ error: 'User not found' });
@@ -626,7 +628,7 @@ const deleteUser = async (req, res) => {
 
     // Delete the user based on their email
     const collection = client.db('UserDB').collection('userlist');
-    const result = await collection.deleteOne({ email: email });
+    const result = await collection.deleteOne({ email });
 
   if (result.deletedCount === 1) {
       res.status(200).json({ message: 'User deleted successfully' });

@@ -106,14 +106,14 @@ app.post('/api/store_token', (req, res) => {
   client
     .db('TokenDB')
     .collection('tokenlist')
-    .insertOne({ email: email, token: token })
+    .insertOne({ email, token })
     .then((result) => {
       console.log('Inserted token in TokenDB');
       // Attempt to find the user
       client
         .db('UserDB')
         .collection('userlist')
-        .findOne({ email: email })
+        .findOne({ email })
         .then((user) => {
           if (user) {
             // Update the 'fcmToken' field in the database for the found entry
@@ -684,6 +684,7 @@ async function initRoute(userEmail, date) {
         /* fields for object to be returned to frontend */
         var id = '';
         var leaveTime = '';
+        var leaveTimeNum = '';
         var type = '';
         var more = {};
         var curStep = {}; // maybe properly define this object later
@@ -799,6 +800,7 @@ async function initReminders(req) {
   console.log('initReminders(): req.body.email: ' + req.body.email);
   var returnList = [];
 
+  var errorString = '';
   var schedule = await client
     .db('ScheduleDB')
     .collection('schedulelist')
@@ -808,12 +810,12 @@ async function initReminders(req) {
     .collection('userlist')
     .findOne({ email: req.body.email });
   if (schedule == null) {
-    var errorString =
+    errorString =
       'initReminders(): no matching email exists in schedule database';
     console.log(errorString);
     return errorString;
   } else if (user == null) {
-    var errorString =
+    errorString =
       'initReminders(): no matching email exists in user database';
     console.log(errorString);
     return errorString;
@@ -839,8 +841,8 @@ async function initReminders(req) {
   }
   console.log('initReminders(): returned firstEvents: ' + firstEvents.length);
   // console.log(firstEvents[1].timeOfFirstEvent);
-
-  for (var i = 0; i < firstEvents.length; i++) {
+  var trip = {};
+  for (i = 0; i < firstEvents.length; i++) {
     console.log(
       'planTrip inputs :' +
         firstEvents[i].locationOfOrigin +
@@ -852,8 +854,7 @@ async function initReminders(req) {
     trip = await planTransitTrip(
       firstEvents[i].locationOfOrigin,
       firstEvents[i].locationOfFirstEvent,
-      new Date(firstEvents[i].timeOfFirstEvent),
-      'none'
+      new Date(firstEvents[i].timeOfFirstEvent)
     );
     console.log(
       'initReminders(): returned trip: ' +
@@ -875,6 +876,7 @@ async function initReminders(req) {
     };
 
     /* Find first instance of bus or skytrain */
+    var step = {};
     for (var j = 0; j < trip.routes[0].legs[0].steps.length; j++) {
       step = trip.routes[0].legs[0].steps[j];
       travelMode = step.travel_mode;
@@ -896,8 +898,7 @@ async function initReminders(req) {
               step.transit_details.departure_time.text;
             break;
           default:
-            type = 'default';
-            id = 'default';
+            console.log('initReminders(): hit default case');
             break;
         }
         break;
@@ -905,8 +906,7 @@ async function initReminders(req) {
     }
 
     reminder.date = firstEvents[i].timeOfFirstEvent.split('T')[0];
-    reminder.leaveTime = departure_time =
-      trip.routes[0].legs[0].departure_time.text;
+    reminder.leaveTime = trip.routes[0].legs[0].departure_time.text;
     reminder.leaveTime_iso = combineDateAndTime(
       reminder.date,
       reminder.leaveTime
@@ -923,7 +923,8 @@ async function initReminders(req) {
   // });
 
   var cronTasks = [];
-  for (var i = 0; i < returnList.length; i++) {
+  var cronTimek = '';
+  for (i = 0; i < returnList.length; i++) {
     if (returnList[i].firstBus.type == 'Bus') {
       // make this cleaner by changing case statement to only look for buses (RTTI API doesnt support skytrains)
       for (var k = 1; k < 6; k++) {
@@ -1036,7 +1037,7 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
       );
     }
 
-    for (var i = 0; i < schedule_friend.events.length; i++) {
+    for (i = 0; i < schedule_friend.events.length; i++) {
       // assumes events are sorted by date
       // console.log("initRoute(): " + schedule.events[i].startTime + " " + date);
       if (schedule_friend.events[i].startTime.split('T')[0] == date) {
@@ -1062,12 +1063,14 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
     //   reject("time gap too big");
     // }
 
+    var timeOfFirstEvent = '';
+    var locationOfFirstEvent = '';
     if (new Date(timeOfFirstEvent_user) < new Date(timeOfFirstEvent_friend)) {
-      var timeOfFirstEvent = timeOfFirstEvent_user;
-      var locationOfFirstEvent = locationOfFirstEvent_user;
+      timeOfFirstEvent = timeOfFirstEvent_user;
+      locationOfFirstEvent = locationOfFirstEvent_user;
     } else {
-      var timeOfFirstEvent = timeOfFirstEvent_friend;
-      var locationOfFirstEvent = locationOfFirstEvent_friend;
+      timeOfFirstEvent = timeOfFirstEvent_friend;
+      locationOfFirstEvent = locationOfFirstEvent_friend;
     }
     console.log(
       'initRouteWithFriends(): timeOfFirstEvent: ' + timeOfFirstEvent
@@ -1100,13 +1103,14 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
       49.2412,
       -123.0298
     );
+    var meetingPoint = '';
     if (
       (distToCommercial_friend + distToCommercial_user) / 2 <
       (distToJoyce_friend + distToJoyce_user) / 2
     ) {
-      var meetingPoint = 'Commercial Broadway Station';
+      meetingPoint = 'Commercial Broadway Station';
     } else {
-      var meetingPoint = 'Joyce-Collingwood Station';
+      meetingPoint = 'Joyce-Collingwood Station';
     }
     console.log('initRouteWithFriends(): meetingPoint: ' + meetingPoint);
     console.log(
@@ -1196,6 +1200,7 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
             var leaveTime = '';
             var leaveTimeNum = '';
             var type = '';
+            var travelMode = '';
             var more = {};
             var curStep = {}; // maybe properly define this object later
             var returnList = [];
@@ -1205,7 +1210,7 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
             more.arrival_time = arrive_time_ubc;
             more.departure_time = trip.routes[0].legs[0].departure_time.text;
             more.steps = [];
-
+            
             trip.routes[0].legs[0].steps.forEach((step, stepIndex) => {
               travelMode = step.travel_mode;
 
@@ -1333,7 +1338,7 @@ function getLatLong(address) {
 
     console.log('getLatLong: calling geocode api with address: ');
     geocode({
-      address: address,
+      address,
       authentication: authentication_geo,
     })
       .then((response) => {
@@ -1361,70 +1366,6 @@ function getLatLong(address) {
 }
 
 /**
- * Finds the nearest bus stops within a 500m radius to a given address.
- *
- * @param address
- * @returns a list of bus stops
- *
- * ChatGPT usage: Partial
- */
-async function getNearestBuses(address) {
-  return new Promise((resolve, reject) => {
-    lat = 0;
-    long = 0;
-
-    console.log('--------------------');
-    console.log('getBuses: calling getlatlong');
-    var address =
-      'Student Union Boulevard, Vancouver, British Columbia, Canada';
-    getLatLong(address).then((coords) => {
-      console.log('getNearestBuses(): returned coords: ' + coords);
-      console.log('--------------------');
-      lat = coords[0];
-      long = coords[1];
-
-      var apiKey = 'crj9j8Kj97pbPkkc61dX';
-
-      const queryParams = queryString.stringify({
-        lat: lat,
-        long: long,
-        radius: 500, // Set the radius to your desired value (in meters)
-      });
-
-      const options = {
-        hostname: 'api.translink.ca',
-        path: `/rttiapi/v1/stops?apikey=${apiKey}&${queryParams}`,
-        method: 'GET',
-        headers: {
-          Accept: 'application/json',
-        },
-      };
-      console.log('getnearestbuses(): options set. ' + options.path);
-
-      const request = https
-        .get(options, (response) => {
-          let data = '';
-          console.log('getnearestbuses(): request sent');
-
-          response.on('data', (chunk) => {
-            data += chunk;
-          });
-
-          response.on('end', () => {
-            console.log('getNearestBuses() return');
-            console.log(JSON.parse(data));
-            console.log('--------------------');
-            resolve(JSON.parse(data));
-          });
-        })
-        .on('error', (err) => {
-          console.log('Error: ' + err.message);
-        });
-    });
-  });
-}
-
-/**
  * Generates a commute route using Google's Directions API
  *
  * @param {*} origin      address where the commute starts
@@ -1440,8 +1381,8 @@ async function planTransitTrip(origin, destination, arriveTime) {
     const apiKey = 'AIzaSyBVsUyKxBvRjE0XdooMuoDrpAfu1KO_2mM';
 
     const params = new URLSearchParams({
-      origin: origin,
-      destination: destination,
+      origin,
+      destination,
       mode: 'transit',
       arrival_time: Math.floor(arriveTime.getTime() / 1000),
       key: apiKey,
@@ -1449,7 +1390,7 @@ async function planTransitTrip(origin, destination, arriveTime) {
 
     const url = `${apiUrl}?${params.toString()}`;
 
-    const request = https.get(url, (response) => {
+    https.get(url, (response) => {
       let data = '';
       console.log('planTransitTrip(): request sent');
 
@@ -1528,8 +1469,8 @@ function combineDateAndTime(dateString, timeString) {
     throw new Error('Invalid time format');
   }
 
-  var hours = parseInt(timeComponents[1]);
-  var minutes = parseInt(timeComponents[2]);
+  var hours = parseInt(timeComponents[1], 10);
+  var minutes = parseInt(timeComponents[2], 10);
   var isPM = timeComponents[3].toLowerCase() === 'p';
 
   // Adjust hours for PM

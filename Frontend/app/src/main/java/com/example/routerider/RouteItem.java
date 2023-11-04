@@ -8,15 +8,11 @@ import java.util.List;
 public class RouteItem {
     private List<TransitItem> transitItems;
     private List<String> steps;
-    private String distance;
-    private String duration;
 
 
-    public RouteItem(List<TransitItem> transitItems, List<String> steps, String distance, String duration){
+    public RouteItem(List<TransitItem> transitItems, List<String> steps){
         this.transitItems = transitItems;
         this.steps = steps;
-        this.distance = distance;
-        this.duration = duration;
     }
 
     public RouteItem(String json){

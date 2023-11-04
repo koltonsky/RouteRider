@@ -65,7 +65,7 @@ public class HomeActivity extends AppCompatActivity {
                             }
                         }
                     }
-                    RouteItem routeItem = new RouteItem(transitItemList, stepsList, "0", "0");
+                    RouteItem routeItem = new RouteItem(transitItemList, stepsList);
                     callback.onResponse(routeItem);
                     // dayRoutes.add(routeItem);
                     //Log.d("DAY ROUTES", "ADDED DAY ROUTE");

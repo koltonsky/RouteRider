@@ -261,7 +261,7 @@ public class ScheduleFragment extends Fragment {
 
             assert parsedDate != null;
             return parsedDate.after(currentDate); // Date is valid and ahead of the current date and time
-        } catch (java.text.ParseException e) {
+        } catch (ParseException e) {
             // Parsing failed, the date is not valid
             return false;
         }
@@ -815,15 +815,6 @@ class UpdateEventTask extends AsyncTask<Void, Void, Event> {
             return null;
         }
     }
-
-    @Override
-    protected void onPostExecute(Event updatedEvent) {
-        if (updatedEvent != null) {
-            System.out.println("Event updated: " + updatedEvent.getHtmlLink());
-        } else {
-            // Handle the error or show a message to the user
-        }
-    }
 }
 
 // NO CHATGPT
@@ -874,15 +865,6 @@ class CreateEventTask extends AsyncTask<Void, Void, Event> {
             return null;
         }
     }
-
-    @Override
-    protected void onPostExecute(Event event) {
-        if (event != null) {
-            System.out.printf("Event created: %s\n", event.getHtmlLink());
-        } else {
-            // Handle the error or show a message to the user
-        }
-    }
 }
 
 // NO CHATGPT
@@ -906,11 +888,6 @@ class DeleteEventTask extends AsyncTask<Void, Void, Event> {
             e.printStackTrace();
             return null;
         }
-    }
-
-    @Override
-    protected void onPostExecute(Event event) {
-
     }
 }
 

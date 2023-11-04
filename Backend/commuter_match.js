@@ -1,5 +1,4 @@
 const express = require('express');
-const https = require('https');
 // const fetch = require('node-fetch');
 const { MongoClient} = require('mongodb');
 // const ApiKeyManager = require('@esri/arcgis-rest-request');
@@ -202,7 +201,7 @@ async function findMatchingUsers(userEmail) {
 
 
   //getFirstEventsOfEachDay("koltonluu@gmail.com");
-  const userEmail = "koltonluu@gmail.com";
+  //const userEmail = "koltonluu@gmail.com";
   //const getFirstEventsOfEachDayReturn = getFirstEventsOfEachDay(userEmail);
 
   //const emailsExcludingUser = findOtherEmails(userEmail);

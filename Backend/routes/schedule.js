@@ -4,7 +4,7 @@ const client = new MongoClient(uri);
 
 // ChatGPT usage: Yes
 const createNewSchedule = async (req, res) => {
-  try {
+  try{
     // Extract user data from the request body
     const scheduleData = req.body;
 
@@ -616,7 +616,7 @@ const addEvent = async (req, res) => {
 const editEventGeolocation = async (req, res) => {
   try {
     const userEmail = req.params.email;
-    const eventIndex = parseInt(req.params.index);
+    const eventIndex = parseInt(req.params.index, 10);
     const updatedGeolocation = req.body.geolocation; // Assuming the updated geolocation is sent as an array in the request body
 
     const collection = client.db('ScheduleDB').collection('schedulelist');

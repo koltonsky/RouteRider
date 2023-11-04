@@ -27,6 +27,7 @@ import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 
 import com.example.routerider.APICaller;
+import com.example.routerider.CalendarException;
 import com.example.routerider.HelperFunc;
 import com.example.routerider.R;
 import com.example.routerider.ScheduleItem;
@@ -65,15 +66,11 @@ import java.util.List;
 import java.util.Map;
 
 public class ScheduleFragment extends Fragment {
-    private LinearLayout scheduleView;
     private Date currentDay;
     private TextView currentDayText;
     private CalendarAsyncTask calendarAsyncTask;
     private DateFormat formatter;
     private Button getPreviousDay;
-    private Button getNextDay;
-    private FloatingActionButton addEvent;
-    private List<ScheduleItem> eventList;
 
     // YES CHATGPT
     @Override
@@ -83,15 +80,14 @@ public class ScheduleFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_schedule, container, false);
         getPreviousDay = view.findViewById(R.id.previousDay);
         getPreviousDay.setEnabled(false);
-        getNextDay = view.findViewById(R.id.nextDay);
+        Button getNextDay = view.findViewById(R.id.nextDay);
         getNextDay.setEnabled(false);
         GoogleSignInAccount account = User.getCurrentAccount();
         currentDay = new Date();
         formatter = new SimpleDateFormat("E, dd MMM");
         currentDayText = view.findViewById(R.id.currentDayText);
         currentDayText.setText(formatter.format(currentDay));
-        scheduleView = view.findViewById(R.id.scheduleView);
-        addEvent = view.findViewById(R.id.floatingActionButton);
+        FloatingActionButton addEvent = view.findViewById(R.id.floatingActionButton);
 
         APICaller apiCall = new APICaller();
         GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(
@@ -104,8 +100,8 @@ public class ScheduleFragment extends Fragment {
                     GoogleNetHttpTransport.newTrustedTransport(), GsonFactory.getDefaultInstance(), credential)
                     .setApplicationName("RouteRider")
                     .build();
-        } catch (GeneralSecurityException | IOException e) {
-            throw new RuntimeException(e);
+        } catch (GeneralSecurityException | IOException gse) {
+            throw new CalendarException("An error occurred while setting up the calendar service", gse);
         }
 
         calendarAsyncTask = (CalendarAsyncTask) new CalendarAsyncTask(this.getActivity(), this.getContext(), view, account).execute(service);
@@ -223,11 +219,7 @@ public class ScheduleFragment extends Fragment {
     // YES CHATGPT
     public interface EventInputListener {
         static boolean onEventInput(String eventName, String eventAddress, String eventDate, String eventStartTime, String eventEndTime) {
-            if(validateInputs(eventName, eventAddress, eventDate, eventStartTime, eventEndTime)) {
-                return true;
-            }
-
-            return false;
+            return validateInputs(eventName, eventAddress, eventDate, eventStartTime, eventEndTime);
         }
     }
 
@@ -243,11 +235,7 @@ public class ScheduleFragment extends Fragment {
             return false;
         }
 
-        if (!isStartTimeBeforeEndTime(eventStartTime, eventEndTime)) {
-            return false;
-        }
-
-        return true;
+        return isStartTimeBeforeEndTime(eventStartTime, eventEndTime);
     }
 
     // YES CHATGPT
@@ -261,7 +249,7 @@ public class ScheduleFragment extends Fragment {
 
             assert parsedDate != null;
             return parsedDate.after(currentDate); // Date is valid and ahead of the current date and time
-        } catch (java.text.ParseException e) {
+        } catch (ParseException e) {
             // Parsing failed, the date is not valid
             return false;
         }
@@ -285,7 +273,7 @@ public class ScheduleFragment extends Fragment {
 
             assert start != null;
             return start.before(end);
-        } catch (java.text.ParseException e) {
+        } catch (ParseException e) {
             // Parsing failed, the times are not valid
             return false;
         }
@@ -316,7 +304,7 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
         dayList =  new ArrayList<>();
         service = calendars[0];
         eventList = new ArrayList<>();
-        APICaller apiCall = new APICaller();
+
 
         try {
             CalendarList calendarList = service.calendarList().list().execute();
@@ -368,13 +356,6 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
                         // Format the start and end times as strings (you can customize the format)
                         String startTimeString = (startTime != null) ? startTime.toString() : "N/A";
                         String endTimeString = (endTime != null) ? endTime.toString() : "N/A";
-
-                        System.out.println("Event ID: " + eventId);
-//                            System.out.println("Event Summary: " + eventSummary);
-//                            System.out.println("Event Location: " + eventLocation);
-//                            System.out.println("Start Time: " + startTimeString);
-//                            System.out.println("End Time: " + endTimeString);
-//                            System.out.println();
                         if (eventLocation.contains("Room")) {
                             eventLocation = "UBC " + eventLocation;
                         }
@@ -400,69 +381,70 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
             test.put("email", account.getEmail());
             test.put("events", eventList);
             String jsonSchedule = new Gson().toJson(test);
+            calendarApiCall(jsonSchedule);
 
-            System.out.println(jsonSchedule);
-            System.out.println("avbout to get schedule");
-
-
-            apiCall.APICall("api/schedulelist/" + account.getEmail(), "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
-                @Override
-                public void onResponse(String responseBody) {
-                    System.out.println("BODY: " + responseBody);
-                    if(responseBody.equals("\"Schedule found\"")) {
-                        System.out.println("TRUE");
-                        apiCall.APICall("api/schedulelist/" + account.getEmail(), jsonSchedule, APICaller.HttpMethod.PUT, new APICaller.ApiCallback() {
-                            @Override
-                            public void onResponse(String responseBodyUpdate) {
-                                System.out.println("Update schedule: " + responseBodyUpdate);
-                            }
-
-                            @Override
-                            public void onError(String errorMessage) {
-                                System.out.println("Error: " + errorMessage);
-                            }
-                        });
-                    } else {
-                        System.out.println("TEST");
-                        apiCall.APICall("api/schedulelist/" + account.getEmail(), jsonSchedule, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
-                            @Override
-                            public void onResponse(String responseBodyPost) {
-                                System.out.println("Created schedule: " + responseBodyPost);
-                            }
-
-                            @Override
-                            public void onError(String errorMessage) {
-                                System.out.println("Error: " + errorMessage);
-                            }
-                        });
-                    }
-                }
-
-                @Override
-                public void onError(String errorMessage) {
-                    System.out.println("Error " + errorMessage);
-                    System.out.println(errorMessage.split(",")[0]);
-                    if( (errorMessage.split(",")[0]).equals("Error: 404")){
-                        System.out.println("schedule not found, creating schedule using Google Calendar data");
-                        apiCall.APICall("api/schedulelist/", jsonSchedule, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
-                            @Override
-                            public void onResponse(String responseBodyPost) {
-                                System.out.println("Created schedule: " + responseBodyPost);
-                            }
-
-                            @Override
-                            public void onError(String errorMessage) {
-                                System.out.println("Error: " + errorMessage);
-                            }
-                        });
-                    }
-                }
-            });
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         return null;
+    }
+
+    private void calendarApiCall(String jsonSchedule) {
+        APICaller apiCall = new APICaller();
+        apiCall.APICall("api/schedulelist/" + account.getEmail(), "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
+            @Override
+            public void onResponse(String responseBody) {
+                System.out.println("BODY: " + responseBody);
+                if(responseBody.equals("\"Schedule found\"")) {
+                    System.out.println("TRUE");
+                    apiCall.APICall("api/schedulelist/" + account.getEmail(), jsonSchedule, APICaller.HttpMethod.PUT, new APICaller.ApiCallback() {
+                        @Override
+                        public void onResponse(String responseBodyUpdate) {
+                            System.out.println("Update schedule: " + responseBodyUpdate);
+                        }
+
+                        @Override
+                        public void onError(String errorMessage) {
+                            System.out.println("Error: " + errorMessage);
+                        }
+                    });
+                } else {
+                    System.out.println("TEST");
+                    apiCall.APICall("api/schedulelist/" + account.getEmail(), jsonSchedule, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
+                        @Override
+                        public void onResponse(String responseBodyPost) {
+                            System.out.println("Created schedule: " + responseBodyPost);
+                        }
+
+                        @Override
+                        public void onError(String errorMessage) {
+                            System.out.println("Error: " + errorMessage);
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                System.out.println("Error " + errorMessage);
+                System.out.println(errorMessage.split(",")[0]);
+                if( (errorMessage.split(",")[0]).equals("Error: 404")){
+                    System.out.println("schedule not found, creating schedule using Google Calendar data");
+                    apiCall.APICall("api/schedulelist/", jsonSchedule, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
+                        @Override
+                        public void onResponse(String responseBodyPost) {
+                            System.out.println("Created schedule: " + responseBodyPost);
+                        }
+
+                        @Override
+                        public void onError(String errorMessage) {
+                            System.out.println("Error: " + errorMessage);
+                        }
+                    });
+                }
+            }
+        });
     }
 
 
@@ -815,15 +797,6 @@ class UpdateEventTask extends AsyncTask<Void, Void, Event> {
             return null;
         }
     }
-
-    @Override
-    protected void onPostExecute(Event updatedEvent) {
-        if (updatedEvent != null) {
-            System.out.println("Event updated: " + updatedEvent.getHtmlLink());
-        } else {
-            // Handle the error or show a message to the user
-        }
-    }
 }
 
 // NO CHATGPT
@@ -874,15 +847,6 @@ class CreateEventTask extends AsyncTask<Void, Void, Event> {
             return null;
         }
     }
-
-    @Override
-    protected void onPostExecute(Event event) {
-        if (event != null) {
-            System.out.printf("Event created: %s\n", event.getHtmlLink());
-        } else {
-            // Handle the error or show a message to the user
-        }
-    }
 }
 
 // NO CHATGPT
@@ -906,11 +870,6 @@ class DeleteEventTask extends AsyncTask<Void, Void, Event> {
             e.printStackTrace();
             return null;
         }
-    }
-
-    @Override
-    protected void onPostExecute(Event event) {
-
     }
 }
 

@@ -7,7 +7,7 @@ const client = new MongoClient(uri);
 
 // ChatGPT usage: Yes
 const createNewUser = async (req, res) => {
-  
+  try {
     // Extract user data from the request body
     const userData = req.body;
 
@@ -33,10 +33,15 @@ const createNewUser = async (req, res) => {
       res.status(201).json({ message: successMessage });
       //console.log("existing user");
     }
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 };
 
 // ChatGPT usage: Yes
 const updateAddress = async (req, res) => {
+  try {
     const email = req.params.email; // Get the email from the URL parameter
     const newAddress = req.body.address; // Get the new address from the request body
 
@@ -54,6 +59,10 @@ const updateAddress = async (req, res) => {
     } else {
       res.status(404).json({ error: 'User not found' });
     }
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
   };
 
   // ChatGPT usage: Yes

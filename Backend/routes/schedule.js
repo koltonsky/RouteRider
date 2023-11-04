@@ -4,6 +4,7 @@ const client = new MongoClient(uri);
 
 // ChatGPT usage: Yes
 const createNewSchedule = async (req, res) => {
+  try{
     // Extract user data from the request body
     const scheduleData = req.body;
 
@@ -29,6 +30,10 @@ const createNewSchedule = async (req, res) => {
       res.set('Content-Length', successMessageLength);
       res.status(201).json({ message: successMessage });
     }
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 };
 
 // ChatGPT usage: Yes

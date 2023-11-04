@@ -99,8 +99,8 @@ public class ScheduleFragment extends Fragment {
                     GoogleNetHttpTransport.newTrustedTransport(), GsonFactory.getDefaultInstance(), credential)
                     .setApplicationName("RouteRider")
                     .build();
-        } catch (GeneralSecurityException | IOException e) {
-            throw new RuntimeException(e);
+        } catch (GeneralSecurityException | IOException gse) {
+            throw new RuntimeException("An error occurred while setting up the calendar service: " + gse.getMessage(), gse);
         }
 
         calendarAsyncTask = (CalendarAsyncTask) new CalendarAsyncTask(this.getActivity(), this.getContext(), view, account).execute(service);
@@ -272,7 +272,7 @@ public class ScheduleFragment extends Fragment {
 
             assert start != null;
             return start.before(end);
-        } catch (java.text.ParseException e) {
+        } catch (ParseException e) {
             // Parsing failed, the times are not valid
             return false;
         }

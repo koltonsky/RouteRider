@@ -2,7 +2,7 @@ const express = require('express');
 const https = require('https');
 const path = require('path');
 const fs = require('fs');
-const queryString = require('querystring');
+// const queryString = require('querystring');
 const port = 8081;
 // const fetch = require('node-fetch');
 const { MongoClient } = require('mongodb');
@@ -12,14 +12,13 @@ const { geocode } = require('@esri/arcgis-rest-geocoding');
 
 const app = express();
 app.use(express.json());
-const axios = require('axios');
 
 const user = require('./routes/user.js');
 const schedule = require('./routes/schedule.js');
 const commuters = require('./commuter_match.js');
 const recommendation = require('./recommendation.js');
-const { get } = require('http');
-const { time, error } = require('console');
+// const { get } = require('http');
+// const { time, error } = require('console');
 
 const admin = require('firebase-admin');
 const serviceAccount = require('./serviceAccountKey.json');
@@ -695,7 +694,8 @@ async function initRoute(userEmail, date) {
         more.arrival_time = trip.routes[0].legs[0].arrival_time.text;
         more.departure_time = trip.routes[0].legs[0].departure_time.text;
         more.steps = [];
-
+        
+        var travelMode = '';
         trip.routes[0].legs[0].steps.forEach((step, stepIndex) => {
           travelMode = step.travel_mode;
 

@@ -49,7 +49,6 @@ async function getFirstEventsOfEachDay(userEmail) {
 
         if (!userSchedule) {
             console.log('User not found or schedule is empty.');
-            return { events: [] };
         }
 
         // Aggregate the events to find the first event of each day
@@ -84,7 +83,6 @@ async function getFirstEventsOfEachDay(userEmail) {
         return { events: reversedFirstEvents };
     } catch (err) {
         console.error('Error:', err);
-        return { events: [] }; // Return an empty array in case of an error
     }
 }
 

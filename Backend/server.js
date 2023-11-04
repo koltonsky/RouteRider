@@ -746,7 +746,7 @@ async function initRoute(userEmail, date) {
 
         /* Directions API doesn't include leaveTime in "WALKING" steps, so we need to calculate ourselves */
         for (var i = 0; i < returnList.length - 1; i++) {
-          if (i == 0 && returnList[i]._type == 'Walk') {
+          if (i === 0 && returnList[i]._type == 'Walk') {
             returnList[i]._leaveTime =
               returnList[returnList.length - 1].departure_time;
             returnList[i]._leaveTimeNum = timeToTimestamp(
@@ -877,6 +877,7 @@ async function initReminders(req) {
 
     /* Find first instance of bus or skytrain */
     var step = {};
+    var travelMode = '';
     for (var j = 0; j < trip.routes[0].legs[0].steps.length; j++) {
       step = trip.routes[0].legs[0].steps[j];
       travelMode = step.travel_mode;
@@ -1390,7 +1391,7 @@ async function planTransitTrip(origin, destination, arriveTime) {
 
     const url = `${apiUrl}?${params.toString()}`;
 
-    https.get(url, (response) => {
+    const request = https.get(url, (response) => {
       let data = '';
       console.log('planTransitTrip(): request sent');
 

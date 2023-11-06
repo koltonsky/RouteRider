@@ -24,7 +24,7 @@
             android:orientation="vertical">
 
     <TextView
-        android:id="@+id/eventName"
+        android:id="@+id/event_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -35,14 +35,14 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/eventLocation"
+        android:id="@+id/event_location"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="Event Location"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/eventName" />
+        app:layout_constraintTop_toBottomOf="@+id/event_name" />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -52,28 +52,28 @@
         android:layout_marginBottom="8dp"
         >
         <TextView
-            android:id="@+id/startTime"
+            android:id="@+id/start_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
 
             android:text="Start Time"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/eventLocation" />
+            app:layout_constraintTop_toBottomOf="@+id/event_location" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="5dp"
             android:layout_marginEnd="5dp"
             android:text="-"
-            app:layout_constraintStart_toEndOf="@+id/startTime"
-            app:layout_constraintTop_toBottomOf="@+id/eventLocation" />
+            app:layout_constraintStart_toEndOf="@+id/start_time"
+            app:layout_constraintTop_toBottomOf="@+id/event_location" />
         <TextView
-            android:id="@+id/endTime"
+            android:id="@+id/end_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="End Time"
-            app:layout_constraintStart_toEndOf="@+id/startTime"
-            app:layout_constraintTop_toBottomOf="@+id/eventLocation" />
+            app:layout_constraintStart_toEndOf="@+id/start_time"
+            app:layout_constraintTop_toBottomOf="@+id/event_location" />
             </LinearLayout>
         </LinearLayout>
     </androidx.cardview.widget.CardView>

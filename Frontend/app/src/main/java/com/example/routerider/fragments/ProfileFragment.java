@@ -109,7 +109,7 @@ public class ProfileFragment extends Fragment {
         });
 
 
-        TextView friends = view.findViewById(R.id.friendList);
+        TextView friends = view.findViewById(R.id.friend_list);
         friends.setOnClickListener(v -> {
             Intent intent = new Intent(requireContext(), FriendsActivity.class);
             startActivity(intent);
@@ -128,7 +128,7 @@ public class ProfileFragment extends Fragment {
 
             builder.setTitle("Enter New Address");
             builder.setPositiveButton("OK", (dialog, which) -> {
-                EditText editText = dialogView.findViewById(R.id.updateAddress);
+                EditText editText = dialogView.findViewById(R.id.update_address);
                 String userInput = editText.getText().toString();
 
                 Map<String, Object> newAddress = new HashMap<>();
@@ -169,7 +169,7 @@ public class ProfileFragment extends Fragment {
         });
 
 
-        Button logoutButton = view.findViewById(R.id.logoutButton);
+        Button logoutButton = view.findViewById(R.id.logout_button);
         logoutButton.setOnClickListener(v -> {
             SharedPreferences preferences = requireActivity().getSharedPreferences("routeRider", Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = preferences.edit();

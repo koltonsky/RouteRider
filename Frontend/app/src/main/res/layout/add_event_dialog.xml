@@ -9,13 +9,13 @@
         android:orientation="vertical">
 
         <EditText
-            android:id="@+id/eventName"
+            android:id="@+id/event_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Event Name"/>
 
         <EditText
-            android:id="@+id/eventAddress"
+            android:id="@+id/event_address"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Address"/>
@@ -26,7 +26,7 @@
             android:orientation="horizontal">
 
             <EditText
-                android:id="@+id/eventDateMonth"
+                android:id="@+id/event_date_month"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -34,7 +34,7 @@
                 android:inputType="date"/>
 
             <EditText
-                android:id="@+id/eventDateDay"
+                android:id="@+id/event_date_day"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -42,7 +42,7 @@
                 android:inputType="datetime"/>
 
             <EditText
-                android:id="@+id/eventDateYear"
+                android:id="@+id/event_date_year"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -53,14 +53,14 @@
         </LinearLayout>
 
         <EditText
-            android:id="@+id/eventStartTime"
+            android:id="@+id/event_start_time"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Event Start Time: Format (23:59)"
             android:inputType="time"/>
 
         <EditText
-            android:id="@+id/eventEndTime"
+            android:id="@+id/event_end_time"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Event End Time: Format (23:59)"

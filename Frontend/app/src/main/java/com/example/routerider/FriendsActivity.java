@@ -34,9 +34,9 @@ public class FriendsActivity extends AppCompatActivity {
 
         GoogleSignInAccount account = User.getCurrentAccount();
 
-        Button addFriend = findViewById(R.id.addFriendButton);
-        friendListDisplay = findViewById(R.id.friendList);
-        friendRequestDisplay = findViewById(R.id.friendRequestList);
+        Button addFriend = findViewById(R.id.add_friend_button);
+        friendListDisplay = findViewById(R.id.friend_list);
+        friendRequestDisplay = findViewById(R.id.friend_request_list);
         APICaller apiCall = new APICaller();
 
         generateFriendList();
@@ -49,7 +49,7 @@ public class FriendsActivity extends AppCompatActivity {
 
             builder.setTitle("Enter your friend's email");
             builder.setPositiveButton("OK", (dialog, which) -> {
-                EditText editText = dialogView.findViewById(R.id.addFriendEmail);
+                EditText editText = dialogView.findViewById(R.id.add_friend_email);
                 String userInput = editText.getText().toString();
 
                 Map<String, Object> map = new HashMap<>();

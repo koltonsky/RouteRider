@@ -8,7 +8,7 @@
     android:background="@color/white">
 
     <ProgressBar
-        android:id="@+id/loadingBar"
+        android:id="@+id/loading_bar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"/>

@@ -15,10 +15,6 @@ public class RouteItem {
         this.steps = steps;
     }
 
-    public RouteItem(String json){
-        new Gson().fromJson(json, RouteItem.class);
-    }
-
     public String getLeaveBy() {
         return transitItems.get(0).getTime();
     }

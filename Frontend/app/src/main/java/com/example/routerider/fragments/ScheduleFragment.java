@@ -87,7 +87,7 @@ public class ScheduleFragment extends Fragment {
         formatter = new SimpleDateFormat("E, dd MMM");
         currentDayText = view.findViewById(R.id.currentDayText);
         currentDayText.setText(formatter.format(currentDay));
-        FloatingActionButton addEvent = view.findViewById(R.id.floatingActionButton);
+        FloatingActionButton addEvent = view.findViewById(R.id.floating_action_button);
 
         APICaller apiCall = new APICaller();
         GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(
@@ -132,14 +132,14 @@ public class ScheduleFragment extends Fragment {
             View dialogView = dialogInflater.inflate(R.layout.add_event_dialog, null);
             alertDialogBuilder.setView(dialogView);
 
-            final EditText eventNameEditText = dialogView.findViewById(R.id.eventName);
-            final EditText eventAddressEditText = dialogView.findViewById(R.id.eventAddress);
-            final EditText eventStartTimeEditText = dialogView.findViewById(R.id.eventStartTime);
-            final EditText eventEndTimeEditText = dialogView.findViewById(R.id.eventEndTime);
+            final EditText eventNameEditText = dialogView.findViewById(R.id.event_name);
+            final EditText eventAddressEditText = dialogView.findViewById(R.id.event_address);
+            final EditText eventStartTimeEditText = dialogView.findViewById(R.id.event_start_time);
+            final EditText eventEndTimeEditText = dialogView.findViewById(R.id.event_end_time);
 
-            final EditText eventDateMonthEditText = dialogView.findViewById(R.id.eventDateMonth);
-            final EditText eventDateDayEditText = dialogView.findViewById(R.id.eventDateDay);
-            final EditText eventDateYearEditText = dialogView.findViewById(R.id.eventDateYear);
+            final EditText eventDateMonthEditText = dialogView.findViewById(R.id.event_date_month);
+            final EditText eventDateDayEditText = dialogView.findViewById(R.id.event_date_day);
+            final EditText eventDateYearEditText = dialogView.findViewById(R.id.event_date_year);
 
 
             alertDialogBuilder.setPositiveButton("OK", null);
@@ -463,7 +463,7 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
     public void updateDisplay(Date day) {
         dayList = new ArrayList<>();
         LinearLayout eventListView = scheduleView.findViewById(R.id.scheduleView);
-        TextView emptyListText = scheduleView.findViewById(R.id.emptyText);
+        TextView emptyListText = scheduleView.findViewById(R.id.empty_text);
         eventListView.removeAllViewsInLayout();
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String dateString = dateFormat.format(day);
@@ -490,16 +490,16 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
             eventListView = scheduleView.findViewById(R.id.scheduleView);
             View view = inflater.inflate(R.layout.view_event, eventListView, false);
 
-            TextView eventName = view.findViewById(R.id.eventName);
+            TextView eventName = view.findViewById(R.id.event_name);
             eventName.setText(item.getTitle());
 
-            TextView eventLocation = view.findViewById(R.id.eventLocation);
+            TextView eventLocation = view.findViewById(R.id.event_location);
             eventLocation.setText(item.getLocation());
 
-            TextView startTime = view.findViewById(R.id.startTime);
+            TextView startTime = view.findViewById(R.id.start_time);
             startTime.setText(item.getStartTime().substring(11, 16));
 
-            TextView endTime = view.findViewById(R.id.endTime);
+            TextView endTime = view.findViewById(R.id.end_time);
             endTime.setText(item.getEndTime().substring(11, 16)); // Adjust substring as needed
 
             // Check if there is a previous event view and the time gap is more than 15 minutes
@@ -511,11 +511,11 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
 
                     if (timeDifference > fifteenMinutesInMillis) {
                         View timeGapView = inflater.inflate(R.layout.timegap_chip, eventListView, false);
-                        TextView timeGapTextView = timeGapView.findViewById(R.id.timeGapTextView);
+                        TextView timeGapTextView = timeGapView.findViewById(R.id.time_gap_text);
                         timeGapTextView.setText("Gap: " + formatTimeDifference(timeDifference));
                         LinearLayout hiddenView = timeGapView.findViewById(R.id.hidden_view);
                         CardView cardView = timeGapView.findViewById(R.id.base_cardview);
-                        Button viewRecommendationsButton = timeGapView.findViewById(R.id.viewRecommendationsButton);
+                        Button viewRecommendationsButton = timeGapView.findViewById(R.id.view_recommendations_button);
                         viewRecommendationsButton.setOnClickListener(v -> {
                             if (hiddenView.getVisibility() == View.VISIBLE) {
                                 TransitionManager.beginDelayedTransition(cardView, new AutoTransition());
@@ -562,14 +562,14 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
                 View dialogView = dialogInflater.inflate(R.layout.add_event_dialog, null);
                 alertDialogBuilder.setView(dialogView);
 
-                final EditText eventNameEditText = dialogView.findViewById(R.id.eventName);
-                final EditText eventAddressEditText = dialogView.findViewById(R.id.eventAddress);
-                final EditText eventStartTimeEditText = dialogView.findViewById(R.id.eventStartTime);
-                final EditText eventEndTimeEditText = dialogView.findViewById(R.id.eventEndTime);
+                final EditText eventNameEditText = dialogView.findViewById(R.id.event_name);
+                final EditText eventAddressEditText = dialogView.findViewById(R.id.event_address);
+                final EditText eventStartTimeEditText = dialogView.findViewById(R.id.event_start_time);
+                final EditText eventEndTimeEditText = dialogView.findViewById(R.id.event_end_time);
 
-                final EditText eventDateMonthEditText = dialogView.findViewById(R.id.eventDateMonth);
-                final EditText eventDateDayEditText = dialogView.findViewById(R.id.eventDateDay);
-                final EditText eventDateYearEditText = dialogView.findViewById(R.id.eventDateYear);
+                final EditText eventDateMonthEditText = dialogView.findViewById(R.id.event_date_month);
+                final EditText eventDateDayEditText = dialogView.findViewById(R.id.event_date_day);
+                final EditText eventDateYearEditText = dialogView.findViewById(R.id.event_date_year);
 
                 eventNameEditText.setText(item.getTitle());
                 eventAddressEditText.setText(item.getLocation());
@@ -724,11 +724,11 @@ class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
                 } else {
                     timeGapRecView = inflater.inflate(R.layout.restaurant_chip, hiddenView, false);
                 }
-                TextView recNameText = timeGapRecView.findViewById(R.id.recName);
+                TextView recNameText = timeGapRecView.findViewById(R.id.rec_name);
                 recNameText.setText(rec.getName());
-                TextView recAddressText = timeGapRecView.findViewById(R.id.recAddress);
+                TextView recAddressText = timeGapRecView.findViewById(R.id.rec_address);
                 recAddressText.setText(rec.getAddress());
-                ImageButton recMapsButton = timeGapRecView.findViewById(R.id.mapsButton);
+                ImageButton recMapsButton = timeGapRecView.findViewById(R.id.maps_button);
                 recMapsButton.setOnClickListener(v2 -> {
                     Intent intent = new Intent(Intent.ACTION_VIEW,
                             Uri.parse("google.navigation:q=" + rec.getAddress()));

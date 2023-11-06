@@ -15,7 +15,7 @@
             android:text="Please enter address in this format: Street, City, Province"/>
 
         <EditText
-            android:id="@+id/updateAddress"
+            android:id="@+id/update_address"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Enter Address"/>

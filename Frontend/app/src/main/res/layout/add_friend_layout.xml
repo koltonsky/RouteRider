@@ -4,7 +4,7 @@
     android:layout_height="match_parent">
 
     <EditText
-        android:id="@+id/addFriendEmail"
+        android:id="@+id/add_friend_email"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Enter Email"/>

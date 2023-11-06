@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             RelativeLayout mainLayout = findViewById(R.id.main_display);
             mainLayout.setVisibility(View.VISIBLE);
-            ProgressBar loadingAnimation = findViewById(R.id.loadingBar);
+            ProgressBar loadingAnimation = findViewById(R.id.loading_bar);
             loadingAnimation.setVisibility(View.GONE);
 
             Button loginButton = findViewById(R.id.login_button);

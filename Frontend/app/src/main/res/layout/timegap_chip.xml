@@ -37,7 +37,7 @@
             android:layout_height="match_parent"
             android:orientation="horizontal">
     <TextView
-        android:id="@+id/timeGapTextView"
+        android:id="@+id/time_gap_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Gap: HH:mm"
@@ -50,9 +50,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_weight="3"/>
 
-    <!-- Button to view recommendations -->
     <Button
-        android:id="@+id/viewRecommendationsButton"
+        android:id="@+id/view_recommendations_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Show Recommendations"

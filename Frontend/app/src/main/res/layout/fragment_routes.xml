@@ -27,7 +27,7 @@
 
                 />
             <Button
-                android:id="@+id/transitFriendButton"
+                android:id="@+id/transit_friend_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -42,7 +42,7 @@
             android:background="#E9EBF0">
 
             <Button
-                android:id="@+id/previousDay"
+                android:id="@+id/previous_day"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -51,7 +51,7 @@
                 />
 
             <TextView
-                android:id="@+id/currentDayText"
+                android:id="@+id/current_day_text"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="Day"
@@ -62,7 +62,7 @@
                 android:layout_weight="2.5" />
 
             <Button
-                android:id="@+id/nextDay"
+                android:id="@+id/next_day"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -77,7 +77,7 @@
             android:layout_height="match_parent">
 
             <LinearLayout
-                android:id="@+id/routesView"
+                android:id="@+id/routes_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical" />

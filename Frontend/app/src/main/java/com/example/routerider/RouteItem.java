@@ -1,7 +1,5 @@
 package com.example.routerider;
 
-import com.google.gson.Gson;
-
 import java.util.List;
 
 // NO CHATGPT

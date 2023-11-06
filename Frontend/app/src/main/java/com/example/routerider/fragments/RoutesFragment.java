@@ -264,6 +264,18 @@ public class RoutesFragment extends Fragment {
         });
     }
 
+    private String parseEmail(String selection) {
+        String selectedFriendEmail = "";
+
+        int start = selection.indexOf('(');
+        int end = selection.indexOf(')');
+
+        if (start != -1 && end != -1 && start < end) {
+            selectedFriendEmail = selection.substring(start + 1, end);
+        }
+        return selectedFriendEmail;
+    }
+
     // YES CHATGPT
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -284,15 +296,7 @@ public class RoutesFragment extends Fragment {
             String[] friendNames = fetchFriendsList();
             alertDialogBuilder.setItems(friendNames, (dialog, which) -> {
                 String selectedFriend = friendNames[which];
-                String selectedFriendEmail = "";
-
-                int start = selectedFriend.indexOf('(');
-                int end = selectedFriend.indexOf(')');
-
-                if (start != -1 && end != -1 && start < end) {
-                    selectedFriendEmail = selectedFriend.substring(start + 1, end);
-                }
-                fetchFriendRoutes(selectedFriendEmail, () -> {
+                fetchFriendRoutes(parseEmail(selectedFriend), () -> {
                     routesView = view.findViewById(R.id.routes_view);
                     routesView.removeAllViewsInLayout();
                     TextView friendText = new TextView(getContext());

@@ -287,7 +287,6 @@ public class RoutesFragment extends Fragment {
         nextDayButton.setEnabled(true);
         currentDayText = view.findViewById(R.id.current_day_text);
         currentDayText.setText(dayTextFormatter.format(currentDay));
-
         transitFriendButton = view.findViewById(R.id.transit_friend_button);
 
         transitFriendButton.setOnClickListener(v -> {
@@ -316,24 +315,24 @@ public class RoutesFragment extends Fragment {
         java.util.Calendar calendar =  java.util.Calendar.getInstance();
 
         previousDayButton.setOnClickListener(v -> {
-            calendar.setTime(currentDay);
-            calendar.add( java.util.Calendar.DAY_OF_YEAR, -1);
-            Date previousDay = calendar.getTime();
-            updateDateDisplay(previousDay);
-            fetchRoutes(previousDay, fetchRoutesCallback);
-
+            getDay(-1, fetchRoutesCallback);
         });
 
         nextDayButton.setOnClickListener(v -> {
-            calendar.setTime(currentDay);
-            calendar.add( java.util.Calendar.DAY_OF_YEAR, 1);
-            Date nextDay = calendar.getTime();
-            updateDateDisplay(nextDay);
-            fetchRoutes(nextDay, fetchRoutesCallback);
+            getDay(1, fetchRoutesCallback);
         });
 
         fetchRoutes(new Date(), fetchRoutesCallback);
         return view;
+    }
+
+    private void getDay(int gap, FetchRoutesCallback callback) {
+        java.util.Calendar calendar =  java.util.Calendar.getInstance();
+        calendar.setTime(currentDay);
+        calendar.add( java.util.Calendar.DAY_OF_YEAR, gap);
+        Date newDay = calendar.getTime();
+        updateDateDisplay(newDay);
+        fetchRoutes(newDay, callback);
     }
 
     private void showFriendRouteError() {

@@ -136,9 +136,11 @@ public class HomeActivity extends AppCompatActivity {
             public void onTabSelected(TabLayout.Tab tab) {
                 viewPager.setCurrentItem(tab.getPosition());
             }
+            // Should be kept empty
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
             }
+            // Should be kept empty
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
             }

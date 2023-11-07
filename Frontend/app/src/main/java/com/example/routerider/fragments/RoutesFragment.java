@@ -312,7 +312,6 @@ public class RoutesFragment extends Fragment {
         });
 
         FetchRoutesCallback fetchRoutesCallback = createFetchRoutesCallback(view);
-        java.util.Calendar calendar =  java.util.Calendar.getInstance();
 
         previousDayButton.setOnClickListener(v -> {
             getDay(-1, fetchRoutesCallback);

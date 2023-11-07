@@ -64,7 +64,7 @@ public class ScheduleFragment extends Fragment {
     private Date currentDay;
     private TextView currentDayText;
     private DateFormat formatter;
-    private Button getPreviousDay;
+    private Button previousDayButton;
     private static View view;
     private static GoogleSignInAccount account;
 
@@ -74,8 +74,8 @@ public class ScheduleFragment extends Fragment {
     private static FragmentActivity activity;
 
     public static void displayGoogleSchedule() {
-        Button getNextDay = view.findViewById(R.id.nextDay);
-        getNextDay.setEnabled(true);
+        Button nextDayButton = view.findViewById(R.id.nextDay);
+        nextDayButton.setEnabled(true);
         Date today = new Date();
         updateDisplay(today);
     }
@@ -92,10 +92,10 @@ public class ScheduleFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         view = inflater.inflate(R.layout.fragment_schedule, container, false);
-        getPreviousDay = view.findViewById(R.id.previousDay);
-        getPreviousDay.setEnabled(false);
-        Button getNextDay = view.findViewById(R.id.nextDay);
-        getNextDay.setEnabled(false);
+        previousDayButton = view.findViewById(R.id.previousDay);
+        previousDayButton.setEnabled(false);
+        Button nextDayButton = view.findViewById(R.id.nextDay);
+        nextDayButton.setEnabled(false);
         account = User.getCurrentAccount();
         currentDay = new Date();
         formatter = new SimpleDateFormat("E, dd MMM");
@@ -118,20 +118,13 @@ public class ScheduleFragment extends Fragment {
         }
 
         new CalendarAsyncTask(account).execute(calendarService);
-        getPreviousDay.setOnClickListener(v -> {
-            java.util.Calendar calendar =  java.util.Calendar.getInstance();
-            calendar.setTime(currentDay);
-            calendar.add( java.util.Calendar.DAY_OF_YEAR, -1);
-            Date previousDay = calendar.getTime();
-            changeDay(previousDay);
+
+        previousDayButton.setOnClickListener(v -> {
+            getDay(1);
         });
 
-        getNextDay.setOnClickListener(v -> {
-            java.util.Calendar calendar =  java.util.Calendar.getInstance();
-            calendar.setTime(currentDay);
-            calendar.add( java.util.Calendar.DAY_OF_YEAR, 1);
-            Date nextDay = calendar.getTime();
-            changeDay(nextDay);
+        nextDayButton.setOnClickListener(v -> {
+            getDay(-1);
         });
 
         addEvent.setOnClickListener(v -> {
@@ -208,14 +201,22 @@ public class ScheduleFragment extends Fragment {
         return view;
     }
 
+
+    private void getDay(int gap){
+        java.util.Calendar calendar =  java.util.Calendar.getInstance();
+        calendar.setTime(currentDay);
+        calendar.add( java.util.Calendar.DAY_OF_YEAR, gap);
+        Date day = calendar.getTime();
+        changeDay(day);
+    }
     // NO CHATGPT
     private void changeDay(Date day){
         Date today = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         if (sdf.format(today).equals(sdf.format(day))) {
-            getPreviousDay.setEnabled(false);
+            previousDayButton.setEnabled(false);
         } else {
-            getPreviousDay.setEnabled(true);
+            previousDayButton.setEnabled(true);
         }
         currentDay = day;
         currentDayText.setText(formatter.format(day));
@@ -284,19 +285,23 @@ public class ScheduleFragment extends Fragment {
             return false;
         }
     }
-    public static void updateDisplay(Date day) {
+
+    private static void parseDayList(String dateString) {
         dayList = new ArrayList<>();
-        LinearLayout eventListView = view.findViewById(R.id.scheduleView);
-        TextView emptyListText = view.findViewById(R.id.empty_text);
-        eventListView.removeAllViewsInLayout();
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        String dateString = dateFormat.format(day);
         for (ScheduleItem item : eventList) {
             String itemDay = item.getStartTime().substring(0, 10);
             if (dateString.equals(itemDay)) {
                 dayList.add(item);
             }
         }
+    }
+    public static void updateDisplay(Date day) {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String dateString = dateFormat.format(day);
+        parseDayList(dateString);
+        LinearLayout eventListView = view.findViewById(R.id.scheduleView);
+        TextView emptyListText = view.findViewById(R.id.empty_text);
+        eventListView.removeAllViewsInLayout();
         if (dayList.size() > 0) {
             emptyListText.setVisibility(View.GONE);
         } else {
@@ -467,7 +472,7 @@ public class ScheduleFragment extends Fragment {
             previousEventView = view;
         }
     }
-
+    // YES CHATGPT
     private static void fetchTimeGapRecommendations(LinearLayout eventListView, ScheduleItem item) {
         SimpleDateFormat fullDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         LayoutInflater inflater = LayoutInflater.from(view.getContext());
@@ -517,6 +522,7 @@ public class ScheduleFragment extends Fragment {
         }
     }
 
+    // NO CHATGPT
     public static void updateRecommendationLayout(String responseBody, ArrayList<TimeGapRecommendation> recs, LayoutInflater inflater, Button viewRecommendationsButton, LinearLayout hiddenView, CardView cardView) {
         try {
             JSONObject json = new JSONObject(responseBody);
@@ -571,6 +577,7 @@ public class ScheduleFragment extends Fragment {
             e.printStackTrace();
         }
     }
+    // YES CHATGPT
     private static String formatTimeDifference(long timeDifference) {
         long minutes = (timeDifference / (1000 * 60)) % 60;
         long hours = (timeDifference / (1000 * 60 * 60)) % 24;

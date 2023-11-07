@@ -34,7 +34,6 @@ public class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
         Calendar service = calendars[0];
         ScheduleFragment.eventList = new ArrayList<>();
 
-
         try {
             CalendarList calendarList = service.calendarList().list().execute();
             List<CalendarListEntry> items = calendarList.getItems();

@@ -1,7 +1,5 @@
 package com.example.routerider.fragments;
 
-import static androidx.core.content.ContextCompat.startActivity;
-
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;

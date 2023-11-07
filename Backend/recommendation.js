@@ -5,7 +5,7 @@
 const {
   Client,
   Status,
-  LatLng,
+  //LatLng,
 } = require('@googlemaps/google-maps-services-js');
 
 let suggestions = [];
@@ -13,7 +13,7 @@ const API_KEY = 'AIzaSyADWClq31r1vS21EWOcBnpOayxFOIDd-YQ';
 
 const recommendation = async (addr1, addr2) => {
   suggestions = [];
-  return new Promise(async (resolve, reject) => {
+  return new Promise(async (resolve, reject) => {  
     // const timeGap = event2.start - event1.end;
     const client = new Client();
 
@@ -62,7 +62,7 @@ const recommendation = async (addr1, addr2) => {
       const placesRequest = {
         params: {
           key: API_KEY,
-          location: location,
+          location,
           radius: 500,
           type: ['restaurant', 'cafe', 'library'],
         },

@@ -48,6 +48,7 @@ const serviceAccount =
 //const serviceAccount = require('./serviceAccountKey.json');
 
 const cron = require('node-cron');
+const { get } = require('http');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -769,35 +770,7 @@ async function initRoute(userEmail, date) {
         returnList.push(more);
 
         /* Directions API doesn't include leaveTime in "WALKING" steps, so we need to calculate ourselves */
-        for (var i = 0; i < returnList.length - 1; i++) {
-          if (i === 0 && returnList[i]._type == 'Walk') {
-            returnList[i]._leaveTime =
-              returnList[returnList.length - 1].departure_time;
-            returnList[i]._leaveTimeNum = timeToTimestamp(
-              returnList[returnList.length - 1].departure_time
-            );
-          } else if (
-            i == returnList.length - 2 &&
-            returnList[i]._type == 'Walk'
-          ) {
-            returnList[i]._leaveTime =
-              returnList[returnList.length - 1].arrival_time;
-            returnList[i]._leaveTimeNum = timeToTimestamp(
-              returnList[returnList.length - 2].arrival_time
-            );
-          } else if (returnList[i]._type == 'Walk') {
-            // assumes 'type' for next array entry is either "Bus" or "SkyTrain"
-            returnList[i]._leaveTime = timestampToTime(
-              returnList[i + 1]._leaveTimeNum - returnList[i]._leaveTimeNum
-            );
-            returnList[i]._leaveTimeNum =
-              returnList[i + 1]._leaveTimeNum - returnList[i]._leaveTimeNum;
-          }
-          console.log('updated leavetime: ' + returnList[i]._leaveTime);
-        }
-        console.log('result of initroute:');
-        console.log(returnList);
-
+        returnList = calcWalkingTimes(returnList);
         resolve(returnList);
       })
       .catch((error) => {
@@ -1087,7 +1060,8 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
     // if (timeDifference > twoHoursInMilliseconds) {
     //   reject("time gap too big");
     // }
-
+    var meetingPoint = getMeetingPoint(locationOfOrigin_user, locationOfOrigin_friend);
+    
     var timeOfFirstEvent = '';
     var locationOfFirstEvent = '';
     if (new Date(timeOfFirstEvent_user) < new Date(timeOfFirstEvent_friend)) {
@@ -1097,61 +1071,6 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
       timeOfFirstEvent = timeOfFirstEvent_friend;
       locationOfFirstEvent = locationOfFirstEvent_friend;
     }
-    console.log(
-      'initRouteWithFriends(): timeOfFirstEvent: ' + timeOfFirstEvent
-    );
-
-    // determine whether to take 99 B-Line or R4 based on address
-    var addressCoords_user = getLatLong(locationOfOrigin_user);
-    var addressCoords_friend = getLatLong(locationOfOrigin_friend);
-    var distToCommercial_user = calcDist(
-      addressCoords_user[0],
-      addressCoords_user[1],
-      49.2624,
-      -123.0698
-    );
-    var distToJoyce_user = calcDist(
-      addressCoords_user[0],
-      addressCoords_user[1],
-      49.2412,
-      -123.0298
-    );
-    var distToCommercial_friend = calcDist(
-      addressCoords_friend[0],
-      addressCoords_friend[1],
-      49.2624,
-      -123.0698
-    );
-    var distToJoyce_friend = calcDist(
-      addressCoords_friend[0],
-      addressCoords_friend[1],
-      49.2412,
-      -123.0298
-    );
-    var meetingPoint = '';
-    if (
-      (distToCommercial_friend + distToCommercial_user) / 2 <
-      (distToJoyce_friend + distToJoyce_user) / 2
-    ) {
-      meetingPoint = 'Commercial Broadway Station';
-    } else {
-      meetingPoint = 'Joyce-Collingwood Station';
-    }
-    console.log('initRouteWithFriends(): meetingPoint: ' + meetingPoint);
-    console.log(
-      'user date: ' +
-        timeOfFirstEvent_user +
-        ' friend date: ' +
-        timeOfFirstEvent_friend
-    );
-    console.log(
-      '@@@@@@@@@@@@@@@@@@@@@@@@: plan trip params: ' +
-        meetingPoint +
-        ' ' +
-        locationOfFirstEvent +
-        ' ' +
-        timeOfFirstEvent
-    );
 
     planTransitTrip(
       meetingPoint,
@@ -1159,8 +1078,27 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
       new Date(timeOfFirstEvent)
     )
       .then((trip) => {
+        // to be added to end of returnList
+        var curStep1 = {
+          _id: 'Walk',
+          _leaveTime: trip.routes[0].legs[0].steps[0].duration.text,
+          _leaveTimeNum: trip.routes[0].legs[0].steps[0].duration.value,
+          _type: 'Walk',
+        };
+        var curStep2 = {
+          _id: trip.routes[0].legs[0].steps[1].transit_details.line.short_name,
+          _leaveTime: trip.routes[0].legs[0].steps[1].transit_details.departure_time.text,
+          _leaveTimeNum: trip.routes[0].legs[0].steps[1].transit_details.departure_time.value,
+          _type: 'Bus',
+        };
+
+        // to be added to end of returnList.more.steps
+        var arrive_time_ubc = trip.routes[0].legs[0].arrival_time.text;
+        var step1 = trip.routes[0].legs[0].steps[0].html_instructions;
+        var step2 = trip.routes[0].legs[0].steps[1].html_instructions;
+
         var departureTimeFromStation =
-          trip.routes[0].legs[0].departure_time.text;
+        trip.routes[0].legs[0].departure_time.text;
         console.log(
           'initRouteWithFriends(): departureTimeFromStation: ' +
             departureTimeFromStation
@@ -1173,46 +1111,10 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
           'initRouteWithFriends(): departureTimeFromStation iso: ' +
             departureTimeFromStation_iso
         );
-        var test = new Date(departureTimeFromStation_iso);
-        var test1 = test.setHours(test.getHours() + 7);
-        console.log('test1: ', test1);
-
-        var busId =
-          trip.routes[0].legs[0].steps[1].transit_details.line.short_name;
-        var busLeaveTime =
-          trip.routes[0].legs[0].steps[1].transit_details.departure_time.text;
-        var busLeaveTimeNum =
-          trip.routes[0].legs[0].steps[1].transit_details.departure_time.value;
-        var arrive_time_ubc = trip.routes[0].legs[0].arrival_time.text;
-        var curStep1 = {
-          _id: 'Walk',
-          _leaveTime: trip.routes[0].legs[0].steps[0].duration.text,
-          _leaveTimeNum: trip.routes[0].legs[0].steps[0].duration.value,
-          _type: 'Walk',
-        };
-        var curStep2 = {
-          _id: busId,
-          _leaveTime: busLeaveTime,
-          _leaveTimeNum: busLeaveTimeNum,
-          _type: 'Bus',
-        };
-        var step1 = trip.routes[0].legs[0].steps[0].html_instructions;
-        var step2 = trip.routes[0].legs[0].steps[1].html_instructions;
-        console.log(
-          'initRouteWithFriends(): locationOfOrigin_user: ' +
-            locationOfOrigin_user +
-            ' meetingPoint: ' +
-            meetingPoint +
-            ' departureTimeFromStation_iso: ' +
-            departureTimeFromStation_iso
-        );
-        console.log(
-          'leave house time: ' +
-            new Date(departureTimeFromStation_iso) +
-            '  ' +
-            departureTimeFromStation_iso
-        );
-        planTransitTrip(locationOfOrigin_user, meetingPoint, new Date(test1))
+        var azureTime = new Date(departureTimeFromStation_iso);
+        var azureTimeToPST = azureTime.setHours(azureTime.getHours() + 8);
+        
+        planTransitTrip(locationOfOrigin_user, meetingPoint, new Date(azureTimeToPST))
           .then((trip) => {
             console.log(
               'initRoute(): returned trip: ' +
@@ -1293,33 +1195,9 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
             returnList[returnList.length - 1].steps.push(step2);
 
             /* Directions API doesn't include leaveTime in "WALKING" steps, so we need to calculate ourselves */
-            for (var i = 0; i < returnList.length - 1; i++) {
-              if (i === 0 && returnList[i]._type == 'Walk') {
-                returnList[i]._leaveTime =
-                  returnList[returnList.length - 1].departure_time;
-                returnList[i]._leaveTimeNum = timeToTimestamp(
-                  returnList[returnList.length - 1].departure_time
-                );
-              } else if (
-                i == returnList.length - 2 &&
-                returnList[i]._type == 'Walk'
-              ) {
-                returnList[i]._leaveTime =
-                  returnList[returnList.length - 1].arrival_time;
-                returnList[i]._leaveTimeNum = timeToTimestamp(
-                  returnList[returnList.length - 2].arrival_time
-                );
-              } else if (returnList[i]._type == 'Walk') {
-                // assumes 'type' for next array entry is either "Bus" or "SkyTrain"
-                returnList[i]._leaveTime = timestampToTime(
-                  returnList[i + 1]._leaveTimeNum - returnList[i]._leaveTimeNum
-                );
-                returnList[i]._leaveTimeNum =
-                  returnList[i + 1]._leaveTimeNum - returnList[i]._leaveTimeNum;
-              }
-              console.log('updated leavetime: ' + returnList[i]._leaveTime);
-              resolve(returnList);
-            }
+            returnList = calcWalkingTimes(returnList);
+            resolve(returnList);
+            
             returnList.forEach((element) => {
               console.log(
                 'initRouteWithFriends(): returnList: ' +
@@ -1467,6 +1345,89 @@ function calcDist(x1, y1, x2, y2) {
   return Math.sqrt(a * a + b * b);
 }
 
+/**
+ * Determine whether to take 99 B-Line or R4 based on addresses of user and friend
+ * @param {*} address1 
+ * @param {*} address2 
+ * 
+ * ChatGPT usage: No
+ */
+function getMeetingPoint(address1, address2) {
+  var addressCoords_user = getLatLong(address1);
+  var addressCoords_friend = getLatLong(address2);
+  var distToCommercial_user = calcDist(
+    addressCoords_user[0],
+    addressCoords_user[1],
+    49.2624,
+    -123.0698
+  );
+  var distToJoyce_user = calcDist(
+    addressCoords_user[0],
+    addressCoords_user[1],
+    49.2412,
+    -123.0298
+  );
+  var distToCommercial_friend = calcDist(
+    addressCoords_friend[0],
+    addressCoords_friend[1],
+    49.2624,
+    -123.0698
+  );
+  var distToJoyce_friend = calcDist(
+    addressCoords_friend[0],
+    addressCoords_friend[1],
+    49.2412,
+    -123.0298
+  );
+  var meetingPoint = '';
+  if (
+    (distToCommercial_friend + distToCommercial_user) / 2 <
+    (distToJoyce_friend + distToJoyce_user) / 2
+  ) {
+    meetingPoint = 'Commercial Broadway Station';
+  } else {
+    meetingPoint = 'Joyce-Collingwood Station';
+  }
+  return meetingPoint;
+}
+
+/**
+ * Impute missing data in 'Walk' steps of a transit route
+ * @param {*} commuteInfo
+ * 
+ * ChatGPT usage: No  
+ */
+function calcWalkingTimes(commuteInfo) {
+  var returnList = commuteInfo;
+  for (var i = 0; i < returnList.length - 1; i++) {
+    if (i == 0 && returnList[i]._type == 'Walk') { 
+      returnList[i]._leaveTime =
+        returnList[returnList.length - 1].departure_time;
+      returnList[i]._leaveTimeNum = timeToTimestamp(
+        returnList[returnList.length - 1].departure_time
+      );
+    } else if (
+      i == returnList.length - 2 &&
+      returnList[i]._type == 'Walk'
+    ) {
+      returnList[i]._leaveTime =
+        returnList[returnList.length - 1].arrival_time;
+      returnList[i]._leaveTimeNum = timeToTimestamp(
+        returnList[returnList.length - 2].arrival_time
+      );
+    } else if (returnList[i]._type == 'Walk') {
+      // assumes 'type' for next array entry is either "Bus" or "SkyTrain"
+      returnList[i]._leaveTime = timestampToTime(
+        returnList[i + 1]._leaveTimeNum - returnList[i]._leaveTimeNum
+      );
+      returnList[i]._leaveTimeNum =
+        returnList[i + 1]._leaveTimeNum - returnList[i]._leaveTimeNum;
+    }
+    console.log('updated leavetime: ' + returnList[i]._leaveTime);
+  }
+  return returnList;
+}
+
 // ChatGPT usage: Yes
 function timeToTimestamp(timeString) {
   const date = new Date(timeString);
@@ -1481,7 +1442,7 @@ function timestampToTime(timestamp) {
     minute: '2-digit',
   });
 }
-
+// combineDateAndTime('2021-03-01', '12:00 PM');
 // ChatGPT usage: Yes
 function combineDateAndTime(dateString, timeString) {
   // Convert the time to 24-hour format and add seconds

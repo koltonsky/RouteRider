@@ -21,7 +21,31 @@ const recommendation = require('./recommendation.js');
 // const { time, error } = require('console');
 
 const admin = require('firebase-admin');
-const serviceAccount = require('./serviceAccountKey.json');
+
+// Retrieve the private key from the environment variable
+const privateKey = process.env.PRIVATE_KEY;
+const serviceAccountType = process.env.SERVICE_ACCOUNT_TYPE;
+
+// Create the serviceAccount object
+const serviceAccount =
+{
+  "type": serviceAccountType,
+  "project_id": "routerider-402800",
+  "private_key_id": "5bcd35ff287cd344df63e9bd5d96170fdc72130a",
+  "private_key": privateKey,
+  "client_email": "firebase-adminsdk-stvy2@routerider-402800.iam.gserviceaccount.com",
+  "client_id": "107472218462534326183",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-stvy2%40routerider-402800.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+};
+
+// Use the serviceAccount object in your code
+
+
+//const serviceAccount = require('./serviceAccountKey.json');
 
 const cron = require('node-cron');
 

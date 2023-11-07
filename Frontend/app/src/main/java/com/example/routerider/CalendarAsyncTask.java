@@ -23,7 +23,6 @@ import java.util.Map;
 public class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
     // private List<ScheduleItem> eventList;
     private GoogleSignInAccount account;
-    private Calendar service;
     private String calendarId;
 
 
@@ -33,7 +32,7 @@ public class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
 
     @Override
     protected Void doInBackground(Calendar... calendars) {
-        service = calendars[0];
+        Calendar service = calendars[0];
         ScheduleFragment.eventList = new ArrayList<>();
 
 

@@ -770,7 +770,7 @@ async function initRoute(userEmail, date) {
 
         /* Directions API doesn't include leaveTime in "WALKING" steps, so we need to calculate ourselves */
         for (var i = 0; i < returnList.length - 1; i++) {
-          if (i === 0 && returnList[i]._type === 'Walk') {
+          if (i === 0 && returnList[i]._type == 'Walk') {
             returnList[i]._leaveTime =
               returnList[returnList.length - 1].departure_time;
             returnList[i]._leaveTimeNum = timeToTimestamp(
@@ -1294,7 +1294,7 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
 
             /* Directions API doesn't include leaveTime in "WALKING" steps, so we need to calculate ourselves */
             for (var i = 0; i < returnList.length - 1; i++) {
-              if (i == 0 && returnList[i]._type == 'Walk') {
+              if (i === 0 && returnList[i]._type == 'Walk') {
                 returnList[i]._leaveTime =
                   returnList[returnList.length - 1].departure_time;
                 returnList[i]._leaveTimeNum = timeToTimestamp(

@@ -25,7 +25,6 @@ const serviceAccount = require('./serviceAccountKey.json');
 
 const cron = require('node-cron');
 const { get } = require('http');
-const moment = require('moment-timezone');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),

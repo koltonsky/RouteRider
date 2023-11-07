@@ -21,7 +21,6 @@ import java.util.Map;
 
 // YES CHATGPT
 public class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
-    // private List<ScheduleItem> eventList;
     private GoogleSignInAccount account;
     private String calendarId;
 

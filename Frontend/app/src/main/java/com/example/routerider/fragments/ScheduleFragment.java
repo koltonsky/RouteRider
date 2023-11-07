@@ -65,7 +65,6 @@ public class ScheduleFragment extends Fragment {
     public static List<ScheduleItem> eventList;
     private Date currentDay;
     private TextView currentDayText;
-    private CalendarAsyncTask calendarAsyncTask;
     private DateFormat formatter;
     private Button getPreviousDay;
     private static View view;
@@ -93,7 +92,7 @@ public class ScheduleFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+
         view = inflater.inflate(R.layout.fragment_schedule, container, false);
         getPreviousDay = view.findViewById(R.id.previousDay);
         getPreviousDay.setEnabled(false);
@@ -106,7 +105,7 @@ public class ScheduleFragment extends Fragment {
         currentDayText.setText(formatter.format(currentDay));
         FloatingActionButton addEvent = view.findViewById(R.id.floating_action_button);
 
-        APICaller apiCall = new APICaller();
+
         GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(
                 requireContext(), Collections.singleton(CalendarScopes.CALENDAR));
         credential.setSelectedAccount(account.getAccount());
@@ -120,9 +119,7 @@ public class ScheduleFragment extends Fragment {
             throw new CalendarException("An error occurred while setting up the calendar service", gse);
         }
 
-        calendarAsyncTask = (CalendarAsyncTask) new CalendarAsyncTask(account).execute(calendarService);
-
-
+        new CalendarAsyncTask(account).execute(calendarService);
         getPreviousDay.setOnClickListener(v -> {
             java.util.Calendar calendar =  java.util.Calendar.getInstance();
             calendar.setTime(currentDay);
@@ -186,12 +183,12 @@ public class ScheduleFragment extends Fragment {
                             "primary");
 
                     String jsonUpdateEvent = new Gson().toJson(newEvent);
-
+                    APICaller apiCall = new APICaller();
                     apiCall.APICall("api/schedulelist/" + account.getEmail(), jsonUpdateEvent, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
                         @Override
                         public void onResponse(String responseBody) {
                             System.out.println("BODY: " + responseBody);
-                            calendarAsyncTask = (CalendarAsyncTask) new CalendarAsyncTask(account).execute(calendarService);
+                            new CalendarAsyncTask(account).execute(calendarService);
                         }
 
                         @Override

@@ -42,6 +42,7 @@ async function findUsers(userEmail) {
  * 8. In case of an error, it returns an object with an empty events array.
  */
 // ChatGPT usage: Yes
+/*
 async function getFirstEventsOfEachDay(userEmail) {
     try {
 
@@ -85,6 +86,53 @@ async function getFirstEventsOfEachDay(userEmail) {
         console.error('Error:', err);
     }
 }
+*/
+async function getFirstEventsOfEachDay(userEmail) {
+    try {
+        const userSchedule = await client.db('ScheduleDB').collection('schedulelist').findOne({ email: userEmail });
+
+        if (!userSchedule) {
+            console.log('User not found or schedule is empty.');
+            return { events: [] }; // Return an empty array if user not found or schedule is empty
+        }
+
+        // Get all events sorted by start time in ascending order
+        const allEvents = await client
+            .db('ScheduleDB')
+            .collection('schedulelist')
+            .find({ email: userEmail }, { events: 1 })
+            .toArray();
+
+        // Flatten the events array
+        const flattenedEvents = allEvents.flatMap((day) => day.events);
+
+        // Sort events by start time in ascending order
+        const sortedEvents = flattenedEvents.sort((a, b) => a.startTime - b.startTime);
+
+        // Find the first event of each day
+        const firstEvents = [];
+        const seenDates = new Set();
+
+        for (const event of sortedEvents) {
+            const dateStr = new Date(event.startTime).toLocaleDateString();
+
+            if (!seenDates.has(dateStr)) {
+                seenDates.add(dateStr);
+                firstEvents.push({ date: dateStr, event });
+            }
+        }
+
+        const reversedFirstEvents = firstEvents.reverse();
+
+        console.log('First events of each day:');
+        console.log(reversedFirstEvents);
+
+        return { events: reversedFirstEvents };
+    } catch (err) {
+        console.error('Error:', err);
+    }
+}
+
 
 /**
  * Finds and retrieves email addresses of schedules excluding the specified user's schedule.
@@ -101,6 +149,7 @@ async function getFirstEventsOfEachDay(userEmail) {
  * 6. In case of an error, it returns an empty array.
  */
 // ChatGPT usage: Yes
+/*
   async function findOtherEmails(userEmail) {
     try {
 
@@ -131,6 +180,30 @@ async function getFirstEventsOfEachDay(userEmail) {
         return []; // Return an empty array in case of an error
     }
 }
+*/
+
+async function findOtherEmails(userEmail) {
+    try {
+        // Find schedules excluding the user's schedule
+        const schedulesExcludingUser = await client
+            .db('ScheduleDB')
+            .collection('schedulelist')
+            .find({ email: { $ne: userEmail } }, { projection: { email: 1 } })
+            .toArray();
+
+        // Extract the email addresses from the result
+        const emailsExcludingUser = schedulesExcludingUser.map(schedule => schedule.email);
+
+        console.log('Emails of schedules excluding the user:');
+        console.log(emailsExcludingUser);
+
+        return emailsExcludingUser;
+    } catch (err) {
+        console.error('Error:', err);
+        return []; // Return an empty array in case of an error
+    }
+}
+
 
 /**
  * Finds matching users based on the first events of the day for a given user.
@@ -148,6 +221,7 @@ async function getFirstEventsOfEachDay(userEmail) {
  * 6. In case of an error, it returns an empty array.
  */
 // ChatGPT usage: Yes
+/*
 async function findMatchingUsers(userEmail) {
     try {
 
@@ -194,6 +268,54 @@ async function findMatchingUsers(userEmail) {
         return []; // Return an empty array in case of an error
     }
 }
+*/
+async function findMatchingUsers(userEmail) {
+    try {
+        // Step 1: Get the first events for the user
+        const userFirstEvents = await getFirstEventsOfEachDay(userEmail);
+
+        console.log('User First Events:');
+        console.log(userFirstEvents);
+
+        // Step 2: Find other emails, excluding the user's email
+        const otherEmails = await findOtherEmails(userEmail);
+
+        // Step 3: Create an empty list to hold the set of users
+        const matchingUsers = new Set();
+
+        // Step 4: Iterate through other emails and compare events
+        for (const email of otherEmails) {
+            // Get the first events of the day for the current email
+            const firstEventsOfTheDay = await getFirstEventsOfEachDay(email);
+
+            console.log(`First Events of the Day for ${email}:`);
+            console.log(firstEventsOfTheDay);
+
+            // Step 5: Compare the events and add email to the list if conditions match
+            for (const userEvent of userFirstEvents.events) {
+                for (const otherEvent of firstEventsOfTheDay.events) {
+                    if (
+                        userEvent.event.address.slice(0, 3) === 'UBC' &&
+                        otherEvent.event.address.slice(0, 3) === 'UBC' &&
+                        userEvent.event.startTime === otherEvent.event.startTime
+                    ) {
+                        matchingUsers.add(email);
+                        break; // Once a match is found, no need to check other events for this email
+                    }
+                }
+            }
+        }
+
+        console.log('Users with matching events:');
+        console.log(matchingUsers);
+
+        return matchingUsers;
+    } catch (err) {
+        console.error('Error:', err);
+        return []; // Return an empty array in case of an error
+    }
+}
+
 
   
 

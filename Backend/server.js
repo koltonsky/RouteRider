@@ -1494,3 +1494,5 @@ function compareTimeStrings(timeStr1, timeStr2) {
 
   return formattedTimeStr1 === formattedTimeStr2;
 }
+
+module.exports = app;

@@ -1,5 +1,8 @@
 package com.example.routerider.fragments;
 
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -11,10 +14,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -57,6 +62,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 
 
 public class ScheduleFragment extends Fragment {
@@ -120,11 +127,11 @@ public class ScheduleFragment extends Fragment {
         new CalendarAsyncTask(account).execute(calendarService);
 
         previousDayButton.setOnClickListener(v -> {
-            getDay(1);
+            getDay(-1);
         });
 
         nextDayButton.setOnClickListener(v -> {
-            getDay(-1);
+            getDay(1);
         });
 
         addEvent.setOnClickListener(v -> {
@@ -141,10 +148,10 @@ public class ScheduleFragment extends Fragment {
             final EditText eventStartTimeEditText = dialogView.findViewById(R.id.event_start_time);
             final EditText eventEndTimeEditText = dialogView.findViewById(R.id.event_end_time);
 
-            final EditText eventDateMonthEditText = dialogView.findViewById(R.id.event_date_month);
-            final EditText eventDateDayEditText = dialogView.findViewById(R.id.event_date_day);
-            final EditText eventDateYearEditText = dialogView.findViewById(R.id.event_date_year);
-
+            final EditText dateEditText = dialogView.findViewById(R.id.date_edit_text);
+            dateEditText.setOnClickListener(vw -> showDatePicker(dateEditText, requireContext()));
+            eventStartTimeEditText.setOnClickListener(vw -> showTimePicker(eventStartTimeEditText, requireContext()));
+            eventEndTimeEditText.setOnClickListener(vw -> showTimePicker(eventEndTimeEditText, requireContext()));
 
             alertDialogBuilder.setPositiveButton("OK", null);
 
@@ -156,9 +163,7 @@ public class ScheduleFragment extends Fragment {
             dialog.setOnShowListener(dialogInterface -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view1 -> {
                 String eventName = eventNameEditText.getText().toString();
                 String eventAddress = eventAddressEditText.getText().toString();
-                String eventDate = eventDateYearEditText.getText().toString() + "-"
-                        + eventDateMonthEditText.getText().toString() + "-"
-                        + eventDateDayEditText.getText().toString();
+                String eventDate = dateEditText.getText().toString();
                 String eventStartTime = eventStartTimeEditText.getText().toString();
                 String eventEndTime = eventEndTimeEditText.getText().toString();
 
@@ -348,17 +353,16 @@ public class ScheduleFragment extends Fragment {
                 final EditText eventStartTimeEditText = dialogView.findViewById(R.id.event_start_time);
                 final EditText eventEndTimeEditText = dialogView.findViewById(R.id.event_end_time);
 
-                final EditText eventDateMonthEditText = dialogView.findViewById(R.id.event_date_month);
-                final EditText eventDateDayEditText = dialogView.findViewById(R.id.event_date_day);
-                final EditText eventDateYearEditText = dialogView.findViewById(R.id.event_date_year);
+                final EditText dateEditText = dialogView.findViewById(R.id.date_edit_text);
+                dateEditText.setOnClickListener(vw -> showDatePicker(dateEditText, view.getContext()));
+                eventStartTimeEditText.setOnClickListener(vw -> showTimePicker(eventStartTimeEditText, view.getContext()));
+                eventEndTimeEditText.setOnClickListener(vw -> showTimePicker(eventEndTimeEditText, view.getContext()));
+                dateEditText.setText(item.getStartTime().substring(0, 10));
 
                 eventNameEditText.setText(item.getTitle());
                 eventAddressEditText.setText(item.getLocation());
                 eventStartTimeEditText.setText(item.getStartTime().substring(11, 16));
                 eventEndTimeEditText.setText(item.getEndTime().substring(11, 16));
-                eventDateMonthEditText.setText(item.getStartTime().substring(5, 7));
-                eventDateDayEditText.setText(item.getStartTime().substring(8, 10));
-                eventDateYearEditText.setText(item.getStartTime().substring(0, 4));
 
 
                 alertDialogBuilder.setPositiveButton("OK", null);
@@ -371,9 +375,7 @@ public class ScheduleFragment extends Fragment {
                 dialog.setOnShowListener(dialogInterface -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view1 -> {
                     String updateEventName = eventNameEditText.getText().toString();
                     String eventAddress = eventAddressEditText.getText().toString();
-                    String eventDate = eventDateYearEditText.getText().toString() + "-"
-                            + eventDateMonthEditText.getText().toString() + "-"
-                            + eventDateDayEditText.getText().toString();
+                    String eventDate = dateEditText.getText().toString();
                     String eventStartTime = eventStartTimeEditText.getText().toString();
                     String eventEndTime = eventEndTimeEditText.getText().toString();
 
@@ -459,7 +461,7 @@ public class ScheduleFragment extends Fragment {
                         }
                     });
                     finalEventListView.removeView(view);
-                    new DeleteEventTask(calendarService, item).execute();
+                    new DeleteEventTask(calendarService, item, activity.getApplicationContext()).execute();
                     dialog.dismiss();
                 }));
 
@@ -502,7 +504,7 @@ public class ScheduleFragment extends Fragment {
                         apiCall.APICall("api/recommendation/timegap/" + item.getLocation() + "/" + dayList.get(dayList.indexOf(item) - 1).getLocation(), "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
 
                             @Override
-                            public void onResponse(String responseBody) throws JSONException {
+                            public void onResponse(String responseBody) {
                                 System.out.println("BODY: " + responseBody);
                                 updateRecommendationLayout(responseBody, recs, inflater, viewRecommendationsButton, hiddenView, cardView);
                             }
@@ -583,4 +585,54 @@ public class ScheduleFragment extends Fragment {
         long hours = (timeDifference / (1000 * 60 * 60)) % 24;
         return String.format("%02d:%02d", hours, minutes);
     }
+
+    private static void showDatePicker(final EditText date, Context context) {
+        java.util.Calendar calendar = java.util.Calendar.getInstance();
+        int currentYear = calendar.get(java.util.Calendar.YEAR);
+        int currentMonth = calendar.get(java.util.Calendar.MONTH);
+        int currentDay = calendar.get(java.util.Calendar.DAY_OF_MONTH);
+
+        // Create a DatePickerDialog with the current date as the initial date
+        DatePickerDialog datePickerDialog = new DatePickerDialog(
+                context,
+                (view, year, month, dayOfMonth) -> {
+                    // Handle the selected date
+                    String selectedDate = year + "-" + (month + 1) + "-" + dayOfMonth;
+                    date.setText(selectedDate);
+                },
+                currentYear,
+                currentMonth,
+                currentDay
+        );
+
+        // Set the minimum date to the current date
+        datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
+
+        // Show the DatePickerDialog
+        datePickerDialog.show();
+    }
+
+    private static void showTimePicker(final EditText time, Context context) {
+        java.util.Calendar calendar = java.util.Calendar.getInstance();
+        int currentHour = calendar.get(java.util.Calendar.HOUR_OF_DAY);
+        int currentMinute = calendar.get(java.util.Calendar.MINUTE);
+
+        // Create a TimePickerDialog with the current time as the initial time
+        TimePickerDialog timePickerDialog = new TimePickerDialog(
+                context,
+                (view, hourOfDay, minute) -> {
+                    // Handle the selected time
+                    String selectedTime = String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute);
+                    time.setText(selectedTime);
+                },
+                currentHour,
+                currentMinute,
+                true // Set to true for 24-hour format
+        );
+
+        // Show the TimePickerDialog
+        timePickerDialog.show();
+    }
+
+
 }

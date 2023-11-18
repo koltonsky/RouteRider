@@ -195,7 +195,7 @@ public class ScheduleFragment extends Fragment {
 
                     dialog.dismiss();
                 } else {
-                    Toast.makeText(requireContext(), "Invalid inputs, please try again", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(activity.getApplicationContext(), "Please input proper time", Toast.LENGTH_LONG).show();
                 }
             }));
 
@@ -239,11 +239,14 @@ public class ScheduleFragment extends Fragment {
     private static boolean validateInputs(String eventName, String eventAddress, String eventDate, String eventStartTime, String eventEndTime) {
         if (eventName.isEmpty() || eventAddress.isEmpty() || eventDate.isEmpty() || eventStartTime.isEmpty() || eventEndTime.isEmpty()) {
             // Check if any field is empty
+            Toast.makeText(activity.getApplicationContext(), "Please fill out all fields", Toast.LENGTH_LONG).show();
+
             return false;
         }
 
         if (!isDateValid((eventDate + " " + eventStartTime)) || !isTimeValid(eventStartTime) || !isTimeValid(eventEndTime)) {
             // Check if date and time formats are valid
+            Toast.makeText(activity.getApplicationContext(), "Please input proper time", Toast.LENGTH_LONG).show();
             return false;
         }
 

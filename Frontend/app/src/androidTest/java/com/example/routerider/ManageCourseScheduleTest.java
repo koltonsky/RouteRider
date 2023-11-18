@@ -24,6 +24,8 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.test.espresso.Espresso;
+import androidx.test.espresso.IdlingRegistry;
+import androidx.test.espresso.IdlingResource;
 import androidx.test.espresso.ViewAction;
 import androidx.test.espresso.ViewInteraction;
 import androidx.test.espresso.action.ViewActions;
@@ -52,6 +54,7 @@ import org.junit.runners.MethodSorters;
 public class ManageCourseScheduleTest {
 
     private View decorView;
+    private IdlingResource idlingResource;
 
     @Rule
     public ActivityScenarioRule<MainActivity> mActivityScenarioRule =
@@ -59,7 +62,43 @@ public class ManageCourseScheduleTest {
 
     @Before
     public void setup() {
+        idlingResource = new ElapsedTimeIdlingResource(2000); // Set the timeout to 2 seconds
+        IdlingRegistry.getInstance().register(idlingResource);
         mActivityScenarioRule.getScenario().onActivity(activity -> decorView = activity.getWindow().getDecorView());
+    }
+
+    private static class ElapsedTimeIdlingResource implements IdlingResource {
+
+        private final long startTime;
+        private final long waitingTime;
+        private ResourceCallback resourceCallback;
+
+        public ElapsedTimeIdlingResource(long waitingTime) {
+            this.startTime = System.currentTimeMillis();
+            this.waitingTime = waitingTime;
+        }
+
+        @Override
+        public String getName() {
+            return ElapsedTimeIdlingResource.class.getName();
+        }
+
+        @Override
+        public boolean isIdleNow() {
+            long elapsed = System.currentTimeMillis() - startTime;
+            boolean idle = elapsed >= waitingTime;
+
+            if (idle && resourceCallback != null) {
+                resourceCallback.onTransitionToIdle();
+            }
+
+            return idle;
+        }
+
+        @Override
+        public void registerIdleTransitionCallback(ResourceCallback resourceCallback) {
+            this.resourceCallback = resourceCallback;
+        }
     }
 
     @Test

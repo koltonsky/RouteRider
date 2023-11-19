@@ -5,5 +5,8 @@
   "friends": [
     "friend1@example.com",
     "friend2@example.com"
+  ],
+  "friendRequests": [
+    "friend3@example.com"
   ]
 }

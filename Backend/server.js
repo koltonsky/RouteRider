@@ -61,11 +61,25 @@ admin.initializeApp({
 const uri = 'mongodb://0.0.0.0:27017'; // Replace with your MongoDB connection string
 const client = new MongoClient(uri);
 
+/*
 async function connectToDatabase() {
   try {
     await new Promise((resolve) => setTimeout(resolve, port));
     await client.connect();
     console.log('Connected to MongoDB');
+  } catch (error) {
+    console.error('MongoDB Connection Error:', error);
+  }
+}
+*/
+
+async function connectToDatabase() {
+  try {
+    await client.connect();
+    console.log('Connected to MongoDB');
+
+    // Start the SSL server after successfully connecting to MongoDB
+    startSSLServer();
   } catch (error) {
     console.error('MongoDB Connection Error:', error);
   }
@@ -509,6 +523,7 @@ app.use('/', (req, res, next) => {
   res.send('Hello from SSL server');
 });
 
+/*
 const sslServer = https.createServer(
   {
     key: fs.readFileSync(path.join(__dirname, 'certification', 'test_key.key')),
@@ -518,10 +533,24 @@ const sslServer = https.createServer(
   },
   app
 );
+*/
 
+function startSSLServer() {
+  const sslServer = https.createServer(
+    {
+      key: fs.readFileSync(path.join(__dirname, 'certification', 'test_key.key')),
+      cert: fs.readFileSync(path.join(__dirname, 'certification', 'certificate.pem')),
+    },
+    app
+  );
+
+  sslServer.listen(port, () => console.log('Secure server :) on port ' + port));
+}
+connectToDatabase();
+/*
 connectToDatabase();
 sslServer.listen(port, () => console.log('Secure server :) on port ' + port));
-
+*/
 // var dummy_schedule = {
 //   email: 'koltonluu@gmail.com',
 //   events: [

@@ -9,20 +9,29 @@ const client = new MongoClient(uri);
 const createNewUser = async (req, res) => {
   try {
     // Extract user data from the request body
+    console.log("test1");
     const userData = req.body;
+    console.log("test2");
+
 
     // Assuming you have already connected to the MongoDB client
     const collection = client.db('UserDB').collection('userlist');
+    console.log("test3");
+
 
     // Check if a user with a specific identifier (e.g., email) already exists
     const existingUser = await collection.findOne({ email: userData.email });
+    console.log("test4");
+
 
     if (existingUser) {
       // If a user with the same email exists, return an error message
+      await collection.insertOne(userData);
+      console.log("inserted");
       const errorMessage = 'User with this email already exists';
       const errorMessageLength = Buffer.byteLength(errorMessage, 'utf8');
       res.set('Content-Length', errorMessageLength);
-      res.status(109).json({ message: errorMessage });
+      res.status(409).json({ message: errorMessage });
       console.log("existing user");
     } else {
       // If the user doesn't exist, insert the new user document into the collection
@@ -36,6 +45,7 @@ const createNewUser = async (req, res) => {
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Internal server error' });
+    console.log("test5");
   }
 };
 

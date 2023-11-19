@@ -41,6 +41,7 @@ import androidx.test.uiautomator.UiDevice;
 import androidx.test.uiautomator.UiObject2;
 
 import org.hamcrest.Matchers;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Rule;
@@ -67,6 +68,13 @@ public class ManageCourseScheduleTest {
         mActivityScenarioRule.getScenario().onActivity(activity -> decorView = activity.getWindow().getDecorView());
     }
 
+    @After
+    public void tearDown() {
+        // Unregister the IdlingResource after the test
+        IdlingRegistry.getInstance().unregister(idlingResource);
+    }
+
+    // YES CHATGPT
     private static class ElapsedTimeIdlingResource implements IdlingResource {
 
         private final long startTime;
@@ -101,6 +109,7 @@ public class ManageCourseScheduleTest {
         }
     }
 
+    // YES CHATGPT
     @Test
     public void a_addEventTest() throws InterruptedException {
         try {
@@ -190,6 +199,7 @@ public class ManageCourseScheduleTest {
         displayEndTime.check(ViewAssertions.matches(ViewMatchers.withText("18:00")));
     }
 
+    // YES CHATGPT
     @Test
     public void b_editEventTest() throws InterruptedException {
         ViewInteraction displayEventName = Espresso.onView(ViewMatchers.withId(R.id.event_name));
@@ -247,6 +257,7 @@ public class ManageCourseScheduleTest {
         displayEndTime.check(ViewAssertions.matches(ViewMatchers.withText("20:00")));
     }
 
+    // YES CHATGPT
     @Test
     public void c_deleteEventTest() throws InterruptedException {
         ViewInteraction displayEventName = Espresso.onView(ViewMatchers.withId(R.id.event_name));
@@ -272,6 +283,7 @@ public class ManageCourseScheduleTest {
         displayEventName.check(ViewAssertions.doesNotExist());
     }
 
+    // YES CHATGPT
     @Test
     public void d_changeEventDateTest() throws InterruptedException {
         ViewInteraction floatingButton = Espresso.onView(ViewMatchers.withId(R.id.floating_action_button));
@@ -390,6 +402,7 @@ public class ManageCourseScheduleTest {
         nextDay.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
     }
 
+    // YES CHATGPT
     @Test
     public void addEventFailureTest() {
         ViewInteraction floatingButton = Espresso.onView(ViewMatchers.withId(R.id.floating_action_button));

@@ -48,7 +48,7 @@ const nonExistingEmail = 'nonexistinguser@example.com';
     // Log messages or perform setup before each test if needed
     // Avoid logging directly in beforeAll for async operations
   });
-
+// Interface POST https://20.163.28.92:8081/api/schedulelist
   describe('Create New Schedule', () => {
     let scheduleData; // Declare scheduleData outside to use in different test cases
   
@@ -67,7 +67,11 @@ const nonExistingEmail = 'nonexistinguser@example.com';
       await collection.deleteOne({ email: scheduleData.email });
     });
   
-    // Test for successfully creating a new schedule
+    // Input: scheduleData
+// Expected status code:  201
+// Expected behavior: Schedule created successfully
+// Expected output: { message: 'Schedule created successfully' }
+// ChatGPT usage: Yes
     test('POST /api/schedulelist should create a new schedule successfully', async () => {
       const res = await request
         .post('/api/schedulelist')
@@ -77,7 +81,11 @@ const nonExistingEmail = 'nonexistinguser@example.com';
       expect(res.body.message).toBe('Schedule created successfully');
     });
   
-    // Test for creating a schedule with an existing email
+// Input: scheduleData
+// Expected status code: 409
+// Expected behavior: Schedule with this email already exists
+// Expected output: { message: 'Schedule with this email already exists' }
+// ChatGPT usage: Yes
     test('POST /api/schedulelist should return an error for an existing schedule', async () => {
       // Assuming a schedule with the same email already exists
       await request
@@ -92,7 +100,11 @@ const nonExistingEmail = 'nonexistinguser@example.com';
       expect(res.body.message).toBe('Schedule with this email already exists');
     });
   
-    // Test for handling server errors during schedule creation
+// Input: scheduleData
+// Expected status code: 500
+// Expected behavior: Internal server error
+// Expected output: { error: 'Internal server error' }
+// ChatGPT usage: Yes
     test('POST /api/schedulelist should handle server errors during creation', async () => {
       // Mocking an error during the database insertion
       const collectionMock = jest.spyOn(client.db('ScheduleDB').collection('schedulelist'), 'insertOne');
@@ -119,7 +131,7 @@ const nonExistingEmail = 'nonexistinguser@example.com';
   });
   
   
-  
+  // Interface GET https://20.163.28.92:8081/api/schedulelist/:email
 describe('GET /api/schedulelist/:email', () => {
     // Mock schedule data for testing
     const scheduleData = {
@@ -139,6 +151,11 @@ describe('GET /api/schedulelist/:email', () => {
       await collection.deleteOne({ email: scheduleData.email });
     });
   
+    // Input: existing email
+// Expected status code: 200
+// Expected behavior: Schedule found
+// Expected output: 'Schedule found'
+// ChatGPT usage: Yes
     test('should return schedule when it exists', async () => {
       const res = await request.get(`/api/schedulelist/${scheduleData.email}`);
   
@@ -146,6 +163,11 @@ describe('GET /api/schedulelist/:email', () => {
       expect(res.body).toBe('Schedule found');
     });
   
+    // Input: nonExistingEmail
+// Expected status code: 404
+// Expected behavior: Schedule not found
+// Expected output: { error: 'Schedule not found' }
+// ChatGPT usage: Yes
     test('should return 404 if schedule does not exist', async () => {
       const nonExistingEmail = 'nonexistent@example.com';
       const res = await request.get(`/api/schedulelist/${nonExistingEmail}`);
@@ -154,6 +176,11 @@ describe('GET /api/schedulelist/:email', () => {
       expect(res.body.error).toBe('Schedule not found');
     });
   
+    // Input: userEmail
+// Expected status code: 500
+// Expected behavior: Internal server error
+// Expected output: { error: 'Internal server error' }
+// ChatGPT usage: Yes
     test('GET /api/schedulelist/:email should return 500 on internal server error', async () => {
         // Mock an internal server error by not connecting to the MongoDB client
         jest.spyOn(client, 'db').mockImplementationOnce(() => {
@@ -174,6 +201,7 @@ describe('GET /api/schedulelist/:email', () => {
       });      
   });
 
+  // Interface GET https://20.163.28.92:8081/api/schedulelist/:email/:id
   describe('GET /api/schedulelist/:email/:id', () => {
     const userEmail = 'user@example.com';
     const eventId = '12345'; // Event ID
@@ -203,6 +231,11 @@ describe('GET /api/schedulelist/:email', () => {
       await collection.deleteOne({ email: scheduleData.email });
     });
   
+    // Input: userEmail, eventId
+// Expected status code: 200
+// Expected behavior: Calendar ID found
+// Expected output: { calendarID: 'calendar123' }
+// ChatGPT usage: Yes
     test('should return calendarID when both schedule and event are found', async () => {
       const res = await request.get(`/api/schedulelist/${userEmail}/${eventId}`);
   
@@ -210,6 +243,11 @@ describe('GET /api/schedulelist/:email', () => {
       expect(res.body.calendarID).toBe('calendar123');
     });
   
+    // Input: nonExistingEmail, eventId
+// Expected status code: 404
+// Expected behavior: Schedule not found
+// Expected output: { error: 'Schedule not found' }
+// ChatGPT usage: Yes
     test('should return 404 when schedule is not found', async () => {
       const nonExistingEmail = 'nonexistent@example.com';
       const res = await request.get(`/api/schedulelist/${nonExistingEmail}/${eventId}`);
@@ -218,6 +256,11 @@ describe('GET /api/schedulelist/:email', () => {
       expect(res.body.error).toBe('Schedule not found');
     });
   
+    // Input: userEmail, nonExistingEventId
+// Expected status code: 404
+// Expected behavior: Event not found in the schedule
+// Expected output: { error: 'Event not found in the schedule' }
+// ChatGPT usage: Yes
     test('should return 404 when event is not found in the schedule', async () => {
       const nonExistingEventId = 'nonexistentEvent';
       const res = await request.get(`/api/schedulelist/${userEmail}/${nonExistingEventId}`);
@@ -226,6 +269,11 @@ describe('GET /api/schedulelist/:email', () => {
       expect(res.body.error).toBe('Event not found in the schedule');
     });
   
+    // Input: userEmail, eventId
+// Expected status code: 404
+// Expected behavior: Calendar ID not found for the event
+// Expected output: { error: 'Calendar ID not found for the event' }
+// ChatGPT usage: Yes
     test('should return 404 when calendarID is not found for the event', async () => {
       const eventWithoutCalendarID = { id: 'noCalendarIDEvent' };
       const modifiedSchedule = { ...scheduleData, events: [eventWithoutCalendarID] };
@@ -238,6 +286,12 @@ describe('GET /api/schedulelist/:email', () => {
       expect(res.body.error).toBe('Calendar ID not found for the event');
     });
   
+
+    // Input: userEmail, eventId
+// Expected status code: 500
+// Expected behavior: Internal server error
+// Expected output: { error: 'Internal server error' }
+// ChatGPT usage: Yes
     test('should return 500 on internal server error', async () => {
         // Mock an internal server error by not connecting to the MongoDB client
         jest.spyOn(client, 'db').mockImplementationOnce(() => {
@@ -258,7 +312,7 @@ describe('GET /api/schedulelist/:email', () => {
       });
       
   });
-  
+  // Interface POST https://20.163.28.92:8081/api/schedulelist/:email
   describe('POST /api/schedulelist/:email', () => {
     // Mock user data for testing
     const scheduleData = {
@@ -287,6 +341,11 @@ describe('GET /api/schedulelist/:email', () => {
         await collection.deleteOne({ email: scheduleData.email });
       });
   
+      // Input: scheduleData, newEventData
+// Expected status code:  200
+// Expected behavior: Event added successfully
+// Expected output: { message: 'Event added successfully' }
+// ChatGPT usage: Yes
     test('should add a new event successfully', async () => {
       const res = await request
         .post(`/api/schedulelist/${scheduleData.email}`)
@@ -296,6 +355,11 @@ describe('GET /api/schedulelist/:email', () => {
       expect(res.body.message).toBe('Event added successfully');
     });
   
+    // Input: scheduleData, newEventData
+// Expected status code: 404
+// Expected behavior: Schedule not found
+// Expected output: { error: 'Schedule not found' }
+// ChatGPT usage: Yes
     test('should return 404 for a non-existing user', async () => {
       const nonExistingEmail = 'nonexistent@example.com';
       const res = await request
@@ -306,6 +370,11 @@ describe('GET /api/schedulelist/:email', () => {
       expect(res.body.error).toBe('Schedule not found');
     });
   
+    // Input: scheduleData, newEventData
+// Expected status code: 400
+// Expected behavior: Invalid startTime or endTime
+// Expected output: { error: 'Invalid startTime or endTime' }
+// ChatGPT usage: Yes
     test('should return 400 for invalid startTime or endTime', async () => {
       const invalidEventData = {
         ...newEventData,
@@ -320,6 +389,11 @@ describe('GET /api/schedulelist/:email', () => {
       expect(res.body.error).toBe('Invalid startTime or endTime');
     });
   
+    // Input: scheduleData, newEventData
+// Expected status code: 400
+// Expected behavior: Event duration less than or equal to 0
+// Expected output:   { error: 'Event duration must be greater than 0' }
+// ChatGPT usage: Yes
     test('should return 400 for event duration less than or equal to 0', async () => {
       const invalidEventData = {
         ...newEventData,
@@ -334,6 +408,11 @@ describe('GET /api/schedulelist/:email', () => {
       expect(res.body.error).toBe('Event duration must be greater than 0');
     });
   
+    // Input: scheduleData, newEventData
+// Expected status code: 400
+// Expected behavior: Event overlaps with existing events 
+// Expected output: { error: 'Event overlaps with existing events' }
+// ChatGPT usage: Yes
     test('should return 400 for overlapping events', async () => {
         console.log("RUNNING");
       // Assuming there's an existing event in the user's schedule
@@ -364,6 +443,11 @@ describe('GET /api/schedulelist/:email', () => {
       expect(res.body.error).toBe('Event overlaps with existing events');
     });
   
+    // Input: scheduleData, newEventData
+// Expected status code: 500 
+// Expected behavior: Internal server error
+// Expected output: { error: 'Internal server error' }
+// ChatGPT usage: Yes
     test('should return 500 on internal server error', async () => {
         // Mock an internal server error by not connecting to the MongoDB client
         jest.spyOn(client, 'db').mockImplementationOnce(() => {
@@ -387,7 +471,7 @@ describe('GET /api/schedulelist/:email', () => {
       
   });
 
-
+// Interface DETE https://20.163.28.92:8081/api/schedulelist/:email/:id
 describe('DELETE /api/schedulelist/:email/:id', () => {
   // Mock schedule data for testing
   const scheduleData = {
@@ -410,6 +494,11 @@ describe('DELETE /api/schedulelist/:email/:id', () => {
     await collection.deleteOne({ email: scheduleData.email });
   });
 
+  // Input: userEmail, eventId
+// Expected status code: 200
+// Expected behavior: Event deleted successfully
+// Expected output: { message: 'Event deleted successfully' }
+// ChatGPT usage: Yes
   test('should delete an existing event and return 200', async () => {
     const eventIdToDelete = 'event1';
     const res = await request.delete(`/api/schedulelist/${scheduleData.email}/${eventIdToDelete}`);
@@ -424,6 +513,11 @@ describe('DELETE /api/schedulelist/:email/:id', () => {
     expect(deletedEvent).toBeUndefined();
   });
 
+  // Input: userEmail, eventId
+// Expected status code: 404
+// Expected behavior: Event not found
+// Expected output: { error: 'Event not found' }
+// ChatGPT usage: Yes
   test('should return 404 for a non-existing event', async () => {
     const nonExistingEventId = 'nonexistentEvent';
     const res = await request.delete(`/api/schedulelist/${scheduleData.email}/${nonExistingEventId}`);
@@ -432,6 +526,11 @@ describe('DELETE /api/schedulelist/:email/:id', () => {
     expect(res.body.error).toBe('Event not found');
   });
 
+  // Input: userEmail, eventId
+// Expected status code: 400
+// Expected behavior: Event not found in user schedule
+// Expected output: { error: 'Event not found' }
+// ChatGPT usage: Yes
   test('should return 400 if event not found in user schedule', async () => {
     const eventIdNotInUserSchedule = 'eventNotInUserSchedule';
     const res = await request.delete(`/api/schedulelist/${scheduleData.email}/${eventIdNotInUserSchedule}`);
@@ -440,6 +539,11 @@ describe('DELETE /api/schedulelist/:email/:id', () => {
     expect(res.body.error).toBe('Event not found');
   });
 
+  // Input: userEmail, eventId
+// Expected status code: 500
+// Expected behavior: Internal server error
+// Expected output: { error: 'Internal server error' }
+// ChatGPT usage: Yes
   test('should return 500 on internal server error', async () => {
     // Mock an internal server error by not connecting to the MongoDB client
     jest.spyOn(client, 'db').mockImplementationOnce(() => {
@@ -460,5 +564,92 @@ describe('DELETE /api/schedulelist/:email/:id', () => {
     }
   });
   
+});
+
+// Interface PUT https://20.163.28.92:8081/api/schedulelist/:email
+describe('Update Schedule', () => {
+  const userEmail = 'example1@gmail.com';
+  const scheduleData1 = {
+    email: 'example1@gmail.com',
+    events: [
+      { id: 'event1', /* other event properties */ },
+      { id: 'event2', /* other event properties */ },
+    ],
+  };
+
+  const scheduleData2 = {
+    email: 'example1@gmail.com',
+    events: [
+      { id: 'event3', /* other event properties */ },
+      { id: 'event4', /* other event properties */ },
+    ],
+  };
+
+  // Before running the tests, add a sample schedule to the database
+  beforeAll(async () => {
+    const collection = client.db('ScheduleDB').collection('schedulelist');
+    await collection.insertOne(scheduleData1);
+  });
+
+  // After running the tests, remove the sample schedule from the database
+  afterAll(async () => {
+    const collection = client.db('ScheduleDB').collection('schedulelist');
+    await collection.deleteOne({ email: scheduleData1.email });
+  });
+
+  // Input: email, scheduleData2
+// Expected status code: 200
+// Expected behavior: Schedule updated successfully
+// Expected output: { message: 'Schedule updated successfully' }
+// ChatGPT usage: Yes
+  test('should update an existing schedule successfully', async () => {
+
+    const res = await request
+      .put(`/api/schedulelist/example1@gmail.com`)
+      .send(scheduleData2);
+
+    expect(res.status).toBe(200);
+    expect(res.body.message).toBe('Schedule updated successfully');
+  });
+
+  // Input: email, scheduleData2
+// Expected status code: 404
+// Expected behavior: Schedule not found
+// Expected output: { error: 'Schedule not found' }
+// ChatGPT usage: Yes
+  test('should return a 404 error for a non-existing schedule', async () => {
+
+    const res = await request
+      .put(`/api/schedulelist/nonexistent@gmail.com`)
+      .send(scheduleData2);
+
+    expect(res.status).toBe(404);
+    expect(res.body.message).toBe('Schedule not found');
+  });
+
+  // Input: email, scheduleData2
+// Expected status code: 500
+// Expected behavior: Internal server error
+// Expected output: { error: 'Internal server error' }
+// ChatGPT usage: Yes
+  test('should return 500 on internal server error', async () => {
+    try {
+      // Mock an internal server error by not connecting to the MongoDB client
+      jest.spyOn(client, 'db').mockImplementationOnce(() => {
+        throw new Error('Mocked MongoDB connection error');
+      });
+  
+      const eventIdToDelete = 'event2';
+      const res = await request.delete(`/api/schedulelist/${scheduleData.email}/${eventIdToDelete}`);
+  
+      expect(res.status).toBe(500);
+      expect(res.body.error).toBe('Internal server error');
+    } catch (error) {
+      console.error('Test error:', error);
+    } finally {
+      // Restore the original implementation of the mocked method
+      jest.restoreAllMocks();
+    }
+  });
 });
   

@@ -89,6 +89,11 @@ describe('Create a new user', () => {
     await collection.deleteOne({ email: user1.email });
   });
 
+// Input: nonexisting user
+// Expected status code: 201
+// Expected behavior: create a new user
+// Expected output: message: User created 
+// ChatGPT usage: Yes
   test('POST /api/userlist should create a new user', async () => {
     const res = await request
       .post('/api/userlist')
@@ -98,6 +103,11 @@ describe('Create a new user', () => {
     expect(res.body.message).toBe('User created successfully');
   });
 
+// Input: existing user
+// Expected status code: 409
+// Expected behavior: return an error if the user already exists
+// Expected output: message: User with this email already exists
+// ChatGPT usage: Yes
   test('POST /api/userlist should return an error if the user already exists', async () => {
     const res = await request
       .post('/api/userlist')
@@ -107,6 +117,11 @@ describe('Create a new user', () => {
     expect(res.body.message).toBe('User with this email already exists');
   });
 
+// Input: user
+// Expected status code: 500
+// Expected behavior: return an error due to internal server error
+// Expected output: error: Internal server error
+// ChatGPT usage: Yes
   test('POST /api/userlist should handle server errors during user creation', async () => {
     // Mocking an error during the database insertion
     const collectionMock = jest.spyOn(client.db('UserDB').collection('userlist'), 'insertOne');
@@ -153,7 +168,11 @@ describe('Get an email', () => {
     await collection.deleteOne({ email: userEmail });
   });
 
-  // Test for getting an existing user by email
+  // Input: existing user email
+  // Expected status code: 200
+  // Expected behavior: retrieve an existing user by email
+  // Expected output: user object
+  // ChatGPT usage: Yes
   test('GET /api/userlist/:email should retrieve an existing user by email', async () => {
     const res = await request.get(`/api/userlist/${userEmail}`);
 
@@ -161,7 +180,11 @@ describe('Get an email', () => {
     expect(res.body.email).toBe(userEmail);
   });
 
-  // Test for getting a non-existing user by email
+  // Input: non-existing user email
+ // Expected status code: 404
+ // Expected behavior: return an error if the user does not exist
+ // Expected output: error: User not found
+ // ChatGPT usage: Yes
   test('GET /api/userlist/:email should return an error for a non-existing user', async () => {
     const res = await request.get(`/api/userlist/${nonExistingEmail}`);
 
@@ -169,7 +192,11 @@ describe('Get an email', () => {
     expect(res.body.error).toBe('User not found');
   });
 
-  // Test for handling server errors during user retrieval
+  // Input: user email
+ // Expected status code: 500
+ // Expected behavior: return an error due to internal server error
+ // Expected output: error: Internal server error
+ // ChatGPT usage: Yes
   test('GET /api/userlist/:email should handle server errors during retrieval', async () => {
     // Mocking an error during the database query
     const collectionMock = jest.spyOn(client.db('UserDB').collection('userlist'), 'findOne');
@@ -193,7 +220,7 @@ describe('Get an email', () => {
   });
 });
 
-  
+// Interface PUT https://20.163.28.92:8081/api/userlist/:email
 describe('Update User Address', () => {
   // Define variables for storing test data
   const userEmail = 'test@example.com';
@@ -213,7 +240,11 @@ describe('Update User Address', () => {
     await collection.deleteOne({ email: userEmail });
   });
 
-  // Test for successfully updating a user's address
+  // Input: existing user email, address
+  // Expected status code: 200
+  // Expected behavior: update an existing user address
+  // Expected output: message: User address updated successfully
+  // ChatGPT usage: Yes
   test('PUT /api/userlist/:email/address should update user address successfully', async () => {
     const newAddress = '123 Main St';
 
@@ -225,7 +256,11 @@ describe('Update User Address', () => {
     expect(res.body.message).toBe('User address updated successfully');
   });
 
-  // Test for updating the address of a non-existing user
+  // Input: non-existing user email, address
+ // Expected status code: 404
+ // Expected behavior: return an error if the user does not exist
+ // Expected output: error: User not found
+ // ChatGPT usage: Yes
   test('PUT /api/userlist/:email/address should return an error for a non-existing user', async () => {
     const newAddress = '456 Oak St';
 
@@ -237,7 +272,11 @@ describe('Update User Address', () => {
     expect(res.body.error).toBe('User not found');
   });
 
-  // Test for handling server errors during address update
+  // Input: user email, address
+ // Expected status code: 500
+ // Expected behavior: return an error due to internal server error
+ // Expected output: error: Internal server error
+ // ChatGPT usage: Yes
   test('PUT /api/userlist/:email/address should handle server errors during update', async () => {
     // Mocking an error during the database update
     const collectionMock = jest.spyOn(client.db('UserDB').collection('userlist'), 'updateOne');
@@ -265,6 +304,7 @@ describe('Update User Address', () => {
   });
 });
 
+// Interface GET https://20.163.28.92:8081/api/userlist/:email/friends
 describe('Get User Friend List with Names', () => {
   // Define variables for storing test data
   const userEmail = 'test@example.com';
@@ -306,7 +346,13 @@ describe('Get User Friend List with Names', () => {
     await collection.deleteOne({ email: 'requester@example.com' });
   });
 
-  // Test for successfully retrieving user friend list with names
+
+  // Input: existing user email
+  // Expected status code: 200
+  // Expected behavior: retrieve an existing user friend list with names and emails
+  // Expected output: friendsWithNames: array of friend objects with name and email properties
+  //                  friendRequestsWithNames: array of friend request objects with name and email properties
+  // ChatGPT usage: Yes
   test('GET friends', async () => {
     const res = await request
       .get(`/api/userlist/${userEmail}/friends`);
@@ -318,7 +364,11 @@ describe('Get User Friend List with Names', () => {
     expect(Array.isArray(res.body.friendRequestsWithNames)).toBe(true);
   });
 
-  // Test for retrieving friend list with names for a non-existing user
+// Input:   non-existing user email
+// Expected status code: 404
+// Expected behavior: return an error if the user does not exist
+// Expected output: error: User not found
+// ChatGPT usage: Yes
   test('GET /api/userlist/:email/friends should return an error for a non-existing user', async () => {
     const res = await request
       .get(`/api/userlist/${nonExistingEmail}/friends`);
@@ -327,7 +377,11 @@ describe('Get User Friend List with Names', () => {
     expect(res.body.error).toBe('User not found');
   });
 
-  // Test for handling server errors during friend list retrieval
+  // Input: user email
+// Expected status code: 500
+// Expected behavior: return an error due to internal server error
+// Expected output: error: Internal server error
+// ChatGPT usage: Yes
   test('GET /api/userlist/:email/friends should handle server errors during retrieval', async () => {
     // Mocking an error during the database query
     const collectionMock = jest.spyOn(client.db('UserDB').collection('userlist'), 'findOne');
@@ -352,6 +406,7 @@ describe('Get User Friend List with Names', () => {
   });
 });
 
+// Interface POST https://20.163.28.92:8081/api/userlist/:email/friendRequest
 describe('Send Friend Request', () => {
   // Define variables for storing test data
   const userEmail = 'test@example.com';
@@ -394,53 +449,73 @@ describe('Send Friend Request', () => {
     await collection.deleteOne({ email: 'requester@example.com' });
   });
 
-  // Test for successfully sending a friend request
+  // Input: existing user email, existing friend email
+// Expected status code: 200
+// Expected behavior: send a friend request successfully
+// Expected output: message: Friend request sent successfully
+// ChatGPT usage: Yes
   test('POST /api/userlist/:email/friendRequest should send a friend request successfully', async () => {
     const friendEmail = 'requester@example.com';
 
     const res = await request
       .post(`/api/userlist/${userEmail}/friendRequest`)
-      .send({ friendEmail });
+      .send({email: friendEmail});
 
     expect(res.status).toBe(200);
     expect(res.body.message).toBe('Friend request sent successfully');
   });
 
-  // Test for sending a friend request to a non-existing user
+// Input: non-existing user email, existing friend email
+// Expected status code: 404
+// Expected behavior: return an error if the user does not exist
+// Expected output: error: User not found
+// ChatGPT usage: Yes
   test('POST /api/userlist/:email/friendRequest should return an error for a non-existing user', async () => {
     const friendEmail = 'nonexistingfriend@example.com';
 
     const res = await request
       .post(`/api/userlist/${nonExistingEmail}/friendRequest`)
-      .send({ friendEmail });
+      .send({email: friendEmail});
 
     expect(res.status).toBe(404);
     expect(res.body.error).toBe('User not found');
   });
 
-  // Test for sending a friend request to a non-existing friend
+// Input: existing user email, non-existing friend email
+// Expected status code: 404
+// Expected behavior: return an error if the friend does not exist
+// Expected output: error: Friend not found in the userlist
+// ChatGPT usage: Yes
   test('POST /api/userlist/:email/friendRequest should return an error for a non-existing friend', async () => {
     const friendEmail = 'nonexistingfriend@example.com';
 
     const res = await request
       .post(`/api/userlist/${userEmail}/friendRequest`)
-      .send({ email: friendEmail });
+      .send({email: friendEmail});
 
     expect(res.status).toBe(404);
     expect(res.body.error).toBe('Friend not found in the userlist');
   });
 
-  // Test for sending a friend request to an existing friend
+// Input: existing user email, existing friend email
+// Expected status code: 400
+// Expected behavior: return an error if the friend request has already been sent
+// Expected output: error: Friend request already sent
+// ChatGPT usage: Yes
   test('POST /api/userlist/:email/friendRequest should return an error for an existing friend', async () => {
     const res = await request
       .post(`/api/userlist/${userEmail}/friendRequest`)
-      .send({ existingFriendEmail });
+      .send({email: existingFriendEmail});
 
     expect(res.status).toBe(400);
     expect(res.body.error).toBe('Friend request already sent');
   });
 
-  // Test for handling server errors during friend request
+// Input: user email
+// Expected status code: 500
+// Expected behavior: return an error due to internal server error
+// Expected output: error: Internal server 
+// ChatGPT usage: Yes
   test('POST /api/userlist/:email/friendRequest should handle server errors during request', async () => {
     // Mocking an error during the database update
     const collectionMock = jest.spyOn(client.db('UserDB').collection('userlist'), 'updateOne');
@@ -468,7 +543,7 @@ describe('Send Friend Request', () => {
   });
 });
 
-
+// Interface POST https://20.163.28.92:8081/api/userlist/:email/:friendRequest/accept
   describe('Accept Friend Request', () => {
     // Test for successfully accepting a friend request
     const userEmail = 'test@example.com';
@@ -511,6 +586,11 @@ describe('Send Friend Request', () => {
       await collection.deleteOne({ email: 'requester@example.com' });
     });
 
+    // Input: existing user email, existing friend email
+// Expected status code: 200
+// Expected behavior: accept a friend request successfully
+// Expected output: message: Friend request accepted successfully
+// ChatGPT usage: Yes
     test('POST /api/userlist/:email/:friendRequest/accept should accept a friend request successfully', async () => {
       // Assuming userEmail and friendEmail are valid emails that exist in the database
       //const friendEmail = 'friend@example.com';
@@ -529,7 +609,11 @@ describe('Send Friend Request', () => {
       expect(res.body.message).toBe('Friend request accepted successfully');
     });
   
-    // Test for accepting a friend request from a non-existing user
+// Input: non-existing user email, existing friend email
+// Expected status code: 404
+// Expected behavior: return an error if the user does not exist
+// Expected output: error: User not found
+// ChatGPT usage: Yes
     test('POST /api/userlist/:email/:friendRequest/accept should return an error for a non-existing user', async () => {
       // Assuming userEmail is a valid email that exists in the database
       const friendEmail = 'nonexistingfriend@example.com';
@@ -541,7 +625,11 @@ describe('Send Friend Request', () => {
       expect(res.body.error).toBe('User not found');
     });
   
-    // Test for accepting a friend request that doesn't exist in the user's friend requests
+// Input: existing user email, non-existing friend email
+// Expected status code: 404
+// Expected behavior: return an error if the friend does not exist
+// Expected output: error: Friend not found in the userlist
+// ChatGPT usage: Yes
     test('POST /api/userlist/:email/:friendRequest/accept should return an error for a non-existing friend request', async () => {
       // Assuming userEmail and friendEmail are valid emails that exist in the database
       const friendEmail = 'nonexistingfriend@example.com';
@@ -553,7 +641,11 @@ describe('Send Friend Request', () => {
       expect(res.body.error).toBe("Friend request not found in the user's friend requests");
     });
   
-    // Test for handling server errors during friend request acceptance
+// Input: existing user email, existing friend email
+// Expected status code: 500
+// Expected behavior: return an error due to internal server error
+// Expected output: error: Internal server error
+// ChatGPT usage: Yes
     test('POST /api/userlist/:email/:friendRequest/accept should handle server errors during acceptance', async () => {
       // Mocking an error during the database update
       const collectionMock = jest.spyOn(client.db('UserDB').collection('userlist'), 'updateOne');
@@ -581,7 +673,7 @@ describe('Send Friend Request', () => {
     });
   });
 
-  
+  // Interface DELETE https://20.163.28.92:8081/api/userlist/:email/:friendRequest/decline
   describe('Decline Friend Request', () => {
     // Test for successfully declining a friend request
     const userEmail = 'test@example.com';
@@ -624,6 +716,11 @@ describe('Send Friend Request', () => {
       await collection.deleteOne({ email: 'requester@example.com' });
     });
 
+    // Input: existing user email, existing friend email
+// Expected status code: 200
+// Expected behavior: decline a friend request successfully
+// Expected output: message: Friend request declined successfully
+// ChatGPT usage: Yes
     test('DELETE /api/userlist/:email/:friendRequest/decline should decline a friend request successfully', async () => {
       // Assuming userEmail and friendEmail are valid emails that exist in the database
   
@@ -634,7 +731,11 @@ describe('Send Friend Request', () => {
       expect(res.body.message).toBe('Friend request declined successfully');
     });
   
-    // Test for declining a friend request from a non-existing user
+// Input: non-existing user email, existing friend email
+// Expected status code: 404
+// Expected behavior: return an error if the user does not exist
+// Expected output: error: User not found
+// ChatGPT usage: Yes
     test('DELETE /api/userlist/:email/:friendRequest/decline should return an error for a non-existing user', async () => {
       // Assuming userEmail is a valid email that exists in the database
       const friendEmail = 'nonexistingfriend@example.com';
@@ -646,7 +747,11 @@ describe('Send Friend Request', () => {
       expect(res.body.error).toBe('User not found');
     });
   
-    // Test for declining a friend request that doesn't exist in the user's friend requests
+// Input: existing user email, non-existing friend email
+// Expected status code: 404
+// Expected behavior: return an error if the friend does not exist
+// Expected output: error: Friend not found in the userlist
+// ChatGPT usage: Yes
     test('DELETE /api/userlist/:email/:friendRequest/decline should return an error for a non-existing friend request', async () => {
       // Assuming userEmail and friendEmail are valid emails that exist in the database
       const friendEmail = 'nonexistingfriend@example.com';
@@ -658,7 +763,11 @@ describe('Send Friend Request', () => {
       expect(res.body.error).toBe("Friend request not found in the user's friend requests");
     });
   
-    // Test for handling server errors during friend request decline
+// Input: existing user email, existing friend email
+// Expected status code: 500
+// Expected behavior: return an error due to internal server error
+// Expected output: error: Internal server error
+// ChatGPT usage: Yes
     test('DELETE /api/userlist/:email/:friendRequest/decline should handle server errors during decline', async () => {
       // Mocking an error during the database update
       const collectionMock = jest.spyOn(client.db('UserDB').collection('userlist'), 'updateOne');

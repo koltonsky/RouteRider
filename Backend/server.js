@@ -43,7 +43,7 @@ const serviceAccount =
   "universe_domain": "googleapis.com"
 };
 
-console.log(privateKey);
+//console.log(privateKey);
 // Use the serviceAccount object in your code
 
 

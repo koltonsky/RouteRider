@@ -12,9 +12,14 @@ const app = require(path.resolve(__dirname, '../server'));
 */
 
 const { MongoClient } = require('mongodb');
+/*
 const request = require('supertest');
 const app = require('../server'); // Replace with the actual path to your Express app
 //const user = require('../path/to/your/user');
+*/
+const supertest = require('supertest');
+const app = require('../server'); // Replace with the actual path to your Express app
+const request = supertest(app);
 
 const user = {
     "email": "newuserlol3@example.com",
@@ -65,7 +70,7 @@ describe('Create a new user', () => {
     // Expected behavior: user is added to the database
     // Expected output: 'User created successfully'
   test('POST /api/userlist should create a new user', async () => {
-    const res = await request(app)
+    const res = await request
       .post('/api/userlist')
       .send(user);
 
@@ -78,7 +83,7 @@ describe('Create a new user', () => {
     // Expected behavior: database is unchanged
     // Expected output: 'User with this email already exists'
   test('POST /api/userlist should return an error if the user already exists', async () => {
-    const res = await request(app)
+    const res = await request
       .post('/api/userlist')
       .send(user);
 
@@ -94,7 +99,7 @@ describe('Create a new user', () => {
     });
 
     try {
-      const res = await request(app)
+      const res = await request
         .post('/api/userlist')
         .send(user);
 
@@ -117,7 +122,7 @@ describe('Get an email', () => {
     // Test for getting an existing user by email
     test('GET /api/userlist/:email should retrieve an existing user by email', async () => {
       // Assuming userEmail is a valid email that exists in the database
-      const res = await request(app)
+      const res = await request
         .get(`/api/userlist/${userEmail}`);
   
       expect(res.status).toBe(200);
@@ -127,7 +132,7 @@ describe('Get an email', () => {
     // Test for getting a non-existing user by email
     test('GET /api/userlist/:email should return an error for a non-existing user', async () => {
       // Assuming nonExistingEmail is not present in the database
-      const res = await request(app)
+      const res = await request
         .get(`/api/userlist/${nonExistingEmail}`);
   
       expect(res.status).toBe(404);
@@ -144,7 +149,7 @@ describe('Get an email', () => {
         });
       
         try {
-          const res = await request(app)
+          const res = await request
             .get(`/api/userlist/${userEmail}`);
       
           console.log('Response:', res.status, res.body);
@@ -168,7 +173,7 @@ describe('Get an email', () => {
       // Assuming userEmail is a valid email that exists in the database
       const newAddress = '123 Main St';
   
-      const res = await request(app)
+      const res = await request
         .put(`/api/userlist/${userEmail}/address`)
         .send({ address: newAddress });
   
@@ -181,7 +186,7 @@ describe('Get an email', () => {
       // Assuming nonExistingEmail is not present in the database
       const newAddress = '456 Oak St';
   
-      const res = await request(app)
+      const res = await request
         .put(`/api/userlist/${nonExistingEmail}/address`)
         .send({ address: newAddress });
   
@@ -200,7 +205,7 @@ describe('Get an email', () => {
       try {
         const newAddress = '789 Pine St';
   
-        const res = await request(app)
+        const res = await request
           .put(`/api/userlist/${userEmail}/address`)
           .send({ address: newAddress });
   
@@ -221,7 +226,7 @@ describe('Get an email', () => {
     // Test for successfully retrieving user friend list with names
     test('GET /api/userlist/:email/friends should retrieve user friend list with names', async () => {
       // Assuming userEmail is a valid email that exists in the database
-      const res = await request(app)
+      const res = await request
         .get(`/api/userlist/${userEmail}/friends`);
   
       expect(res.status).toBe(200);
@@ -234,7 +239,7 @@ describe('Get an email', () => {
     // Test for retrieving friend list with names for a non-existing user
     test('GET /api/userlist/:email/friends should return an error for a non-existing user', async () => {
       // Assuming nonExistingEmail is not present in the database
-      const res = await request(app)
+      const res = await request
         .get(`/api/userlist/${nonExistingEmail}/friends`);
   
       expect(res.status).toBe(404);
@@ -250,7 +255,7 @@ describe('Get an email', () => {
       });
   
       try {
-        const res = await request(app)
+        const res = await request
           .get(`/api/userlist/${userEmail}/friends`);
   
         console.log('Response:', res.status, res.body);
@@ -272,7 +277,7 @@ describe('Get an email', () => {
       // Assuming userEmail and friendEmail are valid emails that exist in the database
       const friendEmail = 'friend1@example.com';
   
-      const res = await request(app)
+      const res = await request
         .post(`/api/userlist/${userEmail}/friendRequest`)
         .send({ email: friendEmail });
   
@@ -285,7 +290,7 @@ describe('Get an email', () => {
       // Assuming nonExistingEmail is not present in the database
       const friendEmail = 'nonexistingfriend@example.com';
   
-      const res = await request(app)
+      const res = await request
         .post(`/api/userlist/${nonExistingEmail}/friendRequest`)
         .send({ email: friendEmail });
   
@@ -298,7 +303,7 @@ describe('Get an email', () => {
       // Assuming userEmail is a valid email that exists in the database
       const friendEmail = 'nonexistingfriend@example.com';
   
-      const res = await request(app)
+      const res = await request
         .post(`/api/userlist/${userEmail}/friendRequest`)
         .send({ email: friendEmail });
   
@@ -320,7 +325,7 @@ describe('Get an email', () => {
     */
 
       // Sending the friend request again
-      const res = await request(app)
+      const res = await request
         .post(`/api/userlist/${userEmail}/friendRequest`)
         .send({ email: friendEmail });
   
@@ -339,7 +344,7 @@ describe('Get an email', () => {
       try {
         const friendEmail = 'friend@example.com';
   
-        const res = await request(app)
+        const res = await request
           .post(`/api/userlist/${userEmail}/friendRequest`)
           .send({ email: friendEmail });
   
@@ -363,11 +368,11 @@ describe('Get an email', () => {
       const friendEmail = 'friend@example.com';
   
       // Assuming a friend request has been sent
-      await request(app)
+      await request
         .post(`/api/userlist/${friendEmail}/friendRequest`)
         .send({ email: userEmail });
-  
-      const res = await request(app)
+
+      const res = await request
         .post(`/api/userlist/${userEmail}/${friendEmail}/accept`);
   
       expect(res.status).toBe(200);
@@ -379,7 +384,7 @@ describe('Get an email', () => {
       // Assuming userEmail is a valid email that exists in the database
       const friendEmail = 'nonexistingfriend@example.com';
   
-      const res = await request(app)
+      const res = await request
         .post(`/api/userlist/${nonExistingEmail}/${friendEmail}/accept`);
   
       expect(res.status).toBe(404);
@@ -391,7 +396,7 @@ describe('Get an email', () => {
       // Assuming userEmail and friendEmail are valid emails that exist in the database
       const friendEmail = 'nonexistingfriend@example.com';
   
-      const res = await request(app)
+      const res = await request
         .post(`/api/userlist/${userEmail}/${friendEmail}/accept`);
   
       expect(res.status).toBe(400);
@@ -410,7 +415,7 @@ describe('Get an email', () => {
         // Assuming userEmail and friendEmail are valid emails that exist in the database
         const friendEmail = 'friend@example.com';
   
-        const res = await request(app)
+        const res = await request
           .post(`/api/userlist/${userEmail}/${friendEmail}/accept`);
   
         console.log('Response:', res.status, res.body);
@@ -434,11 +439,11 @@ describe('Get an email', () => {
       const friendEmail = 'friend4@example.com';
   
       // Assuming a friend request has been sent
-      await request(app)
+      await request
         .post(`/api/userlist/${friendEmail}/friendRequest`)
         .send({ email: userEmail });
   
-      const res = await request(app)
+      const res = await request
         .delete(`/api/userlist/${userEmail}/${friendEmail}/decline`);
   
       expect(res.status).toBe(200);
@@ -450,7 +455,7 @@ describe('Get an email', () => {
       // Assuming userEmail is a valid email that exists in the database
       const friendEmail = 'nonexistingfriend@example.com';
   
-      const res = await request(app)
+      const res = await request
         .delete(`/api/userlist/${nonExistingEmail}/${friendEmail}/decline`);
   
       expect(res.status).toBe(404);
@@ -462,7 +467,7 @@ describe('Get an email', () => {
       // Assuming userEmail and friendEmail are valid emails that exist in the database
       const friendEmail = 'nonexistingfriend@example.com';
   
-      const res = await request(app)
+      const res = await request
         .delete(`/api/userlist/${userEmail}/${friendEmail}/decline`);
   
       expect(res.status).toBe(400);
@@ -481,7 +486,7 @@ describe('Get an email', () => {
         // Assuming userEmail and friendEmail are valid emails that exist in the database
         const friendEmail = 'friend@example.com';
   
-        const res = await request(app)
+        const res = await request
           .delete(`/api/userlist/${userEmail}/${friendEmail}/decline`);
   
         console.log('Response:', res.status, res.body);

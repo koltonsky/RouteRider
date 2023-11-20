@@ -9,6 +9,19 @@ jobs:
   check-mongodb-connection:
     runs-on: ubuntu-latest
 
+    services:
+      mongo:
+        image: mongo
+        env:
+          MONGO_INITDB_ROOT_USERNAME: username
+          MONGO_INITDB_ROOT_PASSWORD: password
+        options: >-
+          --health-cmd "echo 'db.runCommand(\"ping\").ok' | mongosh --quiet"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+          --name mongo_container
+
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v2
@@ -24,4 +37,4 @@ jobs:
     - name: Check MongoDB Connection
       run: node check-mongodb-connection.js
       env:
-        MONGODB_URI: mongodb://0.0.0.0:27017
+        MONGODB_URI: mongodb://username:password@localhost:27017

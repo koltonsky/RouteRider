@@ -13,6 +13,8 @@
     "supertest": "^6.3.3"
   },
   "scripts": {
-    "test": "jest"
-  }
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "test:backend": "jest Backend/test"
+  }  
 }

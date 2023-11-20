@@ -1,4 +1,4 @@
-name: Run Backend Tests
+name: Node.js CI
 
 on:
   push:
@@ -10,11 +10,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-      - name: Install dependencies
-        run: npm install
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 14
 
-      - name: Run backend tests
-        run: npm run test:backend
+    - name: Install dependencies
+      run: npm install
+
+    - name: Set environment variables
+      run: |
+        echo "MONGODB_URI=mongodb://your-mongodb-uri" >> $GITHUB_ENV
+        echo "OTHER_ENV_VARIABLE=value" >> $GITHUB_ENV
+
+    - name: Run tests
+      run: npm run test:backend

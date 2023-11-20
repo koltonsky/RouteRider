@@ -19,16 +19,19 @@
         app:tabMode="fixed">
 
         <com.google.android.material.tabs.TabItem
+            android:id="@+id/schedule_tab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Schedule"/>
 
         <com.google.android.material.tabs.TabItem
+            android:id="@+id/route_tab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Map"/>
+            android:text="Route"/>
 
         <com.google.android.material.tabs.TabItem
+            android:id="@+id/profile_tab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Profile"/>

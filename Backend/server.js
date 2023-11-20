@@ -29,7 +29,8 @@ const serviceAccountType = process.env.SERVICE_ACCOUNT_TYPE;
 // Create the serviceAccount object
 const serviceAccount =
 {
-  "type": serviceAccountType,
+  //"type": serviceAccountType,
+  "type": "service_account",
   "project_id": "routerider-402800",
   "private_key_id": "5bcd35ff287cd344df63e9bd5d96170fdc72130a",
   //"private_key": privateKey,

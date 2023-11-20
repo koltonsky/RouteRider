@@ -97,6 +97,7 @@ const getUserByEmail = async (req, res) => {
   };
 
   // ChatGPT usage: Yes
+  /*
   const getUserName = async (req, res) => {
     try {
       // Extract the user's email from the request parameters
@@ -120,7 +121,9 @@ const getUserByEmail = async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   };
+  */
 
+  /*
   // ChatGPT usage: Yes
   const getUserAddress = async (req, res) => {
     try {
@@ -145,8 +148,9 @@ const getUserByEmail = async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   };
+  */
 
-
+/*
 // Function to get a user's friend list from 
 // ChatGPT usage: Yes
 const getFriendList = async (req, res) => {
@@ -170,6 +174,7 @@ const getFriendList = async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   };
+  */
 
   // ChatGPT usage: Yes
 const getFriendListWithNames = async (req, res) => {
@@ -238,7 +243,7 @@ const getFriendListWithNames = async (req, res) => {
 };
 
   
-
+/*
 // ChatGPT usage: Yes
   const addFriend = async (req, res) => {
     try {
@@ -339,6 +344,7 @@ const getFriendListWithNames = async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   };
+  */
   // ChatGPT usage: Yes
   const sendFriendRequest = async (req, res) => {
     try {
@@ -537,6 +543,7 @@ const updateFriendList = async (req, res) => {
 
   // Function to update a user's information in MongoDB
   // ChatGPT usage: Yes
+  /*
 const updateUser = async (req, res) => {
     try {
       const userEmail = req.params.email; // User email whose information needs to be updated
@@ -561,6 +568,7 @@ const updateUser = async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   };
+  */
 
 /*
 // Sample user data
@@ -624,6 +632,7 @@ const updateFriendList = async (req, res) => {
   };
 */
 // ChatGPT usage: Yes
+/*
 const deleteUser = async (req, res) => {
   try {
     const email = req.params.email; // Get the email from the URL parameter
@@ -642,6 +651,7 @@ const deleteUser = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+*/
 
 
 
@@ -652,14 +662,14 @@ const deleteUser = async (req, res) => {
     createNewUser,
     updateAddress,
     getUserByEmail,
-    getUserName,
-    getUserAddress,
-    getFriendList,
+    //getUserName,
+    //getUserAddress,
+    //getFriendList,
     getFriendListWithNames,
-    addFriend,
-    deleteFriend,
-    updateUser,
-    deleteUser,
+    //addFriend,
+    //deleteFriend,
+    //updateUser,
+    //deleteUser,
     sendFriendRequest,
     acceptFriendRequest,
     declineFriendRequest,

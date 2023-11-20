@@ -92,14 +92,14 @@ async function connectToDatabase() {
 app.post('/api/userlist', user.createNewUser);
 
 app.get('/api/userlist/:email', user.getUserByEmail);
-app.get('/api/userlist/:email/name', user.getUserName);
-app.get('/api/userlist/:email/address', user.getUserAddress);
+//app.get('/api/userlist/:email/name', user.getUserName);
+//app.get('/api/userlist/:email/address', user.getUserAddress);
 app.get('/api/userlist/:email/friends', user.getFriendListWithNames);
 
 app.put('/api/userlist/:email/address', user.updateAddress);
 
-app.post('/api/userlist/:email/friends', user.addFriend);
-app.delete('/api/userlist/:email/friends', user.deleteFriend);
+//app.post('/api/userlist/:email/friends', user.addFriend);
+//app.delete('/api/userlist/:email/friends', user.deleteFriend);
 
 app.post('/api/userlist/:email/friendRequest', user.sendFriendRequest);
 
@@ -112,10 +112,10 @@ app.delete(
   user.declineFriendRequest
 );
 
-app.put('/api/userlist/:email', user.updateUser);
+//app.put('/api/userlist/:email', user.updateUser);
 
 // test/db purposes only
-app.delete('/api/userlist/:email', user.deleteUser);
+//app.delete('/api/userlist/:email', user.deleteUser);
 
 // Schedule DB
 app.post('/api/schedulelist', schedule.createNewSchedule);
@@ -129,12 +129,10 @@ app.post('/api/schedulelist/:email', schedule.addEvent);
 //app.put('/api/schedulelist/:email/:id', schedule.editEventByID);
 app.delete('/api/schedulelist/:email/:id', schedule.deleteEventByID);
 
-app.put(
-  '/api/schedulelist/:email/:index/geolocation',
-  schedule.editEventGeolocation
-);
 
-app.delete('/api/schedulelist/:email/', schedule.deleteSchedule);
+//app.put('/api/schedulelist/:email/:index/geolocation', schedule.editEventGeolocation);
+
+//app.delete('/api/schedulelist/:email/', schedule.deleteSchedule);
 
 /**
  * ChatGPT usage: Partial

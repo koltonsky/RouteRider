@@ -624,6 +624,7 @@ const addEvent = async (req, res) => {
   */
 
   // ChatGPT usage: Yes
+  /*
 const editEventGeolocation = async (req, res) => {
   try {
     const userEmail = req.params.email;
@@ -666,6 +667,7 @@ const editEventGeolocation = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+*/
 
 // ChatGPT usage: Yes
 const getCalendarID = async (req, res) => {
@@ -824,6 +826,7 @@ const deleteEventByID = async (req, res) => {
 };
 
 // ChatGPT usage: Yes
+/*
 const deleteSchedule = async (req, res) => {
   try {
     const email = req.params.email; // Get the email from the URL parameter
@@ -842,6 +845,7 @@ const deleteSchedule = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+*/
 
 module.exports = {
   createNewSchedule,
@@ -850,11 +854,11 @@ module.exports = {
   //editEventName,
   //editEventAddress,
   //editEventDate,
-  editEventGeolocation,
+  //editEventGeolocation,
   //editEventStartTime,
   //editEventEndTime,
   //deleteEventAtIndex,
-  deleteSchedule,
+  //deleteSchedule,
   //editEventAtIndex,
   updateSchedule,
   deleteEventByID,

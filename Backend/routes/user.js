@@ -371,8 +371,8 @@ const getFriendListWithNames = async (req, res) => {
       }
       */
   
-      // Check if the friend's email is already in the user's friend requests
-      if (!user.friendRequests.includes(friendEmail)) {
+      // Check if the friend's email is already in the user's friend requests or friends
+      if (!user.friendRequests.includes(friendEmail) || !user.friends.includes(friendEmail)) {
         // Friend not found in friend requests, add the friend's email
         user.friendRequests.push(friendEmail);
   

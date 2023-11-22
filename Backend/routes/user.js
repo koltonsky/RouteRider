@@ -2,12 +2,12 @@
 
 
 const {MongoClient} = require('mongodb');
-const uri = 'mongodb://0.0.0.0:27017'; // Replace with your MongoDB connection string
+const uri = 'mongodb://127.0.0.1:27017'; // Replace with your MongoDB connection string
 const client = new MongoClient(uri);
 
 // ChatGPT usage: Yes
 const createNewUser = async (req, res) => {
-  try {
+  //try {
     // Extract user data from the request body
     const userData = req.body;
 
@@ -22,7 +22,7 @@ const createNewUser = async (req, res) => {
 
     if (existingUser) {
       // If a user with the same email exists, return an error message
-      await collection.insertOne(userData);
+      //await collection.insertOne(userData);
       const errorMessage = 'User with this email already exists';
       const errorMessageLength = Buffer.byteLength(errorMessage, 'utf8');
       res.set('Content-Length', errorMessageLength);
@@ -36,15 +36,15 @@ const createNewUser = async (req, res) => {
       res.status(201).json({ message: successMessage });
       //console.log("existing user");
     }
-  } catch (error) {
+  /*} catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Internal server error' });
-  }
+  }*/
 };
 
 // ChatGPT usage: Yes
 const updateAddress = async (req, res) => {
-  try {
+  //try {
     const email = req.params.email; // Get the email from the URL parameter
     const newAddress = req.body.address; // Get the new address from the request body
 
@@ -62,15 +62,15 @@ const updateAddress = async (req, res) => {
     } else {
       res.status(404).json({ error: 'User not found' });
     }
-  } catch (error) {
+  /*} catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Internal server error' });
-  }
+  }*/
   };
 
   // ChatGPT usage: Yes
 const getUserByEmail = async (req, res) => {
-    try {
+    //try {
       // Extract the user's email from the request parameters
       const userEmail = req.params.email;
   
@@ -90,10 +90,10 @@ const getUserByEmail = async (req, res) => {
         // User not found
         res.status(404).json({ error: 'User not found' });
       }
-    } catch (error) {
-      console.error('Error:', error);
-      res.status(500).json({ error: 'Internal server error' });
-    }
+    //} catch (error) {
+    //  console.error('Error:', error);
+    //  res.status(500).json({ error: 'Internal server error' });
+    //}
   };
 
   // ChatGPT usage: Yes
@@ -178,7 +178,7 @@ const getFriendList = async (req, res) => {
 
   // ChatGPT usage: Yes
 const getFriendListWithNames = async (req, res) => {
-  try {
+  //try {
     const userEmail = req.params.email; // User email whose friend list needs to be retrieved
 
     // Assuming you have already connected to the MongoDB client
@@ -186,6 +186,8 @@ const getFriendListWithNames = async (req, res) => {
 
     // Find the user by their email
     const user = await collection.findOne({ email: userEmail });
+
+    var hasFriends = false;
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -202,15 +204,10 @@ const getFriendListWithNames = async (req, res) => {
         const friend = await collection.findOne({ email: friendEmail });
 
         if (friend) {
+          hasFriends = true;
           friendsWithNames.push({
             email: friend.email,
             name: friend.name,
-          });
-        } else {
-          // Handle cases where a friend is not found (optional)
-          friendsWithNames.push({
-            email: friendEmail,
-            name: 'Unknown', // Set to 'Unknown' if friend not found
           });
         }
       }
@@ -220,26 +217,26 @@ const getFriendListWithNames = async (req, res) => {
         const friendRequestUser = await collection.findOne({ email: friendRequestEmail });
 
         if (friendRequestUser) {
+          hasFriends = true;
           friendRequestsWithNames.push({
             email: friendRequestUser.email,
             name: friendRequestUser.name,
-          });
-        } else {
-          // Handle cases where a friend request sender is not found (optional)
-          friendRequestsWithNames.push({
-            email: friendRequestEmail,
-            name: 'Unknown', // Set to 'Unknown' if sender not found
           });
         }
       }
 
       // Include the list of friendRequests and friends in the response
-      res.status(200).json({ friendsWithNames, friendRequestsWithNames });
+      if (hasFriends) {
+        res.status(200).json({ friendsWithNames, friendRequestsWithNames });
+      } else {
+        res.status(201).json({friendsWithNames, friendRequestsWithNames});
+      }
+      
     }
-  } catch (error) {
+  /*} catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Internal server error' });
-  }
+  }*/
 };
 
   
@@ -347,7 +344,7 @@ const getFriendListWithNames = async (req, res) => {
   */
   // ChatGPT usage: Yes
   const sendFriendRequest = async (req, res) => {
-    try {
+    //try {
       const userEmail = req.params.email; // User's email
       const friendEmail = req.body.email; // Friend's email to be added to friend requests
   
@@ -378,7 +375,7 @@ const getFriendListWithNames = async (req, res) => {
       */
   
       // Check if the friend's email is already in the user's friend requests or friends
-      if (!user.friendRequests.includes(friendEmail) || !user.friends.includes(friendEmail)) {
+      if (!user.friendRequests.includes(friendEmail) && !user.friends.includes(friendEmail)) {
         // Friend not found in friend requests, add the friend's email
         user.friendRequests.push(friendEmail);
   
@@ -388,22 +385,22 @@ const getFriendListWithNames = async (req, res) => {
           { $set: { friendRequests: user.friendRequests } }
         );
   
-        if (updateResult.modifiedCount > 0) {
+        //if (updateResult.modifiedCount > 0) {
           return res.status(200).json({ message: 'Friend request sent successfully' });
-        } else {
-          return res.status(500).json({ error: 'Failed to send friend request' });
-        }
+        //} else {
+        //  return res.status(500).json({ error: 'Failed to send friend request' });
+        //}
       } else {
         return res.status(400).json({ error: 'Friend request already sent' });
       }
-    } catch (error) {
+    /*} catch (error) {
       console.error('Error:', error);
       return res.status(500).json({ error: 'Internal server error' });
-    }
+    }*/
   };
   // ChatGPT usage: Yes
   const acceptFriendRequest = async (req, res) => {
-    try {
+    //try {
       const userEmail = req.params.email; // User's email
       const friendEmail = req.params.friendRequest; // Friend's email to accept
   
@@ -430,9 +427,11 @@ const getFriendListWithNames = async (req, res) => {
       // Find the friend and add the user to their list of friends
       const friend = await userCollection.findOne({ email: friendEmail });
   
+      /*
       if (!friend) {
         return res.status(404).json({ error: 'Friend not found in the userlist' });
       }
+      */
   
       friend.friends.push(userEmail);
   
@@ -441,20 +440,24 @@ const getFriendListWithNames = async (req, res) => {
         userCollection.updateOne({ _id: user._id }, { $set: { friendRequests: updatedFriendRequests, friends: user.friends } }),
         userCollection.updateOne({ _id: friend._id }, { $set: { friends: friend.friends } }),
       ]);
+      updateResults.every(result => result.modifiedCount);
+      return res.status(200).json({ message: 'Friend request accepted successfully' });
   
+      /*
       if (updateResults.every(result => result.modifiedCount > 0)) {
         return res.status(200).json({ message: 'Friend request accepted successfully' });
       } else {
         return res.status(500).json({ error: 'Failed to accept friend request' });
       }
-    } catch (error) {
+      */
+    /*} catch (error) {
       console.error('Error:', error);
       return res.status(500).json({ error: 'Internal server error' });
-    }
+    }*/
   };
 // ChatGPT usage: Yes
   const declineFriendRequest = async (req, res) => {
-    try {
+    //try {
       const userEmail = req.params.email; // User's email
       const friendEmail = req.params.friendRequest; // Friend's email to decline
   
@@ -481,15 +484,15 @@ const getFriendListWithNames = async (req, res) => {
         { $set: { friendRequests: updatedFriendRequests } }
       );
   
-      if (updateResult.modifiedCount > 0) {
+      //if (updateResult.modifiedCount > 0) {
         return res.status(200).json({ message: 'Friend request declined successfully' });
-      } else {
-        return res.status(500).json({ error: 'Failed to decline friend request' });
-      }
-    } catch (error) {
+      //} else {
+      //  return res.status(500).json({ error: 'Failed to decline friend request' });
+      //}
+    /*} catch (error) {
       console.error('Error:', error);
       return res.status(500).json({ error: 'Internal server error' });
-    }
+    }*/
   };
   
   

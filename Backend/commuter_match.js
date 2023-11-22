@@ -88,49 +88,41 @@ async function getFirstEventsOfEachDay(userEmail) {
 }
 */
 async function getFirstEventsOfEachDay(userEmail) {
-    try {
-        const userSchedule = await client.db('ScheduleDB').collection('schedulelist').findOne({ email: userEmail });
+    //try {
+ // Fetch the user schedule
+ const userSchedule = await client.db('ScheduleDB').collection('schedulelist').findOne({ email: userEmail });
 
-        if (!userSchedule) {
-            console.log('User not found or schedule is empty.');
-            return { events: [] }; // Return an empty array if user not found or schedule is empty
-        }
+ if (!userSchedule || !userSchedule.events || userSchedule.events.length === 0) {
+     console.log('User not found or schedule is empty.');
+     //console.log(userSchedule.events);
+     return { events: [] };
+ }
 
-        // Get all events sorted by start time in ascending order
-        const allEvents = await client
-            .db('ScheduleDB')
-            .collection('schedulelist')
-            .find({ email: userEmail }, { events: 1 })
-            .toArray();
+ // Sort events by start time in ascending order
+ const sortedEvents = userSchedule.events.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
 
-        // Flatten the events array
-        const flattenedEvents = allEvents.flatMap((day) => day.events);
+ // Find the first event of each day
+ const firstEvents = [];
+ const seenDates = new Set();
 
-        // Sort events by start time in ascending order
-        const sortedEvents = flattenedEvents.sort((a, b) => a.startTime - b.startTime);
+ for (const event of sortedEvents) {
+     const dateStr = new Date(event.startTime).toLocaleDateString();
+     console.log("DATESTR BE " + event.startTime);
+     console.log("DATESTR " + dateStr);
 
-        // Find the first event of each day
-        const firstEvents = [];
-        const seenDates = new Set();
+     if (!seenDates.has(dateStr)) {
+         seenDates.add(dateStr);
+         firstEvents.push({ date: dateStr, event });
+     }
+ }
 
-        for (const event of sortedEvents) {
-            const dateStr = new Date(event.startTime).toLocaleDateString();
+ console.log('First events of each day:');
+ console.log(firstEvents);
 
-            if (!seenDates.has(dateStr)) {
-                seenDates.add(dateStr);
-                firstEvents.push({ date: dateStr, event });
-            }
-        }
-
-        const reversedFirstEvents = firstEvents.reverse();
-
-        console.log('First events of each day:');
-        console.log(reversedFirstEvents);
-
-        return { events: reversedFirstEvents };
-    } catch (err) {
+ return { events: firstEvents };
+    /*} catch (err) {
         console.error('Error:', err);
-    }
+    }*/
 }
 
 
@@ -183,7 +175,7 @@ async function getFirstEventsOfEachDay(userEmail) {
 */
 
 async function findOtherEmails(userEmail) {
-    try {
+    //try {
         // Find schedules excluding the user's schedule
         const schedulesExcludingUser = await client
             .db('ScheduleDB')
@@ -198,10 +190,10 @@ async function findOtherEmails(userEmail) {
         console.log(emailsExcludingUser);
 
         return emailsExcludingUser;
-    } catch (err) {
+    /*} catch (err) {
         console.error('Error:', err);
         return []; // Return an empty array in case of an error
-    }
+    }*/
 }
 
 
@@ -270,7 +262,7 @@ async function findMatchingUsers(userEmail) {
 }
 */
 async function findMatchingUsers(userEmail) {
-    try {
+    //try {
         // Step 1: Get the first events for the user
         const userFirstEvents = await getFirstEventsOfEachDay(userEmail);
 
@@ -310,10 +302,10 @@ async function findMatchingUsers(userEmail) {
         console.log(matchingUsers);
 
         return matchingUsers;
-    } catch (err) {
+    /*} catch (err) {
         console.error('Error:', err);
         return []; // Return an empty array in case of an error
-    }
+    }*/
 }
 
 

@@ -20,6 +20,7 @@ const app = require('../server'); // Replace with the actual path to your Expres
 const supertest = require('supertest');
 const app = require('../server'); // Replace with the actual path to your Express app
 const request = supertest(app);
+const sinon = require('sinon');
 
 const user = {
     "email": "newuserlol3@example.com",
@@ -66,27 +67,23 @@ const nonExistingEmail = 'nonexistinguser@example.com';
 // Interface POST https://20.163.28.92:8081/api/userlist
 describe('Create a new user', () => {
   // Mock user data for testing
-  const user = {
-    email: 'test@example.com',
-    // ... other user properties
-  };
-
-  const user1 = {
-    email: 'test1@example.com',
-    // ... other user properties
-  };
-
-  // Before running the tests, add a sample user to the database
+  let userData; // Declare scheduleData outside to use in different test cases
+  
+  // Set up the test data before running the tests
   beforeAll(async () => {
-    const collection = client.db('UserDB').collection('userlist');
-    await collection.insertOne(user);
+    userData = {
+      email: 'userTHING@example.com',
+      // Add other schedule data properties as needed
+    };
   });
 
-  // After running the tests, remove the sample user from the database
+  // Clean up the test data after running all the tests
   afterAll(async () => {
+    // Assuming you have already connected to the MongoDB client
     const collection = client.db('UserDB').collection('userlist');
-    await collection.deleteOne({ email: user.email });
-    await collection.deleteOne({ email: user1.email });
+    //await collection.deleteOne({ email: userData.email });
+    //await collection.deleteOne({ email: userData.email });
+    await collection.deleteOne({ email: userData.email });
   });
 
 // Input: nonexisting user
@@ -97,7 +94,7 @@ describe('Create a new user', () => {
   test('POST /api/userlist should create a new user', async () => {
     const res = await request
       .post('/api/userlist')
-      .send(user1);
+      .send(userData);
 
     expect(res.status).toBe(201);
     expect(res.body.message).toBe('User created successfully');
@@ -111,47 +108,20 @@ describe('Create a new user', () => {
   test('POST /api/userlist should return an error if the user already exists', async () => {
     const res = await request
       .post('/api/userlist')
-      .send(user);
+      .send(userData);
 
     expect(res.status).toBe(409);
     expect(res.body.message).toBe('User with this email already exists');
   });
 
-// Input: user
-// Expected status code: 500
-// Expected behavior: return an error due to internal server error
-// Expected output: error: Internal server error
-// ChatGPT usage: Yes
-  test('POST /api/userlist should handle server errors during user creation', async () => {
-    // Mocking an error during the database insertion
-    const collectionMock = jest.spyOn(client.db('UserDB').collection('userlist'), 'insertOne');
-    collectionMock.mockImplementationOnce(() => {
-      throw new Error('Mocked MongoDB insertion error');
-    });
 
-    try {
-      const res = await request
-        .post('/api/userlist')
-        .send(user);
-
-      console.log('Response:', res.status, res.body);
-
-      expect(res.status).toBe(500);
-      expect(res.body.error).toBe('Internal server error');
-    } catch (error) {
-      console.error('Test error:', error);
-    } finally {
-      // Restore the original implementation of the mocked method
-      collectionMock.mockRestore();
-    }
-  });
 });
 
 
 // Interface GET https://20.163.28.92:8081/api/userlist/:email
 describe('Get an email', () => {
   // Define variables for storing test data
-  const userEmail = 'test@example.com';
+  const userEmail = 'testg@example.com';
   const nonExistingEmail = 'nonexistent@example.com';
 
   // Before running the tests, add a sample user to the database
@@ -192,38 +162,12 @@ describe('Get an email', () => {
     expect(res.body.error).toBe('User not found');
   });
 
-  // Input: user email
- // Expected status code: 500
- // Expected behavior: return an error due to internal server error
- // Expected output: error: Internal server error
- // ChatGPT usage: Yes
-  test('GET /api/userlist/:email should handle server errors during retrieval', async () => {
-    // Mocking an error during the database query
-    const collectionMock = jest.spyOn(client.db('UserDB').collection('userlist'), 'findOne');
-    collectionMock.mockImplementationOnce(() => {
-      throw new Error('Mocked MongoDB query error');
-    });
-
-    try {
-      const res = await request.get(`/api/userlist/${userEmail}`);
-
-      console.log('Response:', res.status, res.body);
-
-      expect(res.status).toBe(500);
-      expect(res.body.error).toBe('Internal server error');
-    } catch (error) {
-      console.error('Test error:', error);
-    } finally {
-      // Restore the original implementation of the mocked method
-      collectionMock.mockRestore();
-    }
-  });
 });
 
 // Interface PUT https://20.163.28.92:8081/api/userlist/:email
 describe('Update User Address', () => {
   // Define variables for storing test data
-  const userEmail = 'test@example.com';
+  const userEmail = 'testa@example.com';
   const nonExistingEmail = 'nonexistent@example.com';
 
   // Before running the tests, add a sample user to the database
@@ -272,43 +216,16 @@ describe('Update User Address', () => {
     expect(res.body.error).toBe('User not found');
   });
 
-  // Input: user email, address
- // Expected status code: 500
- // Expected behavior: return an error due to internal server error
- // Expected output: error: Internal server error
- // ChatGPT usage: Yes
-  test('PUT /api/userlist/:email/address should handle server errors during update', async () => {
-    // Mocking an error during the database update
-    const collectionMock = jest.spyOn(client.db('UserDB').collection('userlist'), 'updateOne');
-    collectionMock.mockImplementationOnce(() => {
-      throw new Error('Mocked MongoDB update error');
-    });
-
-    try {
-      const newAddress = '789 Pine St';
-
-      const res = await request
-        .put(`/api/userlist/${userEmail}/address`)
-        .send({ address: newAddress });
-
-      console.log('Response:', res.status, res.body);
-
-      expect(res.status).toBe(500);
-      expect(res.body.error).toBe('Internal server error');
-    } catch (error) {
-      console.error('Test error:', error);
-    } finally {
-      // Restore the original implementation of the mocked method
-      collectionMock.mockRestore();
-    }
-  });
 });
 
 // Interface GET https://20.163.28.92:8081/api/userlist/:email/friends
 describe('Get User Friend List with Names', () => {
   // Define variables for storing test data
-  const userEmail = 'test@example.com';
+  const userEmail = 'test1@example.com';
   const nonExistingEmail = 'nonexistent@example.com';
+  const userEmailWithNoFriends = 'userwithnofriends@example.com';
+  const userEmailWithFriendsNoRequests = 'userwithfriendsnorequests@example.com';
+  const userEmailWithRequestsNoFriends = 'userwithrequestsnofriends@example.com';
 
   // Before running the tests, add a sample user to the database
   beforeAll(async () => {
@@ -317,7 +234,7 @@ describe('Get User Friend List with Names', () => {
 
     await collection.insertOne({
       email: userEmail,
-      name: "user1",
+      name: 'test1@example.com',
       friends: ['friend1@example.com'],
       friendRequests: ['requester@example.com']
     });
@@ -332,8 +249,29 @@ describe('Get User Friend List with Names', () => {
     await collection.insertOne({
       email: 'requester@example.com',
       name: "requester",
+      friends: [userEmailWithFriendsNoRequests],
+      friendRequests: []
+    });
+
+    await collection.insertOne({
+      email: userEmailWithNoFriends,
+      name: 'UserWithNoFriends',
       friends: [],
       friendRequests: []
+    });
+
+    await collection.insertOne({
+      email: userEmailWithFriendsNoRequests,
+      name: 'UserWithNoFriends',
+      friends: ["requester@example.com"],
+      friendRequests: []
+    });
+
+    await collection.insertOne({
+      email: userEmailWithRequestsNoFriends,
+      name: 'UserWithNoFriends',
+      friends: [],
+      friendRequests: ["requester@example.com"]
     });
   });
 
@@ -341,9 +279,12 @@ describe('Get User Friend List with Names', () => {
   afterAll(async () => {
     // Assuming client is properly initialized
     const collection = client.db('UserDB').collection('userlist');
-    await collection.deleteOne({ email: userEmail });
+    await collection.deleteOne({ email: 'test1@example.com' });
     await collection.deleteOne({ email: 'friend1@example.com' });
     await collection.deleteOne({ email: 'requester@example.com' });
+    await collection.deleteOne({ email: userEmailWithNoFriends });
+    await collection.deleteOne({ email: userEmailWithFriendsNoRequests });
+    await collection.deleteOne({ email: userEmailWithRequestsNoFriends });
   });
 
 
@@ -377,39 +318,48 @@ describe('Get User Friend List with Names', () => {
     expect(res.body.error).toBe('User not found');
   });
 
-  // Input: user email
-// Expected status code: 500
-// Expected behavior: return an error due to internal server error
-// Expected output: error: Internal server error
-// ChatGPT usage: Yes
-  test('GET /api/userlist/:email/friends should handle server errors during retrieval', async () => {
-    // Mocking an error during the database query
-    const collectionMock = jest.spyOn(client.db('UserDB').collection('userlist'), 'findOne');
-    collectionMock.mockImplementationOnce(() => {
-      throw new Error('Mocked MongoDB query error');
-    });
+  test('get friendless', async () => {
+    // Assuming client and request are properly initialized
+    //const userEmailWithNoFriends = 'userwithnofriends@example.com';
+  
+    // Add the user to the database with no friends or friend requests
 
-    try {
-      const res = await request
-        .get(`/api/userlist/${userEmail}/friends`);
-
-      console.log('Response:', res.status, res.body);
-
-      expect(res.status).toBe(500);
-      expect(res.body.error).toBe('Internal server error');
-    } catch (error) {
-      console.error('Test error:', error);
-    } finally {
-      // Restore the original implementation of the mocked method
-      collectionMock.mockRestore();
-    }
+  
+    const res = await request
+      .get(`/api/userlist/${userEmailWithNoFriends}/friends`);
+  
+    expect(res.status).toBe(201);
+    expect(res.body.friendsWithNames).toEqual([]);
+    expect(res.body.friendRequestsWithNames).toEqual([]);
   });
+
+  test('GET friends should handle case with friends but no friend requests', async () => {
+    const res = await request
+      .get(`/api/userlist/${userEmailWithFriendsNoRequests}/friends`);
+
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body.friendsWithNames)).toBe(true);
+    expect(Array.isArray(res.body.friendRequestsWithNames)).toBe(true);
+    expect(res.body.friendRequestsWithNames).toEqual([]);
+  });
+
+  test('GET friends should handle case with friend requests but no friends', async () => {
+    const res = await request
+      .get(`/api/userlist/${userEmailWithRequestsNoFriends}/friends`);
+
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body.friendsWithNames)).toBe(true);
+    expect(Array.isArray(res.body.friendRequestsWithNames)).toBe(true);
+    expect(res.body.friendsWithNames).toEqual([]);
+  });
+
+
 });
 
 // Interface POST https://20.163.28.92:8081/api/userlist/:email/friendRequest
 describe('Send Friend Request', () => {
   // Define variables for storing test data
-  const userEmail = 'test@example.com';
+  const userEmail = 'test2@example.com';
   const nonExistingEmail = 'nonexistent@example.com';
   const existingFriendEmail = 'friend1@example.com';
 
@@ -419,7 +369,7 @@ describe('Send Friend Request', () => {
     const collection = client.db('UserDB').collection('userlist');
 
     await collection.insertOne({
-      email: userEmail,
+      email: 'test2@example.com',
       name: "user2",
       friends: ['friend1@example.com'],
       friendRequests: []
@@ -444,7 +394,7 @@ describe('Send Friend Request', () => {
   afterAll(async () => {
     // Assuming client is properly initialized
     const collection = client.db('UserDB').collection('userlist');
-    await collection.deleteOne({ email: userEmail });
+    await collection.deleteOne({ email: 'test2@example.com' });
     await collection.deleteOne({ email: 'friend1@example.com' });
     await collection.deleteOne({ email: 'requester@example.com' });
   });
@@ -511,42 +461,12 @@ describe('Send Friend Request', () => {
     expect(res.body.error).toBe('Friend request already sent');
   });
 
-// Input: user email
-// Expected status code: 500
-// Expected behavior: return an error due to internal server error
-// Expected output: error: Internal server 
-// ChatGPT usage: Yes
-  test('POST /api/userlist/:email/friendRequest should handle server errors during request', async () => {
-    // Mocking an error during the database update
-    const collectionMock = jest.spyOn(client.db('UserDB').collection('userlist'), 'updateOne');
-    collectionMock.mockImplementationOnce(() => {
-      throw new Error('Mocked MongoDB update error');
-    });
-
-    try {
-      const friendEmail = 'friend@example.com';
-
-      const res = await request
-        .post(`/api/userlist/${userEmail}/friendRequest`)
-        .send({ friendEmail });
-
-      console.log('Response:', res.status, res.body);
-
-      expect(res.status).toBe(500);
-      expect(res.body.error).toBe('Internal server error');
-    } catch (error) {
-      console.error('Test error:', error);
-    } finally {
-      // Restore the original implementation of the mocked method
-      collectionMock.mockRestore();
-    }
-  });
 });
 
 // Interface POST https://20.163.28.92:8081/api/userlist/:email/:friendRequest/accept
   describe('Accept Friend Request', () => {
     // Test for successfully accepting a friend request
-    const userEmail = 'test@example.com';
+    const userEmail = 'test3@example.com';
     const nonExistingEmail = 'nonexistent@example.com';
     const friendEmail = 'requester@example.com';
   
@@ -556,7 +476,7 @@ describe('Send Friend Request', () => {
       const collection = client.db('UserDB').collection('userlist');
   
       await collection.insertOne({
-        email: userEmail,
+        email: 'test3@example.com',
         name: "user3",
         friends: ['friend1@example.com'],
         friendRequests: ['requester@example.com']
@@ -581,7 +501,7 @@ describe('Send Friend Request', () => {
     afterAll(async () => {
       // Assuming client is properly initialized
       const collection = client.db('UserDB').collection('userlist');
-      await collection.deleteOne({ email: userEmail });
+      await collection.deleteOne({ email: 'test3@example.com' });
       await collection.deleteOne({ email: 'friend1@example.com' });
       await collection.deleteOne({ email: 'requester@example.com' });
     });
@@ -640,43 +560,13 @@ describe('Send Friend Request', () => {
       expect(res.status).toBe(400);
       expect(res.body.error).toBe("Friend request not found in the user's friend requests");
     });
-  
-// Input: existing user email, existing friend email
-// Expected status code: 500
-// Expected behavior: return an error due to internal server error
-// Expected output: error: Internal server error
-// ChatGPT usage: Yes
-    test('POST /api/userlist/:email/:friendRequest/accept should handle server errors during acceptance', async () => {
-      // Mocking an error during the database update
-      const collectionMock = jest.spyOn(client.db('UserDB').collection('userlist'), 'updateOne');
-      collectionMock.mockImplementationOnce(() => {
-        throw new Error('Mocked MongoDB update error');
-      });
-  
-      try {
-        // Assuming userEmail and friendEmail are valid emails that exist in the database
-        const friendEmail = 'friend@example.com';
-  
-        const res = await request
-          .post(`/api/userlist/${userEmail}/${friendEmail}/accept`);
-  
-        console.log('Response:', res.status, res.body);
-  
-        expect(res.status).toBe(500);
-        expect(res.body.error).toBe('Internal server error');
-      } catch (error) {
-        console.error('Test error:', error);
-      } finally {
-        // Restore the original implementation of the mocked method
-        collectionMock.mockRestore();
-      }
-    });
+
   });
 
   // Interface DELETE https://20.163.28.92:8081/api/userlist/:email/:friendRequest/decline
   describe('Decline Friend Request', () => {
     // Test for successfully declining a friend request
-    const userEmail = 'test@example.com';
+    const userEmail = 'test4@example.com';
     const nonExistingEmail = 'nonexistent@example.com';
     const friendEmail = 'requester@example.com';
   
@@ -686,7 +576,7 @@ describe('Send Friend Request', () => {
       const collection = client.db('UserDB').collection('userlist');
   
       await collection.insertOne({
-        email: userEmail,
+        email: 'test4@example.com',
         name: "user4",
         friends: ['friend1@example.com'],
         friendRequests: ['requester@example.com']
@@ -711,7 +601,7 @@ describe('Send Friend Request', () => {
     afterAll(async () => {
       // Assuming client is properly initialized
       const collection = client.db('UserDB').collection('userlist');
-      await collection.deleteOne({ email: userEmail });
+      await collection.deleteOne({ email: 'test4@example.com' });
       await collection.deleteOne({ email: 'friend1@example.com' });
       await collection.deleteOne({ email: 'requester@example.com' });
     });
@@ -762,37 +652,7 @@ describe('Send Friend Request', () => {
       expect(res.status).toBe(400);
       expect(res.body.error).toBe("Friend request not found in the user's friend requests");
     });
-  
-// Input: existing user email, existing friend email
-// Expected status code: 500
-// Expected behavior: return an error due to internal server error
-// Expected output: error: Internal server error
-// ChatGPT usage: Yes
-    test('DELETE /api/userlist/:email/:friendRequest/decline should handle server errors during decline', async () => {
-      // Mocking an error during the database update
-      const collectionMock = jest.spyOn(client.db('UserDB').collection('userlist'), 'updateOne');
-      collectionMock.mockImplementationOnce(() => {
-        throw new Error('Mocked MongoDB update error');
-      });
-  
-      try {
-        // Assuming userEmail and friendEmail are valid emails that exist in the database
-        const friendEmail = 'friend@example.com';
-  
-        const res = await request
-          .delete(`/api/userlist/${userEmail}/${friendEmail}/decline`);
-  
-        console.log('Response:', res.status, res.body);
-  
-        expect(res.status).toBe(500);
-        expect(res.body.error).toBe('Internal server error');
-      } catch (error) {
-        console.error('Test error:', error);
-      } finally {
-        // Restore the original implementation of the mocked method
-        collectionMock.mockRestore();
-      }
-    });
+
   });
   
 

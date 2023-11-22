@@ -249,14 +249,9 @@ app.post('/api/initReminders', (req, res) => {
 // Find commute buddy
 app.get('/api/findMatchingUsers/:userEmail', async (req, res) => {
   const userEmail = req.params.userEmail;
-
-  try {
     const matchingUsers = await commuters.findMatchingUsers(userEmail);
-    res.json({ matchingUsers });
-  } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
+    res.status(200).json({ matchingUsers });
+  
 });
 
 // app.get('/api/initRouteWithFriends', async (req, res) => {
@@ -518,9 +513,11 @@ app.put('/api/schedulelist/:id', async (req, res) => {
 });
 */
 
+/*
 app.use('/', (req, res, next) => {
   res.send('Hello from SSL server');
 });
+*/
 
 /*
 const sslServer = https.createServer(

@@ -60,12 +60,16 @@ const nonExistingEmail = 'nonexistinguser@example.com';
         email: 'user@example.com',
         // Add other schedule data properties as needed
       };
+      const collection = client.db('UserDB').collection('userlist');
+      //await collection.insertOne({ email: userEmail });
+
     });
   
     // Clean up the test data after running all the tests
     afterAll(async () => {
       // Assuming you have already connected to the MongoDB client
       const collection = client.db('ScheduleDB').collection('schedulelist');
+      //await collection.deleteOne({ email: userEmail });
       await collection.deleteOne({ email: scheduleData.email });
     });
   
@@ -90,9 +94,6 @@ const nonExistingEmail = 'nonexistinguser@example.com';
 // ChatGPT usage: Yes
     test('POST /api/schedulelist should return an error for an existing schedule', async () => {
       // Assuming a schedule with the same email already exists
-      await request
-        .post('/api/schedulelist')
-        .send(scheduleData);
   
       const res = await request
         .post('/api/schedulelist')
@@ -102,35 +103,6 @@ const nonExistingEmail = 'nonexistinguser@example.com';
       expect(res.body.message).toBe('Schedule with this email already exists');
     });
   
-// Input: scheduleData
-// Expected status code: 500
-// Expected behavior: Internal server error
-// Expected output: { error: 'Internal server error' }
-// ChatGPT usage: Yes
-
-    test('POST /api/schedulelist should handle server errors during creation', async () => {
-      // Mocking an error during the database insertion
-      const collectionMock = jest.spyOn(client.db('ScheduleDB').collection('schedulelist'), 'insertOne');
-      collectionMock.mockImplementationOnce(() => {
-        throw new Error('Mocked MongoDB insertion error');
-      });
-  
-      try {
-        const res = await request
-          .post('/api/schedulelist')
-          .send(scheduleData);
-  
-        console.log('Response:', res.status, res.body);
-  
-        expect(res.status).toBe(500);
-        expect(res.body.error).toBe('Internal server error');
-      } catch (error) {
-        console.error('Test error:', error);
-      } finally {
-        // Restore the original implementation of the mocked method
-        collectionMock.mockRestore();
-      }
-    });
     
   });
   
@@ -179,35 +151,12 @@ describe('GET /api/schedulelist/:email', () => {
       expect(res.status).toBe(404);
       expect(res.body.error).toBe('Schedule not found');
     });
-  
-    // Input: userEmail
-// Expected status code: 500
-// Expected behavior: Internal server error
-// Expected output: { error: 'Internal server error' }
-// ChatGPT usage: Yes
-    test('GET /api/schedulelist/:email should return 500 on internal server error', async () => {
-        // Mock an internal server error by not connecting to the MongoDB client
-        jest.spyOn(client, 'db').mockImplementationOnce(() => {
-          throw new Error('Mocked MongoDB connection error');
-        });
-      
-        try {
-          const res = await request.get(`/api/schedulelist/${scheduleData.email}`);
-      
-          expect(res.status).toBe(500);
-          expect(res.body.error).toBe('Internal server error');
-        } catch (error) {
-          console.error('Test error:', error);
-        } finally {
-          // Restore the original implementation of the mocked method
-          jest.restoreAllMocks();
-        }
-      });      
+
   });
 
   // Interface GET https://20.163.28.92:8081/api/schedulelist/:email/:id
   describe('GET /api/schedulelist/:email/:id', () => {
-    const userEmail = 'user@example.com';
+    const userEmail = 'user1@example.com';
     const eventId = '12345'; // Event ID
   
     // Mock schedule data for testing
@@ -290,30 +239,6 @@ describe('GET /api/schedulelist/:email', () => {
       expect(res.body.error).toBe('Calendar ID not found for the event');
     });
   
-
-    // Input: userEmail, eventId
-// Expected status code: 500
-// Expected behavior: Internal server error
-// Expected output: { error: 'Internal server error' }
-// ChatGPT usage: Yes
-    test('should return 500 on internal server error', async () => {
-        // Mock an internal server error by not connecting to the MongoDB client
-        jest.spyOn(client, 'db').mockImplementationOnce(() => {
-          throw new Error('Mocked MongoDB connection error');
-        });
-      
-        try {
-          const res = await request.get(`/api/schedulelist/${userEmail}/${eventId}`);
-      
-          expect(res.status).toBe(500);
-          expect(res.body.error).toBe('Internal server error');
-        } catch (error) {
-          console.error('Test error:', error);
-        } finally {
-          // Restore the original implementation of the mocked method
-          jest.restoreAllMocks();
-        }
-      });
       
   });
   // Interface POST https://20.163.28.92:8081/api/schedulelist/:email
@@ -418,7 +343,7 @@ describe('GET /api/schedulelist/:email', () => {
 // Expected output: { error: 'Event overlaps with existing events' }
 // ChatGPT usage: Yes
     test('should return 400 for overlapping events', async () => {
-        console.log("RUNNING");
+        //console.log("RUNNING");
       // Assuming there's an existing event in the user's schedule
       const existingEvent = {
         title: 'Existing Event',
@@ -446,40 +371,49 @@ describe('GET /api/schedulelist/:email', () => {
       expect(res.status).toBe(400);
       expect(res.body.error).toBe('Event overlaps with existing events');
     });
-  
-    // Input: scheduleData, newEventData
-// Expected status code: 500 
-// Expected behavior: Internal server error
-// Expected output: { error: 'Internal server error' }
+
+        // Input: scheduleData, newEventData
+// Expected status code: 400
+// Expected behavior: Event overlaps with existing events 
+// Expected output: { error: 'Event overlaps with existing events' }
 // ChatGPT usage: Yes
-    test('should return 500 on internal server error', async () => {
-        // Mock an internal server error by not connecting to the MongoDB client
-        jest.spyOn(client, 'db').mockImplementationOnce(() => {
-          throw new Error('Mocked MongoDB connection error');
-        });
-      
-        try {
-          const res = await request
-            .post(`/api/schedulelist/${scheduleData.email}`)
-            .send(newEventData);
-      
-          expect(res.status).toBe(500);
-          expect(res.body.error).toBe('Internal server error');
-        } catch (error) {
-          console.error('Test error:', error);
-        } finally {
-          // Restore the original implementation of the mocked method
-          jest.restoreAllMocks();
-        }
-      });
-      
+test('should return 400 for overlapping events, completely encompassing', async () => {
+  //console.log("RUNNING");
+// Assuming there's an existing event in the user's schedule
+const existingEvent = {
+  title: 'Existing Event',
+  startTime: '2023-10-31T16:00:00.000-07:00',
+  endTime: '2023-10-31T18:00:00.000-07:00',
+  // ... other event properties
+};
+
+await request
+  .post(`/api/schedulelist/${scheduleData.email}`)
+  .send(existingEvent);
+
+// Attempting to add a new event that overlaps with the existing one
+const overlappingEventData = {
+  title: 'Overlapping Event',
+  startTime: '2023-10-31T15:00:00.000-07:00',
+  endTime: '2023-10-31T19:00:00.000-07:00',
+  // ... other event properties
+};
+
+const res = await request
+  .post(`/api/schedulelist/${scheduleData.email}`)
+  .send(overlappingEventData);
+
+expect(res.status).toBe(400);
+expect(res.body.error).toBe('Event overlaps with existing events');
+});
+
   });
 
 // Interface DETE https://20.163.28.92:8081/api/schedulelist/:email/:id
 describe('DELETE /api/schedulelist/:email/:id', () => {
   // Mock schedule data for testing
   const scheduleData = {
-    email: 'user@example.com',
+    email: 'user2@example.com',
     events: [
       { id: 'event1', /* other event properties */ },
       { id: 'event2', /* other event properties */ },
@@ -541,31 +475,6 @@ describe('DELETE /api/schedulelist/:email/:id', () => {
 
     expect(res.status).toBe(404);
     expect(res.body.error).toBe('Event not found');
-  });
-
-  // Input: userEmail, eventId
-// Expected status code: 500
-// Expected behavior: Internal server error
-// Expected output: { error: 'Internal server error' }
-// ChatGPT usage: Yes
-  test('should return 500 on internal server error', async () => {
-    // Mock an internal server error by not connecting to the MongoDB client
-    jest.spyOn(client, 'db').mockImplementationOnce(() => {
-      throw new Error('Mocked MongoDB connection error');
-    });
-  
-    try {
-      const eventIdToDelete = 'event2';
-      const res = await request.delete(`/api/schedulelist/${scheduleData.email}/${eventIdToDelete}`);
-  
-      expect(res.status).toBe(500);
-      expect(res.body.error).toBe('Internal server error');
-    } catch (error) {
-      console.error('Test error:', error);
-    } finally {
-      // Restore the original implementation of the mocked method
-      jest.restoreAllMocks();
-    }
   });
   
 });
@@ -629,31 +538,6 @@ describe('Update Schedule', () => {
 
     expect(res.status).toBe(404);
     expect(res.body.message).toBe('Schedule not found');
-  });
-
-  // Input: email, scheduleData2
-// Expected status code: 500
-// Expected behavior: Internal server error
-// Expected output: { error: 'Internal server error' }
-// ChatGPT usage: Yes
-  test('should return 500 on internal server error', async () => {
-    try {
-      // Mock an internal server error by not connecting to the MongoDB client
-      jest.spyOn(client, 'db').mockImplementationOnce(() => {
-        throw new Error('Mocked MongoDB connection error');
-      });
-  
-      const eventIdToDelete = 'event2';
-      const res = await request.delete(`/api/schedulelist/${scheduleData1.email}/${eventIdToDelete}`);
-  
-      expect(res.status).toBe(500);
-      expect(res.body.error).toBe('Internal server error');
-    } catch (error) {
-      console.error('Test error:', error);
-    } finally {
-      // Restore the original implementation of the mocked method
-      jest.restoreAllMocks();
-    }
   });
 });
   

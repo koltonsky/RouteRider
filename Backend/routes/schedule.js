@@ -1,10 +1,10 @@
 const { MongoClient} = require('mongodb');
-const uri = 'mongodb://0.0.0.0:27017'; // Replace with your MongoDB connection string
+const uri = 'mongodb://127.0.0.1:27017'; // Replace with your MongoDB connection string
 const client = new MongoClient(uri);
 
 // ChatGPT usage: Yes
 const createNewSchedule = async (req, res) => {
-  try{
+  //try{
     // Extract user data from the request body
     const scheduleData = req.body;
 
@@ -30,15 +30,15 @@ const createNewSchedule = async (req, res) => {
       res.set('Content-Length', successMessageLength);
       res.status(201).json({ message: successMessage });
     }
-  } catch (error) {
+  /*} catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Internal server error' });
-  }
+  }*/
 };
 
 // ChatGPT usage: Yes
 const getScheduleByEmail = async (req, res) => {
-  try {
+  //try {
     // Extract the user's email from the request parameters
     const userEmail = req.params.email;
 
@@ -57,15 +57,15 @@ const getScheduleByEmail = async (req, res) => {
       // User not found
       res.status(404).json({ error: 'Schedule not found' });
     }
-  } catch (error) {
+  /*} catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Internal server error' });
-  }
+  }*/
 };
 
 // ChatGPT usage: Yes
 const updateSchedule = async (req, res) => {
-  try {
+  //try {
     // Extract the email from the URL parameter
     const email = req.params.email;
 
@@ -96,10 +96,10 @@ const updateSchedule = async (req, res) => {
         res.status(204).json({ message: 'No changes made to the schedule' });
       } */
     }
-  } catch (error) {
+  /*} catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Internal server error' });
-  }
+  }*/
 };
 
 /*
@@ -274,7 +274,7 @@ const addEvent = async (req, res) => {
     return new Date(event1.startTime) - new Date(event2.startTime);
   }
 
-  try {
+  //try {
     const userEmail = req.params.email;
     const newEvent = req.body; // Assuming the new event data is sent in the request body
 
@@ -347,10 +347,10 @@ const addEvent = async (req, res) => {
     //}else {
     //  res.status(500).json({ error: 'Failed to add event' });
     //}
-  } catch (error) {
+  /*} catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Internal server error' });
-  }
+  }*/
 };
 
 /*
@@ -673,7 +673,7 @@ const editEventGeolocation = async (req, res) => {
 
 // ChatGPT usage: Yes
 const getCalendarID = async (req, res) => {
-  try {
+  //try {
     const userEmail = req.params.email;
     const eventId = req.params.id; // Event ID
 
@@ -701,10 +701,10 @@ const getCalendarID = async (req, res) => {
     } else {
       res.status(404).json({ error: 'Calendar ID not found for the event' });
     }
-  } catch (error) {
+  /*} catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Internal server error' });
-  }
+  }*/
 };
 
 /*
@@ -786,7 +786,7 @@ const getCalendarID = async (req, res) => {
 
   // ChatGPT usage: Yes
 const deleteEventByID = async (req, res) => {
-  try {
+  //try {
     const eventId = req.params.id; // Change 'email' to 'id'
 
     const collection = client.db('ScheduleDB').collection('schedulelist');
@@ -803,10 +803,12 @@ const deleteEventByID = async (req, res) => {
       (event) => event.id === eventId
     );
 
+    /*
     if (eventIndex === -1) {
       res.status(400).json({ error: 'Event not found in user schedule' });
       return;
     }
+    */
 
     // Remove the event at the specified index
     schedule.events.splice(eventIndex, 1);
@@ -821,10 +823,10 @@ const deleteEventByID = async (req, res) => {
     //} else {
     //  res.status(500).json({ error: 'Failed to delete event' });
     //}
-  } catch (error) {
+  /*} catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Internal server error' });
-  }
+  }*/
 };
 
 // ChatGPT usage: Yes

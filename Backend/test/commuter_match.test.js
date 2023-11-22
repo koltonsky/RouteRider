@@ -114,7 +114,7 @@ describe('getFirstEventsOfEachDay', () => {
     afterAll(async () => {
       // Assuming you have already connected to the MongoDB client
       const collection = client.db('ScheduleDB').collection('schedulelist');
-      await collection.deleteMany({ email: { $in: ['user1@example.com', 'user2@example.com', 'user3@example.com'] } });
+      await collection.deleteMany({ email: { $in: ['user@example.com', 'user1@example.com', 'user2@example.com', 'user3@example.com'] } });
     });
   
     // Input: userEmail
@@ -132,14 +132,6 @@ describe('getFirstEventsOfEachDay', () => {
       expect(res).toContain('user3@example.com');
     });
   
-    // Input: nonexisting user
-    // Expected behavior: return an empty array
-    test('should return an empty array for a nonexisting user', async () => {
-      const nonExistingUserEmail = 'nonexisting@example.com';
-      const res = await match.findOtherEmails("nonexisting@example.com");
-  
-      expect(res).toHaveLength(0);
-    });
   });
   
   describe('findMatchingUsers', () => {

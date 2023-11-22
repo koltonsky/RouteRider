@@ -24,7 +24,7 @@ const user = {
   };
 
 const userEmail = 'koltonluu@gmail.com';
-const nonExistingEmail = 'nonexistinguser@example.com';
+//const nonExistingEmail = 'nonexistinguser@example.com';
 
 
   beforeAll(async () => {

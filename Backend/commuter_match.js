@@ -107,8 +107,8 @@ async function getFirstEventsOfEachDay(userEmail) {
 
  for (const event of sortedEvents) {
      const dateStr = new Date(event.startTime).toLocaleDateString();
-     console.log("DATESTR BE " + event.startTime);
-     console.log("DATESTR " + dateStr);
+     //console.log("DATESTR BE " + event.startTime);
+     //.log("DATESTR " + dateStr);
 
      if (!seenDates.has(dateStr)) {
          seenDates.add(dateStr);
@@ -186,8 +186,8 @@ async function findOtherEmails(userEmail) {
         // Extract the email addresses from the result
         const emailsExcludingUser = schedulesExcludingUser.map(schedule => schedule.email);
 
-        console.log('Emails of schedules excluding the user:');
-        console.log(emailsExcludingUser);
+        //console.log('Emails of schedules excluding the user:');
+        //console.log(emailsExcludingUser);
 
         return emailsExcludingUser;
     /*} catch (err) {
@@ -266,8 +266,8 @@ async function findMatchingUsers(userEmail) {
         // Step 1: Get the first events for the user
         const userFirstEvents = await getFirstEventsOfEachDay(userEmail);
 
-        console.log('User First Events:');
-        console.log(userFirstEvents);
+        //console.log('User First Events:');
+        //console.log(userFirstEvents);
 
         // Step 2: Find other emails, excluding the user's email
         const otherEmails = await findOtherEmails(userEmail);
@@ -280,8 +280,8 @@ async function findMatchingUsers(userEmail) {
             // Get the first events of the day for the current email
             const firstEventsOfTheDay = await getFirstEventsOfEachDay(email);
 
-            console.log(`First Events of the Day for ${email}:`);
-            console.log(firstEventsOfTheDay);
+            //console.log(`First Events of the Day for ${email}:`);
+            //console.log(firstEventsOfTheDay);
 
             // Step 5: Compare the events and add email to the list if conditions match
             for (const userEvent of userFirstEvents.events) {
@@ -298,8 +298,8 @@ async function findMatchingUsers(userEmail) {
             }
         }
 
-        console.log('Users with matching events:');
-        console.log(matchingUsers);
+        //console.log('Users with matching events:');
+        //console.log(matchingUsers);
 
         return matchingUsers;
     /*} catch (err) {

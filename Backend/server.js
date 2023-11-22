@@ -29,7 +29,8 @@ const serviceAccountType = process.env.SERVICE_ACCOUNT_TYPE;
 // Create the serviceAccount object
 const serviceAccount =
 {
-  "type": serviceAccountType,
+  //"type": serviceAccountType,
+  "type": "service_account",
   "project_id": "routerider-402800",
   "private_key_id": "5bcd35ff287cd344df63e9bd5d96170fdc72130a",
   //"private_key": privateKey,
@@ -60,7 +61,7 @@ admin.initializeApp({
 });
 
 // MongoDB connection setup
-const uri = 'mongodb://0.0.0.0:27017'; // Replace with your MongoDB connection string
+const uri = 'mongodb://127.0.0.1:27017'; // Replace with your MongoDB connection string
 const client = new MongoClient(uri);
 
 /*
@@ -93,14 +94,14 @@ async function connectToDatabase() {
 app.post('/api/userlist', user.createNewUser);
 
 app.get('/api/userlist/:email', user.getUserByEmail);
-app.get('/api/userlist/:email/name', user.getUserName);
-app.get('/api/userlist/:email/address', user.getUserAddress);
+//app.get('/api/userlist/:email/name', user.getUserName);
+//app.get('/api/userlist/:email/address', user.getUserAddress);
 app.get('/api/userlist/:email/friends', user.getFriendListWithNames);
 
 app.put('/api/userlist/:email/address', user.updateAddress);
 
-app.post('/api/userlist/:email/friends', user.addFriend);
-app.delete('/api/userlist/:email/friends', user.deleteFriend);
+//app.post('/api/userlist/:email/friends', user.addFriend);
+//app.delete('/api/userlist/:email/friends', user.deleteFriend);
 
 app.post('/api/userlist/:email/friendRequest', user.sendFriendRequest);
 
@@ -113,10 +114,10 @@ app.delete(
   user.declineFriendRequest
 );
 
-app.put('/api/userlist/:email', user.updateUser);
+//app.put('/api/userlist/:email', user.updateUser);
 
 // test/db purposes only
-app.delete('/api/userlist/:email', user.deleteUser);
+//app.delete('/api/userlist/:email', user.deleteUser);
 
 // Schedule DB
 app.post('/api/schedulelist', schedule.createNewSchedule);
@@ -130,12 +131,10 @@ app.post('/api/schedulelist/:email', schedule.addEvent);
 //app.put('/api/schedulelist/:email/:id', schedule.editEventByID);
 app.delete('/api/schedulelist/:email/:id', schedule.deleteEventByID);
 
-app.put(
-  '/api/schedulelist/:email/:index/geolocation',
-  schedule.editEventGeolocation
-);
 
-app.delete('/api/schedulelist/:email/', schedule.deleteSchedule);
+//app.put('/api/schedulelist/:email/:index/geolocation', schedule.editEventGeolocation);
+
+//app.delete('/api/schedulelist/:email/', schedule.deleteSchedule);
 
 /**
  * ChatGPT usage: Partial

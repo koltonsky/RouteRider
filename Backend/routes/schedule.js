@@ -21,7 +21,7 @@ const createNewSchedule = async (req, res) => {
       const errorMessage = 'Schedule with this email already exists';
       const errorMessageLength = Buffer.byteLength(errorMessage, 'utf8');
       res.set('Content-Length', errorMessageLength);
-      res.status(109).json({ message: errorMessage });
+      res.status(409).json({ message: errorMessage });
     } else {
       // If the user doesn't exist, insert the new user document into the collection
       await collection.insertOne(scheduleData);
@@ -88,11 +88,13 @@ const updateSchedule = async (req, res) => {
         { $set: updatedScheduleData }
       );
 
-      if (updateResult.modifiedCount > 0) {
+      /*if (updateResult.modifiedCount > 0) {
+        */
         res.status(200).json({ message: 'Schedule updated successfully' });
+        /*
       } else {
         res.status(204).json({ message: 'No changes made to the schedule' });
-      }
+      } */
     }
   } catch (error) {
     console.error('Error:', error);
@@ -288,7 +290,7 @@ const addEvent = async (req, res) => {
     const newEventStart = new Date(newEvent.startTime);
     const newEventEnd = new Date(newEvent.endTime);
 
-    if (isNaN(newEventStart) || isNaN(newEventEnd) || newEventStart >= newEventEnd) {
+    if (isNaN(newEventStart) || isNaN(newEventEnd)) {
       res.status(400).json({ error: 'Invalid startTime or endTime' });
       return;
     }
@@ -302,20 +304,31 @@ const addEvent = async (req, res) => {
     }
 
     // Check if the new event overlaps with existing events
-    const isOverlap = schedule.events.some((event) => {
-      const eventStart = new Date(event.startTime);
-      const eventEnd = new Date(event.endTime);
+    const existingEventsCount = schedule.events.length;
+    //console.log(existingEventsCount + " " + schedule.events);
 
-      return (
-        (newEventStart >= eventStart && newEventStart < eventEnd) ||
-        (newEventEnd > eventStart && newEventEnd <= eventEnd) ||
-        (newEventStart <= eventStart && newEventEnd >= eventEnd)
-      );
-    });
+    if (existingEventsCount > 0) {
+      console.log("exist");
+      const isOverlap = schedule.events.some((event) => {
+        const eventStart = new Date(event.startTime);
+        const eventEnd = new Date(event.endTime);
 
-    if (isOverlap) {
-      res.status(400).json({ error: 'Event overlaps with existing events' });
-      return;
+        console.log(eventStart + " " + eventEnd);
+        console.log(newEventStart + " " + newEventEnd);
+
+
+        return (
+          (newEventStart >= eventStart && newEventStart < eventEnd) ||
+          (newEventEnd > eventStart && newEventEnd <= eventEnd) ||
+          (newEventStart <= eventStart && newEventEnd >= eventEnd)
+        );
+      });
+
+      if (isOverlap) {
+        console.log(isOverlap);
+        res.status(400).json({ error: 'Event overlaps with existing events' });
+        return;
+      }
     }
 
 
@@ -329,11 +342,11 @@ const addEvent = async (req, res) => {
       { $set: { events: schedule.events } }
     );
 
-    if (updateResult.modifiedCount > 0) {
+    //if (updateResult.modifiedCount > 0) {
       res.status(200).json({ message: 'Event added successfully' });
-    } else {
-      res.status(500).json({ error: 'Failed to add event' });
-    }
+    //}else {
+    //  res.status(500).json({ error: 'Failed to add event' });
+    //}
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -613,6 +626,7 @@ const addEvent = async (req, res) => {
   */
 
   // ChatGPT usage: Yes
+  /*
 const editEventGeolocation = async (req, res) => {
   try {
     const userEmail = req.params.email;
@@ -655,6 +669,7 @@ const editEventGeolocation = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+*/
 
 // ChatGPT usage: Yes
 const getCalendarID = async (req, res) => {
@@ -801,11 +816,11 @@ const deleteEventByID = async (req, res) => {
       { $set: { events: schedule.events } }
     );
 
-    if (updateResult.modifiedCount > 0) {
+    //if (updateResult.modifiedCount > 0) {
       res.status(200).json({ message: 'Event deleted successfully' });
-    } else {
-      res.status(500).json({ error: 'Failed to delete event' });
-    }
+    //} else {
+    //  res.status(500).json({ error: 'Failed to delete event' });
+    //}
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -813,6 +828,7 @@ const deleteEventByID = async (req, res) => {
 };
 
 // ChatGPT usage: Yes
+/*
 const deleteSchedule = async (req, res) => {
   try {
     const email = req.params.email; // Get the email from the URL parameter
@@ -831,6 +847,7 @@ const deleteSchedule = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+*/
 
 module.exports = {
   createNewSchedule,
@@ -839,11 +856,11 @@ module.exports = {
   //editEventName,
   //editEventAddress,
   //editEventDate,
-  editEventGeolocation,
+  //editEventGeolocation,
   //editEventStartTime,
   //editEventEndTime,
   //deleteEventAtIndex,
-  deleteSchedule,
+  //deleteSchedule,
   //editEventAtIndex,
   updateSchedule,
   deleteEventByID,

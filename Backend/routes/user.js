@@ -11,19 +11,22 @@ const createNewUser = async (req, res) => {
     // Extract user data from the request body
     const userData = req.body;
 
+
     // Assuming you have already connected to the MongoDB client
     const collection = client.db('UserDB').collection('userlist');
+
 
     // Check if a user with a specific identifier (e.g., email) already exists
     const existingUser = await collection.findOne({ email: userData.email });
 
+
     if (existingUser) {
       // If a user with the same email exists, return an error message
+      await collection.insertOne(userData);
       const errorMessage = 'User with this email already exists';
       const errorMessageLength = Buffer.byteLength(errorMessage, 'utf8');
       res.set('Content-Length', errorMessageLength);
-      res.status(109).json({ message: errorMessage });
-      console.log("existing user");
+      res.status(409).json({ message: errorMessage });
     } else {
       // If the user doesn't exist, insert the new user document into the collection
       await collection.insertOne(userData);
@@ -94,6 +97,7 @@ const getUserByEmail = async (req, res) => {
   };
 
   // ChatGPT usage: Yes
+  /*
   const getUserName = async (req, res) => {
     try {
       // Extract the user's email from the request parameters
@@ -117,7 +121,9 @@ const getUserByEmail = async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   };
+  */
 
+  /*
   // ChatGPT usage: Yes
   const getUserAddress = async (req, res) => {
     try {
@@ -142,8 +148,9 @@ const getUserByEmail = async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   };
+  */
 
-
+/*
 // Function to get a user's friend list from 
 // ChatGPT usage: Yes
 const getFriendList = async (req, res) => {
@@ -167,6 +174,7 @@ const getFriendList = async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   };
+  */
 
   // ChatGPT usage: Yes
 const getFriendListWithNames = async (req, res) => {
@@ -235,7 +243,7 @@ const getFriendListWithNames = async (req, res) => {
 };
 
   
-
+/*
 // ChatGPT usage: Yes
   const addFriend = async (req, res) => {
     try {
@@ -336,6 +344,7 @@ const getFriendListWithNames = async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   };
+  */
   // ChatGPT usage: Yes
   const sendFriendRequest = async (req, res) => {
     try {
@@ -368,8 +377,8 @@ const getFriendListWithNames = async (req, res) => {
       }
       */
   
-      // Check if the friend's email is already in the user's friend requests
-      if (!user.friendRequests.includes(friendEmail)) {
+      // Check if the friend's email is already in the user's friend requests or friends
+      if (!user.friendRequests.includes(friendEmail) || !user.friends.includes(friendEmail)) {
         // Friend not found in friend requests, add the friend's email
         user.friendRequests.push(friendEmail);
   
@@ -534,6 +543,7 @@ const updateFriendList = async (req, res) => {
 
   // Function to update a user's information in MongoDB
   // ChatGPT usage: Yes
+  /*
 const updateUser = async (req, res) => {
     try {
       const userEmail = req.params.email; // User email whose information needs to be updated
@@ -558,6 +568,7 @@ const updateUser = async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   };
+  */
 
 /*
 // Sample user data
@@ -621,6 +632,7 @@ const updateFriendList = async (req, res) => {
   };
 */
 // ChatGPT usage: Yes
+/*
 const deleteUser = async (req, res) => {
   try {
     const email = req.params.email; // Get the email from the URL parameter
@@ -639,6 +651,7 @@ const deleteUser = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+*/
 
 
 
@@ -649,14 +662,14 @@ const deleteUser = async (req, res) => {
     createNewUser,
     updateAddress,
     getUserByEmail,
-    getUserName,
-    getUserAddress,
-    getFriendList,
+    //getUserName,
+    //getUserAddress,
+    //getFriendList,
     getFriendListWithNames,
-    addFriend,
-    deleteFriend,
-    updateUser,
-    deleteUser,
+    //addFriend,
+    //deleteFriend,
+    //updateUser,
+    //deleteUser,
     sendFriendRequest,
     acceptFriendRequest,
     declineFriendRequest,

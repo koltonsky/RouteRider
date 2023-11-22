@@ -45,7 +45,7 @@ public class ProfileFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
         GoogleSignInAccount account = User.getCurrentAccount();
         APICaller apiCall = new APICaller();
-        TextView address = view.findViewById(R.id.address);
+        TextView address = view.findViewById(R.id.profile_address);
 
         apiCall.APICall("api/userlist/" + account.getEmail(), "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
             @Override

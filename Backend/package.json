@@ -14,6 +14,12 @@
   },
   "scripts": {
     "test": "jest",
+<<<<<<< HEAD
     "test:coverage": "jest --coverage"
+=======
+    "test:coverage": "jest --coverage",
+    "test:backend": "jest Backend/test"
+>>>>>>> a06977f36b14423577e2695aa5555f52806a43cd
   }
+  
 }

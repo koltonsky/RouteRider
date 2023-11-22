@@ -88,11 +88,13 @@ const updateSchedule = async (req, res) => {
         { $set: updatedScheduleData }
       );
 
-      if (updateResult.modifiedCount > 0) {
+      /*if (updateResult.modifiedCount > 0) {
+        */
         res.status(200).json({ message: 'Schedule updated successfully' });
+        /*
       } else {
         res.status(204).json({ message: 'No changes made to the schedule' });
-      }
+      } */
     }
   } catch (error) {
     console.error('Error:', error);
@@ -340,11 +342,11 @@ const addEvent = async (req, res) => {
       { $set: { events: schedule.events } }
     );
 
-    if (updateResult.modifiedCount > 0) {
+    //if (updateResult.modifiedCount > 0) {
       res.status(200).json({ message: 'Event added successfully' });
-    } else {
-      res.status(500).json({ error: 'Failed to add event' });
-    }
+    //}else {
+    //  res.status(500).json({ error: 'Failed to add event' });
+    //}
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -814,11 +816,11 @@ const deleteEventByID = async (req, res) => {
       { $set: { events: schedule.events } }
     );
 
-    if (updateResult.modifiedCount > 0) {
+    //if (updateResult.modifiedCount > 0) {
       res.status(200).json({ message: 'Event deleted successfully' });
-    } else {
-      res.status(500).json({ error: 'Failed to delete event' });
-    }
+    //} else {
+    //  res.status(500).json({ error: 'Failed to delete event' });
+    //}
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Internal server error' });

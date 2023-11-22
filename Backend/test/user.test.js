@@ -41,7 +41,7 @@ const nonExistingEmail = 'nonexistinguser@example.com';
   beforeAll(async () => {
     // Set up MongoDB connection before tests
     try {
-      const uri = 'mongodb://0.0.0.0:27017'; // Replace with your MongoDB connection string
+      const uri = 'mongodb://127.0.0.1:27017'; // Replace with your MongoDB connection string
       client = new MongoClient(uri);
       await client.connect();
       console.log("connected");

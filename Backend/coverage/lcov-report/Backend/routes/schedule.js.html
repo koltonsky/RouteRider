@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">88.33% </span>
+                <span class="strong">87.9% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>106/120</span>
+                <span class='fraction'>109/124</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">94.11% </span>
+                <span class="strong">87.5% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>32/34</span>
+                <span class='fraction'>35/40</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">88.23% </span>
+                <span class="strong">87.8% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>105/119</span>
+                <span class='fraction'>108/123</span>
             </div>
         
             
@@ -931,9 +931,7 @@
 <a name='L866'></a><a href='#L866'>866</a>
 <a name='L867'></a><a href='#L867'>867</a>
 <a name='L868'></a><a href='#L868'>868</a>
-<a name='L869'></a><a href='#L869'>869</a>
-<a name='L870'></a><a href='#L870'>870</a>
-<a name='L871'></a><a href='#L871'>871</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">2x</span>
+<a name='L869'></a><a href='#L869'>869</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1023,12 +1021,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1277,7 +1273,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1751,7 +1747,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1893,13 +1889,11 @@ const updateSchedule = async (req, res) =&gt; {
         { $set: updatedScheduleData }
       );
 &nbsp;
-      /*if (updateResult.modifiedCount &gt; 0) {
-        */
+      if (updateResult.modifiedCount &gt; 0) {
         res.status(200).json({ message: 'Schedule updated successfully' });
-        /*
-      } else {
-        res.status(204).json({ message: 'No changes made to the schedule' });
-      } */
+      } else <span class="missing-if-branch" title="else path not taken" >E</span>{
+<span class="cstat-no" title="statement not covered" >        res.status(204).json({ message: 'No changes made to the schedule' });</span>
+      }
     }
   } catch (error) {
 <span class="cstat-no" title="statement not covered" >    console.error('Error:', error);</span>
@@ -2147,11 +2141,11 @@ const addEvent = async (req, res) =&gt; {
       { $set: { events: schedule.events } }
     );
 &nbsp;
-    //if (updateResult.modifiedCount &gt; 0) {
+    <span class="missing-if-branch" title="else path not taken" >E</span>if (updateResult.modifiedCount &gt; 0) {
       res.status(200).json({ message: 'Event added successfully' });
-    //}else {
-    //  res.status(500).json({ error: 'Failed to add event' });
-    //}
+    } /*else {
+      res.status(500).json({ error: 'Failed to add event' });
+    }*/
   } catch (error) {
 <span class="cstat-no" title="statement not covered" >    console.error('Error:', error);</span>
 <span class="cstat-no" title="statement not covered" >    res.status(500).json({ error: 'Internal server error' });</span>
@@ -2621,11 +2615,11 @@ const deleteEventByID = async (req, res) =&gt; {
       { $set: { events: schedule.events } }
     );
 &nbsp;
-    //if (updateResult.modifiedCount &gt; 0) {
+    <span class="missing-if-branch" title="else path not taken" >E</span>if (updateResult.modifiedCount &gt; 0) {
       res.status(200).json({ message: 'Event deleted successfully' });
-    //} else {
-    //  res.status(500).json({ error: 'Failed to delete event' });
-    //}
+    } /*else {
+      res.status(500).json({ error: 'Failed to delete event' });
+    }*/
   } catch (error) {
 <span class="cstat-no" title="statement not covered" >    console.error('Error:', error);</span>
 <span class="cstat-no" title="statement not covered" >    res.status(500).json({ error: 'Internal server error' });</span>
@@ -2680,7 +2674,7 @@ module.exports = {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2023-11-22T01:53:07.423Z
+                at 2023-11-20T20:57:14.872Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

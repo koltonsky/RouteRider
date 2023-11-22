@@ -8,6 +8,8 @@ const supertest = require('supertest');
 const app = require('../server'); // Replace with the actual path to your Express app
 const request = supertest(app);
 
+//jest.mock('mongodb');
+
 const user = {
     "email": "newuserlol3@example.com",
     "name": "John Doe",
@@ -28,7 +30,7 @@ const nonExistingEmail = 'nonexistinguser@example.com';
   beforeAll(async () => {
     // Set up MongoDB connection before tests
     try {
-      const uri = 'mongodb://0.0.0.0:27017'; // Replace with your MongoDB connection string
+      const uri = 'mongodb://127.0.0.1:27017'; // Replace with your MongoDB connection string
       client = new MongoClient(uri);
       await client.connect();
       console.log("connected");
@@ -105,6 +107,7 @@ const nonExistingEmail = 'nonexistinguser@example.com';
 // Expected behavior: Internal server error
 // Expected output: { error: 'Internal server error' }
 // ChatGPT usage: Yes
+
     test('POST /api/schedulelist should handle server errors during creation', async () => {
       // Mocking an error during the database insertion
       const collectionMock = jest.spyOn(client.db('ScheduleDB').collection('schedulelist'), 'insertOne');
@@ -128,6 +131,7 @@ const nonExistingEmail = 'nonexistinguser@example.com';
         collectionMock.mockRestore();
       }
     });
+    
   });
   
   
@@ -640,7 +644,7 @@ describe('Update Schedule', () => {
       });
   
       const eventIdToDelete = 'event2';
-      const res = await request.delete(`/api/schedulelist/${scheduleData.email}/${eventIdToDelete}`);
+      const res = await request.delete(`/api/schedulelist/${scheduleData1.email}/${eventIdToDelete}`);
   
       expect(res.status).toBe(500);
       expect(res.body.error).toBe('Internal server error');

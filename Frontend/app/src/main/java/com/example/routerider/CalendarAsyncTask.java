@@ -99,6 +99,10 @@ public class CalendarAsyncTask extends AsyncTask<Calendar, Void, Void> {
             // Format the start and end times as strings (you can customize the format)
             String startTimeString = (startTime != null) ? startTime.toString() : "N/A";
             String endTimeString = (endTime != null) ? endTime.toString() : "N/A";
+//
+//            System.out.println("Start Time: " + startTimeString);
+//            System.out.println("End Time: " + endTimeString);
+
             if (eventLocation.contains("Room")) {
                 eventLocation = "UBC " + eventLocation;
             }

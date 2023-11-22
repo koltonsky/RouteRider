@@ -19,22 +19,26 @@ public class PushNotificationService extends FirebaseMessagingService {
     // YES CHATGPT
     public void sendRegistrationToServer(String token) {
         GoogleSignInAccount account = User.getCurrentAccount();
-        APICaller apiCall = new APICaller();
-        Map<String, Object> map = new HashMap<>();
-        map.put("token", token);
-        map.put("email", account.getEmail());
-        String jsonToken = new Gson().toJson(map);
 
-        apiCall.APICall("api/store_token", jsonToken, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
-            @Override
-            public void onResponse(String responseBody) {
-                System.out.println("BODY: " + responseBody);
-            }
+        if(account != null) {
+            APICaller apiCall = new APICaller();
+            Map<String, Object> map = new HashMap<>();
+            map.put("token", token);
+            map.put("email", account.getEmail());
+            String jsonToken = new Gson().toJson(map);
 
-            @Override
-            public void onError(String errorMessage) {
-                System.out.println("Error: " + errorMessage);
-            }
-        });
+            apiCall.APICall("api/store_token", jsonToken, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
+                @Override
+                public void onResponse(String responseBody) {
+                    System.out.println("BODY: " + responseBody);
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    System.out.println("Error: " + errorMessage);
+                }
+            });
+        }
+
     }
 }

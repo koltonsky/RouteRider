@@ -32,7 +32,8 @@ const serviceAccount =
   "type": serviceAccountType,
   "project_id": "routerider-402800",
   "private_key_id": "5bcd35ff287cd344df63e9bd5d96170fdc72130a",
-  "private_key": privateKey,
+  //"private_key": privateKey,
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDWxaIVXYR7Tb4Z\nASAdm0+qupaOq1rRNReRDLSdOgexVMgsef2wGis74oI/Vtneg/iIqxPrAVbKwHTp\nWSMntGoZUV2aRPOiAgBlHu5cXN0Ql0++r5nhAImRgsKxnsbIJZaX9L1huU8xzAlA\n2LZCoHkSacLmFsVzfTzU0mOKBBc/AzqH99ucTNiQljEsaatRUdnGg6z7B91O7d/V\n3K6E/RefXicJ1lfntWVYxc5tmkPArM56Sqq/DesaLlIEodt8HRBbXemmXz9PXpQz\n4fmth95XzD1mBXwI+YZ8ffaedMN6FOjkSvWrhvtdHeO13vwlBA1GC7xDykCEuoY7\nV7vfWoOFAgMBAAECggEASQfJFrTHENqdsoj0b7zZOTfbbEYOSqdgDR2h6PjLltw6\neQ0+W3x6iRF7sqgIy6Zag7aQvk+lQKpy1spNrvmlPlixmHyrz8IYekorSVL2hOa+\n4ht6Gs2A+e7Z32YbOAG4FJHPOAS4TjmQR/GpADzrDnzSHkVN/PhwD/o+iLbdZLpH\ntrprP0vcQSIY45SkDXj7Z7eBU3pH6I9r4uCwIAP8WUmP2wKswFLtC/ceDm6Va/pZ\ndDZWKTxQiz5RpM6kuIRwMkjCQorFzPaLAoZtjCtbysnipPXAB9zNtL3jrT5TVrMA\n/bqdEFSuPvs6OaclfPn3Ih56wGJdCSLjwxcZpdAVPQKBgQD0weCGaWtIWg/E/142\nmj9OpWQmgNS1v9uWudkDrP2/S86urvVJt0v3lrFNeOTFzMsdoxFFNzkRGg+db33n\npg1RJKU81oBMh+s6Fnxg7Q1Wt+/7QBqjiznKVNU1fCo5CM0223viojE+PJfl2Spn\nCFS1woDUZ/WYm+SIAKf+UWd7NwKBgQDgoyfuvp1JWKxsUUgpC5vg5hzWM3yrnx2h\nUaGwpfq5DGVmrjoHevswolaOj/SvymoIEhms2abbowPTaejU3Sizf+i4oRTspdWG\nYCVedQp9/wblK3A3WSytJVrXUJvjkAc+DDa3p1Zr4ScUQ6QbkofM6mUi2U1W2P7V\nHZQgnNQtIwKBgQCB23dXeQj9iyMAvwhqae4auO9o6kNw5okH8DSumZLLctoGnjbv\n1HtOsjoBw5mFRIGjiMf59DGn3C7atbOUOuqn2Yx9ucS6Vga8e/+joUHJd6+wmzNG\n//A6ZEX2qZjxR7UxXMPe23TK83UX8t9naOkgwkB98WZBgLyAV/DJosEHgwKBgQDN\nzy3q4uEgLgnrQ50lXel2591LsuhqJOH0xuGpAqjvmZfdt4qbB+XT7Sf4fZPk60Ky\nGkNDxjXFzVjX/ZTAUc/UhUAmyA5vspArCTOzkvAF9/3NQTsSurTf/fV4h/YLTA4W\nnwISyVG4jRRM0JwuVtXsvGPkxcrB4xW3E95+8rDCmQKBgARMkmxwl3Q9InjAPONr\nCtLaYdjeZdRtKQOic4092lRdtAIrZvZ7SHlaFUp8LULFY6BzxzdjydMa2BiPb9mA\nmXHQVdvGv5x30soQ3EtQocPkj7xyY4glrG7hSKYHPtFpHlkakQWBrvCjeYJb0g+E\n+EsDxo7zRKeT+9mNDQYTSX7S\n-----END PRIVATE KEY-----\n",
   "client_email": "firebase-adminsdk-stvy2@routerider-402800.iam.gserviceaccount.com",
   "client_id": "107472218462534326183",
   "auth_uri": "https://accounts.google.com/o/oauth2/auth",
@@ -42,6 +43,7 @@ const serviceAccount =
   "universe_domain": "googleapis.com"
 };
 
+//console.log(privateKey);
 // Use the serviceAccount object in your code
 
 
@@ -59,11 +61,25 @@ admin.initializeApp({
 const uri = 'mongodb://0.0.0.0:27017'; // Replace with your MongoDB connection string
 const client = new MongoClient(uri);
 
+/*
 async function connectToDatabase() {
   try {
     await new Promise((resolve) => setTimeout(resolve, port));
     await client.connect();
     console.log('Connected to MongoDB');
+  } catch (error) {
+    console.error('MongoDB Connection Error:', error);
+  }
+}
+*/
+
+async function connectToDatabase() {
+  try {
+    await client.connect();
+    console.log('Connected to MongoDB');
+
+    // Start the SSL server after successfully connecting to MongoDB
+    startSSLServer();
   } catch (error) {
     console.error('MongoDB Connection Error:', error);
   }
@@ -125,96 +141,136 @@ app.delete('/api/schedulelist/:email/', schedule.deleteSchedule);
 app.post('/api/store_token', (req, res) => {
   const token = req.body.token;
   const email = req.body.email;
+  if (!token || !email) {
+    console.log('Invalid email or token');
+    console.log('token: ' + token);
+    res.status(400).json({ message: 'Invalid email or token' });
+    return;
+  }
 
-  // Insert the token into the 'tokenlist' collection
+  // Attempt to find the user
   client
-    .db('TokenDB')
-    .collection('tokenlist')
-    .insertOne({ email, token })
-    .then((result) => {
-      console.log('Inserted token in TokenDB');
-      // Attempt to find the user
-      client
-        .db('UserDB')
-        .collection('userlist')
-        .findOne({ email })
-        .then((user) => {
-          if (user) {
-            // Update the 'fcmToken' field in the database for the found entry
-            client
-              .db('UserDB')
-              .collection('userlist')
-              .updateOne({ _id: user._id }, { $set: { fcmToken: token } })
-              .then(() => {
-                console.log('fcmToken updated successfully in UserDB');
-                res.json({
-                  message:
-                    'Token stored and user fcmToken updated successfully',
-                });
-              });
-          } else {
-            console.log('User not found');
-            res.json({
+    .db('UserDB')
+    .collection('userlist')
+    .findOne({ email })
+    .then((user) => {
+      if (user) {
+        // Update the 'fcmToken' field in the database for the found entry
+        client
+          .db('UserDB')
+          .collection('userlist')
+          .updateOne({ _id: user._id }, { $set: { fcmToken: token } })
+          .then(() => {
+            console.log('fcmToken updated successfully');
+            res.status(200).json({
               message:
-                'Token stored successfully, failed to update user fcmToken',
+                'fcmToken updated successfully',
             });
-          }
-        })
-        .catch((error) => {
-          console.log('Error: ' + error);
-          res.json({ message: error });
+          });
+      } else {
+        console.log('User not found');
+        res.status(400).json({
+          message:
+            'User not found, failed to update fcmToken',
         });
+      }
+    })
+    .catch((error) => {
+      console.log('Error: ' + error);
+      res.status(401).json({ message: error });
     });
 });
 
 /**
  * ChatGPT usage: Partial
  */
-app.post('/api/send-friend-notification', (req, res) => {
+app.post('/api/send-friend-notification', async (req, res) => {
   const senderName = req.body.senderName;
   const receiverEmail = req.body.receiverEmail;
 
   console.log(receiverEmail);
-
-  client
+  // ret = await findUserToken(receiverEmail, senderName, sendNotification);
+  // res.status(ret.status).json({ message: ret.message });
+  findUserToken(receiverEmail, senderName, sendNotification).then((ret) => {
+    res.status(ret.status).json({ message: ret.message });
+  });
+});
+function findUserToken(receiverEmail, senderName, callback) {
+  return new Promise((resolve, reject) => {
+    console.log("@@@@@@@@@@@@@@")
+    client
     .db('UserDB')
     .collection('userlist')
     .findOne({ email: receiverEmail })
-    .then((receiver) => {
-      console.log(
-        'grabbed user: ' +
-          receiver +
-          ' ' +
-          receiver.fcmToken +
-          ' ' +
-          receiver.email
-      );
-      var receiverToken = receiver.fcmToken;
-
-      console.log(receiverToken);
-
-      const message = {
-        token: receiverToken,
-        notification: {
-          title: 'New Friend Request',
-          body: `${senderName} has sent you a friend request!`,
-        },
-      };
-      console.log(message.token);
-
-      admin
-        .messaging()
-        .send(message)
-        .then((response) => {
-          console.log('Successfully sent message:', response);
-          res.send(response);
-        })
-        .catch((error) => {
-          console.error('Error sending message:', error);
-          res.send(error);
-        });
+    .then(async (receiver) => {
+      if (receiver) {
+        console.log(
+          'grabbed user: ' +
+            receiver +
+            ' ' +
+            receiver.fcmToken +
+            ' ' +
+            receiver.email
+        );
+        var receiverToken = receiver.fcmToken;
+  
+        console.log(receiverToken);
+  
+        const message = {
+          token: receiverToken,
+          notification: {
+            title: 'New Friend Request',
+            body: `${senderName} has sent you a friend request!`,
+          },
+        };
+        console.log(message.token);
+        
+        ret = await callback(message);
+        if (ret) {
+          console.log('Successfully sent friend request notification');
+          // res.status(200).json({
+          //   message:
+          //     'Successfully sent friend request notification',
+          // });
+          // return { status: 200, message: 'Successfully sent friend request notification'}
+          resolve({ status: 200, message: 'Successfully sent friend request notification'});
+        } else {
+          console.log('Failed to send friend request notification');
+          // res.status(400).json({
+          //   message:
+          //     'Failed to send friend request notification',
+          // });
+          // return { status: 400, message: 'Failed to send friend request notification'}
+          resolve({ status: 400, message: 'Failed to send friend request notification'});
+        }
+      }
+      else {
+        console.log('Receiver not found');
+        // res.status(400).json({
+        //   message:
+        //     'Receiver not found, failed to send notification',
+        // });
+        // return { status: 400, message: 'Receiver not found, failed to send notification'}
+        resolve({ status: 400, message: 'Receiver not found, failed to send notification'});
+      }
     });
-});
+  });
+}
+function sendNotification(message) {
+  admin
+    .messaging()
+    .send(message)
+    .then((response) => {
+      console.log('Successfully sent message:' + response);
+      // res.status(200).json({message: 'Successfully sent friend request notification'});
+      return 1;
+    })
+    .catch((error) => {
+      console.error('Error sending message:', error);
+      // res.status(400).json(error);
+      return 0;
+    });
+}
 
 /**
  * ChatGPT usage: None
@@ -507,6 +563,7 @@ app.use('/', (req, res, next) => {
   res.send('Hello from SSL server');
 });
 
+/*
 const sslServer = https.createServer(
   {
     key: fs.readFileSync(path.join(__dirname, 'certification', 'test_key.key')),
@@ -516,10 +573,24 @@ const sslServer = https.createServer(
   },
   app
 );
+*/
 
+function startSSLServer() {
+  const sslServer = https.createServer(
+    {
+      key: fs.readFileSync(path.join(__dirname, 'certification', 'test_key.key')),
+      cert: fs.readFileSync(path.join(__dirname, 'certification', 'certificate.pem')),
+    },
+    app
+  );
+
+  sslServer.listen(port, () => console.log('Secure server :) on port ' + port));
+}
+connectToDatabase();
+/*
 connectToDatabase();
 sslServer.listen(port, () => console.log('Secure server :) on port ' + port));
-
+*/
 // var dummy_schedule = {
 //   email: 'koltonluu@gmail.com',
 //   events: [
@@ -1494,3 +1565,5 @@ function compareTimeStrings(timeStr1, timeStr2) {
 
   return formattedTimeStr1 === formattedTimeStr2;
 }
+
+module.exports = { app, sendNotification, findUserToken };

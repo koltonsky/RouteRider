@@ -81,7 +81,7 @@ public class ScheduleFragment extends Fragment {
     private static FragmentActivity activity;
 
     public static void displayGoogleSchedule() {
-        Button nextDayButton = view.findViewById(R.id.nextDay);
+        Button nextDayButton = view.findViewById(R.id.next_day);
         nextDayButton.setEnabled(true);
         Date today = new Date();
         updateDisplay(today);
@@ -99,14 +99,14 @@ public class ScheduleFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         view = inflater.inflate(R.layout.fragment_schedule, container, false);
-        previousDayButton = view.findViewById(R.id.previousDay);
+        previousDayButton = view.findViewById(R.id.previous_day);
         previousDayButton.setEnabled(false);
-        Button nextDayButton = view.findViewById(R.id.nextDay);
+        Button nextDayButton = view.findViewById(R.id.next_day);
         nextDayButton.setEnabled(false);
         account = User.getCurrentAccount();
         currentDay = new Date();
         formatter = new SimpleDateFormat("E, dd MMM");
-        currentDayText = view.findViewById(R.id.currentDayText);
+        currentDayText = view.findViewById(R.id.current_day_text);
         currentDayText.setText(formatter.format(currentDay));
         FloatingActionButton addEvent = view.findViewById(R.id.floating_action_button);
 
@@ -307,7 +307,7 @@ public class ScheduleFragment extends Fragment {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String dateString = dateFormat.format(day);
         parseDayList(dateString);
-        LinearLayout eventListView = view.findViewById(R.id.scheduleView);
+        LinearLayout eventListView = view.findViewById(R.id.schedule_view);
         TextView emptyListText = view.findViewById(R.id.empty_text);
         eventListView.removeAllViewsInLayout();
         if (dayList.size() > 0) {
@@ -321,7 +321,7 @@ public class ScheduleFragment extends Fragment {
         View previousEventView = null;
 
         for (ScheduleItem item : dayList) {
-            eventListView = view.findViewById(R.id.scheduleView);
+            eventListView = view.findViewById(R.id.schedule_view);
             View view = inflater.inflate(R.layout.view_event, eventListView, false);
 
             TextView eventName = view.findViewById(R.id.event_name);

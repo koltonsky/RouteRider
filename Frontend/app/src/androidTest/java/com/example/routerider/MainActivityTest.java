@@ -39,7 +39,7 @@ public class MainActivityTest {
     @Test
     public void mainActivityTest() throws InterruptedException {
         ViewInteraction loginToGoogle = onView(
-                allOf(withId(R.id.login_button), withText("LOGIN TO GOOGLE"),
+                allOf(withId(R.id.login_button), withText("Login to Google"),
                         withParent(withParent(withId(R.id.main_display))),
                         isDisplayed()));
         loginToGoogle.check(matches(isDisplayed()));

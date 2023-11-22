@@ -39,7 +39,7 @@ public class MainActivityTest2 {
     @Test
     public void mainActivityTest2() {
         ViewInteraction appCompatButton = onView(
-                allOf(withId(R.id.login_button), withText("Login to Google"),
+                allOf(withId(R.id.login_button), withText("LOGIN TO GOOGLE"),
                         childAtPosition(
                                 childAtPosition(
                                         withId(R.id.main_display),

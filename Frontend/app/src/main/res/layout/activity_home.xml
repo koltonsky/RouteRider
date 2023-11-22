@@ -21,16 +21,19 @@
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:id="@+id/schedule_tab_button"
             android:text="Schedule"/>
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Map"/>
+            android:id="@+id/routes_tab_button"
+            android:text="Routes"/>
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:id="@+id/profile_tab_button"
             android:text="Profile"/>
     </com.google.android.material.tabs.TabLayout>
 

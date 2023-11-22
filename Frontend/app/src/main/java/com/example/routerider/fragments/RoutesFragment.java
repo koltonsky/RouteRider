@@ -52,6 +52,10 @@ public class RoutesFragment extends Fragment {
     private GoogleSignInAccount account;
     private APICaller apiCall;
 
+    public static String[] friendNames;
+    public static String[] matchingCommuters;
+
+
 
     // YES CHATGPT
     private void displayRoutes(View view, Context context) {
@@ -159,7 +163,7 @@ public class RoutesFragment extends Fragment {
         apiCall = new APICaller();
     }
 
-    private String[] fetchFriendsList() {
+    public String[] fetchFriendsList() {
         apiCall.APICall("api/userlist/" + account.getEmail() + "/friends", "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
             @Override
             public void onResponse(final String responseBody) throws JSONException {
@@ -292,7 +296,7 @@ public class RoutesFragment extends Fragment {
         transitFriendButton.setOnClickListener(v -> {
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(requireContext());
             alertDialogBuilder.setTitle("Friend List");
-            String[] friendNames = fetchFriendsList();
+            friendNames = fetchFriendsList();
             alertDialogBuilder.setItems(friendNames, (dialog, which) -> {
                 String selectedFriend = friendNames[which];
                 fetchFriendRoutes(parseEmail(selectedFriend), () -> {

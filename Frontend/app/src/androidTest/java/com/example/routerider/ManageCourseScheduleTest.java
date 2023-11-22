@@ -386,7 +386,7 @@ public class ManageCourseScheduleTest {
 
         displayEventName.check(ViewAssertions.doesNotExist());
 
-        ViewInteraction nextDay = Espresso.onView(ViewMatchers.withId(R.id.nextDay));
+        ViewInteraction nextDay = Espresso.onView(ViewMatchers.withId(R.id.next_day));
         nextDay.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
     }
 

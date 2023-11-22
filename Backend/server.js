@@ -59,7 +59,7 @@ admin.initializeApp({
 });
 
 // MongoDB connection setup
-const uri = 'mongodb://0.0.0.0:27017'; // Replace with your MongoDB connection string
+const uri = 'mongodb://127.0.0.1:27017'; // Replace with your MongoDB connection string
 const client = new MongoClient(uri);
 
 /*

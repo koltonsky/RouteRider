@@ -51,6 +51,8 @@ const serviceAccount =
 
 const cron = require('node-cron');
 const { get } = require('http');
+const { error } = require('console');
+const e = require('express');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -188,16 +190,20 @@ app.post('/api/send-friend-notification', async (req, res) => {
   const senderName = req.body.senderName;
   const receiverEmail = req.body.receiverEmail;
 
-  console.log(receiverEmail);
+  console.log("friend notif email: " + receiverEmail);
   // ret = await findUserToken(receiverEmail, senderName, sendNotification);
   // res.status(ret.status).json({ message: ret.message });
   findUserToken(receiverEmail, senderName, sendNotification).then((ret) => {
     res.status(ret.status).json({ message: ret.message });
   });
 });
-function findUserToken(receiverEmail, senderName, callback) {
+function findUserToken(receiverEmail, senderName, notificationCallback) {
   return new Promise((resolve, reject) => {
-    console.log("@@@@@@@@@@@@@@")
+    if (!senderName || !receiverEmail) {
+      console.log('null email or name');
+      resolve({ status: 400, message: 'Null receiver email or sender name'});
+    }
+  
     client
     .db('UserDB')
     .collection('userlist')
@@ -225,7 +231,7 @@ function findUserToken(receiverEmail, senderName, callback) {
         };
         console.log(message.token);
         
-        ret = await callback(message);
+        ret = await notificationCallback(message);
         if (ret) {
           console.log('Successfully sent friend request notification');
           // res.status(200).json({
@@ -275,16 +281,18 @@ function sendNotification(message) {
 /**
  * ChatGPT usage: None
  */
-app.post('/api/initReminders', (req, res) => {
+app.post('/api/initReminders', async (req, res) => {
   console.log('*****called initReminders api endpoint*****');
-  initReminders(req)
-    .then(() => {
-      res.status(200).json({ message: 'Reminders initialized' });
-    })
-    .catch((error) => {
-      console.log('initReminders api endpoint connection error');
-      res.status(500).json({ message: error });
-    });
+  // initReminders(req, sendNotification)
+  //   .then(() => {
+  //     res.status(200).json({ message: 'Reminders initialized' });
+  //   })
+  //   .catch((error) => {
+  //     console.log('initReminders api endpoint connection error');
+  //     res.status(500).json({ message: error });
+  //   });
+  let ret = await initReminders(req, sendNotification);
+  res.status(ret.status).json({ message: ret.message });
 });
 
 // Find commute buddy
@@ -321,8 +329,15 @@ const getRecommendedRoutesWithFriends = async (req, res) => {
     const email = req.params.email;
     const friendEmail = req.params.friendEmail;
     const date = req.params.date;
-    const result = await initRouteWithFriends(email, friendEmail, date);
-    return res.status(200).json({ routes: result });
+    await initRouteWithFriends(email, friendEmail, date).then(
+      (result) => {
+        return res.status(200).json({ routes: result });
+      }, 
+      (error) => {
+        console.log('initRouteWithFriends rejected error');
+        return res.status(400).json({ message: error });
+      }
+    );
   } catch (error) {
     console.error(
       'Error in /api/recommendation/routesWithFriends/:email/:friendEmail/:date',
@@ -343,8 +358,18 @@ const getRecommendedRoutes = async (req, res) => {
   try {
     const email = req.params.email;
     const date = req.params.date;
-    const result = await initRoute(email, date);
-    return res.status(200).json({ routes: result });
+    // const result = await initRoute(email, date);
+    // return res.status(200).json({ routes: result });
+
+    await initRoute(email, date).then(
+      (result) => {
+        return res.status(200).json({ routes: result });
+      }, 
+      (error) => {
+        console.log('initRoute rejected error ' + error);
+        return res.status(400).json({ message: error });
+      }
+    );
   } catch (error) {
     console.error('Error in /api/recommendation/routes/:email/:date', error);
     return res.status(500).json({ error: 'An error occurred' });
@@ -385,7 +410,8 @@ async function checkLiveTransitTime(
   userEmail,
   busNumber,
   stopNumber,
-  scheduledLeaveTime
+  scheduledLeaveTime,
+  notificationCallback
 ) {
   return new Promise((resolve, reject) => {
     console.log('its time!');
@@ -438,18 +464,15 @@ async function checkLiveTransitTime(
                     body: `The expected vs. actual ETA is ${realTimeData[0].Schedules[0].ExpectedLeaveTime} vs ${scheduledLeaveTime}`,
                   },
                 };
-
-                admin
-                  .messaging()
-                  .send(message)
-                  .then((response) => {
-                    console.log('Successfully sent message:', response);
-                    resolve(true);
-                  })
-                  .catch((error) => {
-                    console.error('Error sending message:', error);
-                    resolve(false);
-                  });
+                
+                let ret = notificationCallback(message) 
+                if (ret) {
+                  console.log('Successfully sent notification');
+                  resolve(true);
+                } else {
+                  console.log('Failed to send notification');
+                  resolve(false);
+                }
               } else {
                 resolve(false);
               }
@@ -729,6 +752,7 @@ commuters.findMatchingUsers("koltonluu@gmail.com").then(result => {
  */
 async function initRoute(userEmail, date) {
   console.log('called initRoute()');
+  var errorString = '';
 
   var schedule = await client
     .db('ScheduleDB')
@@ -738,30 +762,54 @@ async function initRoute(userEmail, date) {
     .db('UserDB')
     .collection('userlist')
     .findOne({ email: userEmail });
-  console.log('initRoute(): returned schedule: ' + schedule);
-  console.log(schedule.events[0].eventName);
+  if (user == null) {
+    errorString =
+      'No matching email exists in user database';
+    console.log('initRoute(): ' + errorString);
+  } 
+  else if (schedule == null) {
+    errorString =
+      'No matching schedule exists in schedule database';
+    console.log('initRoute() ' + errorString);
+  }
+
+  // console.log('initRoute(): returned schedule: ' + schedule);
+  // console.log(schedule.events[0].eventName);
 
   /* Initialize fields that are need for Directions API call */
-  var timeOfFirstEvent = '';
-  var locationOfFirstEvent = '';
-  var locationOfOrigin = user.address;
-  for (var i = 0; i < schedule.events.length; i++) {
-    // assumes events are sorted by date
-    // console.log("initRoute(): " + schedule.events[i].startTime + " " + date);
-    if (schedule.events[i].startTime.split('T')[0] == date) {
-      // console.log("initRoute(): startTime " + schedule.events[i].startTime);
-      timeOfFirstEvent = schedule.events[i].startTime;
-      locationOfFirstEvent = schedule.events[i].address;
-      locationOfFirstEvent = locationOfFirstEvent.split(',')[0];
-      break;
+  if (schedule != null) {
+    var timeOfFirstEvent = '';
+    var locationOfFirstEvent = '';
+    var locationOfOrigin = user.address;
+    for (var i = 0; i < schedule.events.length; i++) {
+      // assumes events are sorted by date
+      // console.log("initRoute(): " + schedule.events[i].startTime + " " + date);
+      if (schedule.events[i].startTime.split('T')[0] == date) {
+        // console.log("initRoute(): startTime " + schedule.events[i].startTime);
+        timeOfFirstEvent = schedule.events[i].startTime;
+        locationOfFirstEvent = schedule.events[i].address;
+        locationOfFirstEvent = locationOfFirstEvent.split(',')[0];
+        break;
+      }
     }
+    if (timeOfFirstEvent == '' && errorString == '') {
+      errorString = 'No matching date exists in user schedule';
+      console.log(
+        'initRoute(): ' + errorString
+      );
+    }
+    console.log('initRoute(): returned timeOfFirstEvent: ' + timeOfFirstEvent);
+    console.log('initRoute(): returned locationOfFirstEvent: ' + locationOfFirstEvent);
+    console.log('initRoute(): returned locationOfOrigin: ' + locationOfOrigin);
   }
-  console.log('initRoute(): returned timeOfFirstEvent: ' + timeOfFirstEvent);
-  console.log(
-    'initRoute(): returned locationOfFirstEvent: ' + locationOfFirstEvent
-  );
-  console.log('initRoute(): returned locationOfOrigin: ' + locationOfOrigin);
+
   return new Promise((resolve, reject) => {
+    console.log('initRoute(): WEYUKGVRWEVFLUHWBEFYUWEVFYUEVWEJKFVWEVFHJKV ' + errorString)
+    if (errorString != '') {
+      console.log("@@@@@@@@@@");
+      reject(errorString);
+    }
+
     planTransitTrip(
       locationOfOrigin,
       locationOfFirstEvent,
@@ -863,7 +911,7 @@ async function initRoute(userEmail, date) {
  *
  * ChatGPT usage: Partial
  */
-async function initReminders(req) {
+async function initReminders(req, notificationCallback) {
   console.log('called initReminders()');
   console.log('initReminders(): req.body.email: ' + req.body.email);
   var returnList = [];
@@ -877,16 +925,17 @@ async function initReminders(req) {
     .db('UserDB')
     .collection('userlist')
     .findOne({ email: req.body.email });
-  if (schedule == null) {
+
+  if (user == null) {
     errorString =
-      'initReminders(): no matching email exists in schedule database';
+      'No matching email exists in user database';
     console.log(errorString);
-    return errorString;
-  } else if (user == null) {
+    return {status: 400, message: errorString};
+  } else if (schedule == null) {
     errorString =
-      'initReminders(): no matching email exists in user database';
+      'No schedule associated with email';
     console.log(errorString);
-    return errorString;
+    return {status: 400, message: errorString};
   }
   console.log('initReminders(): returned schedule: ' + schedule);
   console.log(schedule.events[0].eventName);
@@ -1003,9 +1052,10 @@ async function initReminders(req) {
             req.body.email,
             returnList[i].firstBus.id,
             returnList[i].firstBus.stopNumber,
-            returnList[i].firstBus.leaveTime
+            returnList[i].firstBus.leaveTime,
+            notificationCallback
           ).then((ret) => {
-            if (ret) {
+            if (ret) { // deschedule other checks if a notification is already sent 
               cronTasks.forEach((task) => {
                 task.stop();
               });
@@ -1015,6 +1065,7 @@ async function initReminders(req) {
       }
     }
   }
+  return {status: 200, message: "Reminders initialized"};
 }
 // const xdding = {
 //   body: {
@@ -1040,14 +1091,45 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
   // var friendEmail = req.body.friendEmail;
   // var date = req.body.date;
   // console.log(userEmail + " " + friendEmail + " " + date);
-  var user = await client
-    .db('UserDB')
-    .collection('userlist')
+  var error = false;
+  var errorMessage = '';
+
+  var schedule_user = await client
+    .db('ScheduleDB')
+    .collection('schedulelist')
     .findOne({ email: userEmail });
+  if (schedule_user == null) {
+    console.log(
+      'initRouteWithFriends(): no matching user schedule exists in schedule database'
+    );
+    error = true;
+    errorMessage =
+      'No matching user schedule exists in schedule database';
+  }
+  var schedule_friend = await client
+    .db('ScheduleDB')
+    .collection('schedulelist')
+    .findOne({ email: friendEmail });
+  if (schedule_friend == null) {
+    console.log(
+      'initRouteWithFriends(): no matching friend schedule exists in schedule database'
+    );
+    error = true;
+    errorMessage =
+      'No matching friend schedule exists in schedule database';
+  }
+
+  var user = await client
+  .db('UserDB')
+  .collection('userlist')
+  .findOne({ email: userEmail });
   if (user == null) {
     console.log(
       'initRouteWithFriends(): no matching user email exists in user database'
     );
+    error = true;
+    errorMessage =
+      'No matching user email exists in user database';
   }
   var friend = await client
     .db('UserDB')
@@ -1057,28 +1139,15 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
     console.log(
       'initRouteWithFriends(): no matching friend email exists in user database'
     );
-  }
-
-  var schedule_user = await client
-    .db('ScheduleDB')
-    .collection('schedulelist')
-    .findOne({ email: userEmail });
-  if (schedule_user == null) {
-    console.log(
-      'initRouteWithFriends(): no matching user email exists in schedule database'
-    );
-  }
-  var schedule_friend = await client
-    .db('ScheduleDB')
-    .collection('schedulelist')
-    .findOne({ email: friendEmail });
-  if (schedule_friend == null) {
-    console.log(
-      'initRouteWithFriends(): no matching friend email exists in schedule database'
-    );
+    error = true;
+    errorMessage =
+      'No matching friend email exists in user database';
   }
 
   return new Promise((resolve, reject) => {
+    if (error) {
+      reject(errorMessage);
+    }
     // determine when to arrive to campus
     var timeOfFirstEvent_user = '';
     var locationOfFirstEvent_user = '';
@@ -1102,7 +1171,7 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
         'initRouteWithFriends(): no matching date exists in user schedule'
       );
       reject(
-        'initRouteWithFriends(): no matching date exists in user schedule'
+        'No matching date exists in user schedule'
       );
     }
 
@@ -1122,7 +1191,7 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
         'initRouteWithFriends(): no matching date exists in friend schedule'
       );
       reject(
-        'initRouteWithFriends(): no matching date exists in friend schedule'
+        'No matching date exists in friend schedule'
       );
     }
 
@@ -1170,29 +1239,29 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
 
         var departureTimeFromStation =
         trip.routes[0].legs[0].departure_time.text;
-        console.log(
-          'initRouteWithFriends(): departureTimeFromStation: ' +
-            departureTimeFromStation
-        );
+        // console.log(
+        //   'initRouteWithFriends(): departureTimeFromStation: ' +
+        //     departureTimeFromStation
+        // );
         var departureTimeFromStation_iso = combineDateAndTime(
           date,
           departureTimeFromStation
         );
-        console.log(
-          'initRouteWithFriends(): departureTimeFromStation iso: ' +
-            departureTimeFromStation_iso
-        );
+        // console.log(
+        //   'initRouteWithFriends(): departureTimeFromStation iso: ' +
+        //     departureTimeFromStation_iso
+        // );
         var azureTime = new Date(departureTimeFromStation_iso);
         var azureTimeToPST = azureTime.setHours(azureTime.getHours() + 8);
         
         planTransitTrip(locationOfOrigin_user, meetingPoint, new Date(azureTimeToPST))
           .then((trip) => {
-            console.log(
-              'initRoute(): returned trip: ' +
-                trip +
-                ' ' +
-                trip.routes[0].legs[0].steps[0].travel_mode
-            );
+            // console.log(
+            //   'initRoute(): returned trip: ' +
+            //     trip +
+            //     ' ' +
+            //     trip.routes[0].legs[0].steps[0].travel_mode
+            // );
             /* fields for object to be returned to frontend */
             var id = '';
             var leaveTime = '';
@@ -1239,14 +1308,14 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
               }
 
               more.steps.push(step.html_instructions);
-              console.log(
-                'initRoute(): adding curStep to returnList ' +
-                  id +
-                  ' | ' +
-                  leaveTime +
-                  ' | ' +
-                  type
-              );
+              // console.log(
+              //   'initRoute(): adding curStep to returnList ' +
+              //     id +
+              //     ' | ' +
+              //     leaveTime +
+              //     ' | ' +
+              //     type
+              // );
               curStep = {
                 _id: id,
                 _leaveTime: leaveTime,
@@ -1269,24 +1338,24 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
             returnList = calcWalkingTimes(returnList);
             resolve(returnList);
             
-            returnList.forEach((element) => {
-              console.log(
-                'initRouteWithFriends(): returnList: ' +
-                  element._id +
-                  ' ' +
-                  element._leaveTime +
-                  ' ' +
-                  element._type
-              );
-            });
+            // returnList.forEach((element) => {
+            //   console.log(
+            //     'initRouteWithFriends(): returnList: ' +
+            //       element._id +
+            //       ' ' +
+            //       element._leaveTime +
+            //       ' ' +
+            //       element._type
+            //   );
+            // });
           })
           .catch((error) => {
-            console.log(error);
+            // console.log(error);
             reject(error);
           });
       })
       .catch((error) => {
-        console.log(error);
+        // console.log(error);
         reject(error);
       });
   });
@@ -1310,24 +1379,24 @@ function getLatLong(address) {
       'AAPK3c726265cc41485bb57c5512e98cf912OLoJQtidjOlcqjdpa0Pl773UqNoOYfwApr6ORYd8Lina8_K0sEbdcyXsNfHFqLKE';
     var authentication_geo = ApiKeyManager.fromKey(apiKey_geo);
 
-    console.log('getLatLong: calling geocode api with address: ');
+    // console.log('getLatLong: calling geocode api with address: ');
     geocode({
       address,
       authentication: authentication_geo,
     })
       .then((response) => {
         // x: longitude, y: latitude
-        console.log(response.candidates[0].location); // => { x: -77.036533, y: 38.898719, spatialReference: ... }
+        // console.log(response.candidates[0].location); // => { x: -77.036533, y: 38.898719, spatialReference: ... }
         lat = response.candidates[0].location.y;
         long = response.candidates[0].location.x;
-        console.log(
-          'helper function getLatLong() output: ' +
-            coords +
-            ' ' +
-            lat +
-            ' ' +
-            long
-        );
+        // console.log(
+        //   'helper function getLatLong() output: ' +
+        //     coords +
+        //     ' ' +
+        //     lat +
+        //     ' ' +
+        //     long
+        // );
         coords[0] = lat.toFixed(5);
         coords[1] = long.toFixed(5);
         resolve(coords);
@@ -1366,43 +1435,43 @@ async function planTransitTrip(origin, destination, arriveTime) {
 
     const request = https.get(url, (response) => {
       let data = '';
-      console.log('planTransitTrip(): request sent');
+      // console.log('planTransitTrip(): request sent');
 
       response.on('data', (chunk) => {
         data += chunk;
       });
 
       response.on('end', () => {
-        console.log('planTransitTrip() return');
-        console.log('--------------------------------------------------------');
+        // console.log('planTransitTrip() return');
+        // console.log('--------------------------------------------------------');
         var routes = JSON.parse(data).routes;
         if (routes.length > 0) {
           // Process each route
           routes.forEach((route, index) => {
             // Access route information such as summary, distance, duration, steps, etc.
-            console.log(`Route ${index + 1}:`);
-            console.log(`Summary: ${route.summary}`);
-            console.log(`Distance: ${route.legs[0].distance.text}`);
-            console.log(`Duration: ${route.legs[0].duration.text}`);
-            console.log('Steps:');
+            // console.log(`Route ${index + 1}:`);
+            // console.log(`Summary: ${route.summary}`);
+            // console.log(`Distance: ${route.legs[0].distance.text}`);
+            // console.log(`Duration: ${route.legs[0].duration.text}`);
+            // console.log('Steps:');
             route.legs[0].steps.forEach((step, stepIndex) => {
-              console.log(`Step ${stepIndex + 1}: ${step.html_instructions}`);
+              // console.log(`Step ${stepIndex + 1}: ${step.html_instructions}`);
             });
-            console.log('-----------------------');
+            // console.log('-----------------------');
           });
         } else {
-          console.log('No routes found.');
+          // console.log('No routes found.');
           reject('No routes found.');
         }
-        console.log('--------------------------------------------------------');
+        // console.log('--------------------------------------------------------');
         // console.log(data);
         // console.log(JSON.parse(data));
-        console.log('--------------------------------------------------------');
+        // console.log('--------------------------------------------------------');
         resolve(JSON.parse(data));
       });
     });
     request.on('error', (err) => {
-      console.log('Error: ' + err.message);
+      // console.log('Error: ' + err.message);
       reject('Error: ' + err.message);
     });
   });
@@ -1494,7 +1563,7 @@ function calcWalkingTimes(commuteInfo) {
       returnList[i]._leaveTimeNum =
         returnList[i + 1]._leaveTimeNum - returnList[i]._leaveTimeNum;
     }
-    console.log('updated leavetime: ' + returnList[i]._leaveTime);
+    // console.log('updated leavetime: ' + returnList[i]._leaveTime);
   }
   return returnList;
 }
@@ -1517,7 +1586,7 @@ function timestampToTime(timestamp) {
 // ChatGPT usage: Yes
 function combineDateAndTime(dateString, timeString) {
   // Convert the time to 24-hour format and add seconds
-  console.log('inputs: ' + dateString + ' ' + timeString);
+  // console.log('inputs: ' + dateString + ' ' + timeString);
   // const timeComponents = timeString.match(/(\d+):(\d+) (A|P)M/);
 
   const timeComponents = timeString.match(/(\d+):(\d+)\s*(A|P)\s*M/);
@@ -1538,7 +1607,7 @@ function combineDateAndTime(dateString, timeString) {
   const isoDateTimeString = `${dateString}T${hours
     .toString()
     .padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
-  console.log('output: ' + isoDateTimeString);
+  // console.log('output: ' + isoDateTimeString);
   const date = new Date(isoDateTimeString);
 
   if (isNaN(date)) {

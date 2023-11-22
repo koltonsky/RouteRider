@@ -29,10 +29,12 @@ const serviceAccountType = process.env.SERVICE_ACCOUNT_TYPE;
 // Create the serviceAccount object
 const serviceAccount =
 {
-  "type": serviceAccountType,
+  //"type": serviceAccountType,
+  "type": "service_account",
   "project_id": "routerider-402800",
   "private_key_id": "5bcd35ff287cd344df63e9bd5d96170fdc72130a",
-  "private_key": privateKey,
+  //"private_key": privateKey,
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDWxaIVXYR7Tb4Z\nASAdm0+qupaOq1rRNReRDLSdOgexVMgsef2wGis74oI/Vtneg/iIqxPrAVbKwHTp\nWSMntGoZUV2aRPOiAgBlHu5cXN0Ql0++r5nhAImRgsKxnsbIJZaX9L1huU8xzAlA\n2LZCoHkSacLmFsVzfTzU0mOKBBc/AzqH99ucTNiQljEsaatRUdnGg6z7B91O7d/V\n3K6E/RefXicJ1lfntWVYxc5tmkPArM56Sqq/DesaLlIEodt8HRBbXemmXz9PXpQz\n4fmth95XzD1mBXwI+YZ8ffaedMN6FOjkSvWrhvtdHeO13vwlBA1GC7xDykCEuoY7\nV7vfWoOFAgMBAAECggEASQfJFrTHENqdsoj0b7zZOTfbbEYOSqdgDR2h6PjLltw6\neQ0+W3x6iRF7sqgIy6Zag7aQvk+lQKpy1spNrvmlPlixmHyrz8IYekorSVL2hOa+\n4ht6Gs2A+e7Z32YbOAG4FJHPOAS4TjmQR/GpADzrDnzSHkVN/PhwD/o+iLbdZLpH\ntrprP0vcQSIY45SkDXj7Z7eBU3pH6I9r4uCwIAP8WUmP2wKswFLtC/ceDm6Va/pZ\ndDZWKTxQiz5RpM6kuIRwMkjCQorFzPaLAoZtjCtbysnipPXAB9zNtL3jrT5TVrMA\n/bqdEFSuPvs6OaclfPn3Ih56wGJdCSLjwxcZpdAVPQKBgQD0weCGaWtIWg/E/142\nmj9OpWQmgNS1v9uWudkDrP2/S86urvVJt0v3lrFNeOTFzMsdoxFFNzkRGg+db33n\npg1RJKU81oBMh+s6Fnxg7Q1Wt+/7QBqjiznKVNU1fCo5CM0223viojE+PJfl2Spn\nCFS1woDUZ/WYm+SIAKf+UWd7NwKBgQDgoyfuvp1JWKxsUUgpC5vg5hzWM3yrnx2h\nUaGwpfq5DGVmrjoHevswolaOj/SvymoIEhms2abbowPTaejU3Sizf+i4oRTspdWG\nYCVedQp9/wblK3A3WSytJVrXUJvjkAc+DDa3p1Zr4ScUQ6QbkofM6mUi2U1W2P7V\nHZQgnNQtIwKBgQCB23dXeQj9iyMAvwhqae4auO9o6kNw5okH8DSumZLLctoGnjbv\n1HtOsjoBw5mFRIGjiMf59DGn3C7atbOUOuqn2Yx9ucS6Vga8e/+joUHJd6+wmzNG\n//A6ZEX2qZjxR7UxXMPe23TK83UX8t9naOkgwkB98WZBgLyAV/DJosEHgwKBgQDN\nzy3q4uEgLgnrQ50lXel2591LsuhqJOH0xuGpAqjvmZfdt4qbB+XT7Sf4fZPk60Ky\nGkNDxjXFzVjX/ZTAUc/UhUAmyA5vspArCTOzkvAF9/3NQTsSurTf/fV4h/YLTA4W\nnwISyVG4jRRM0JwuVtXsvGPkxcrB4xW3E95+8rDCmQKBgARMkmxwl3Q9InjAPONr\nCtLaYdjeZdRtKQOic4092lRdtAIrZvZ7SHlaFUp8LULFY6BzxzdjydMa2BiPb9mA\nmXHQVdvGv5x30soQ3EtQocPkj7xyY4glrG7hSKYHPtFpHlkakQWBrvCjeYJb0g+E\n+EsDxo7zRKeT+9mNDQYTSX7S\n-----END PRIVATE KEY-----\n",
   "client_email": "firebase-adminsdk-stvy2@routerider-402800.iam.gserviceaccount.com",
   "client_id": "107472218462534326183",
   "auth_uri": "https://accounts.google.com/o/oauth2/auth",
@@ -42,6 +44,7 @@ const serviceAccount =
   "universe_domain": "googleapis.com"
 };
 
+//console.log(privateKey);
 // Use the serviceAccount object in your code
 
 
@@ -56,14 +59,28 @@ admin.initializeApp({
 });
 
 // MongoDB connection setup
-const uri = 'mongodb://0.0.0.0:27017'; // Replace with your MongoDB connection string
+const uri = 'mongodb://127.0.0.1:27017'; // Replace with your MongoDB connection string
 const client = new MongoClient(uri);
 
+/*
 async function connectToDatabase() {
   try {
     await new Promise((resolve) => setTimeout(resolve, port));
     await client.connect();
     console.log('Connected to MongoDB');
+  } catch (error) {
+    console.error('MongoDB Connection Error:', error);
+  }
+}
+*/
+
+async function connectToDatabase() {
+  try {
+    await client.connect();
+    console.log('Connected to MongoDB');
+
+    // Start the SSL server after successfully connecting to MongoDB
+    startSSLServer();
   } catch (error) {
     console.error('MongoDB Connection Error:', error);
   }
@@ -75,14 +92,14 @@ async function connectToDatabase() {
 app.post('/api/userlist', user.createNewUser);
 
 app.get('/api/userlist/:email', user.getUserByEmail);
-app.get('/api/userlist/:email/name', user.getUserName);
-app.get('/api/userlist/:email/address', user.getUserAddress);
+//app.get('/api/userlist/:email/name', user.getUserName);
+//app.get('/api/userlist/:email/address', user.getUserAddress);
 app.get('/api/userlist/:email/friends', user.getFriendListWithNames);
 
 app.put('/api/userlist/:email/address', user.updateAddress);
 
-app.post('/api/userlist/:email/friends', user.addFriend);
-app.delete('/api/userlist/:email/friends', user.deleteFriend);
+//app.post('/api/userlist/:email/friends', user.addFriend);
+//app.delete('/api/userlist/:email/friends', user.deleteFriend);
 
 app.post('/api/userlist/:email/friendRequest', user.sendFriendRequest);
 
@@ -95,10 +112,10 @@ app.delete(
   user.declineFriendRequest
 );
 
-app.put('/api/userlist/:email', user.updateUser);
+//app.put('/api/userlist/:email', user.updateUser);
 
 // test/db purposes only
-app.delete('/api/userlist/:email', user.deleteUser);
+//app.delete('/api/userlist/:email', user.deleteUser);
 
 // Schedule DB
 app.post('/api/schedulelist', schedule.createNewSchedule);
@@ -112,12 +129,10 @@ app.post('/api/schedulelist/:email', schedule.addEvent);
 //app.put('/api/schedulelist/:email/:id', schedule.editEventByID);
 app.delete('/api/schedulelist/:email/:id', schedule.deleteEventByID);
 
-app.put(
-  '/api/schedulelist/:email/:index/geolocation',
-  schedule.editEventGeolocation
-);
 
-app.delete('/api/schedulelist/:email/', schedule.deleteSchedule);
+//app.put('/api/schedulelist/:email/:index/geolocation', schedule.editEventGeolocation);
+
+//app.delete('/api/schedulelist/:email/', schedule.deleteSchedule);
 
 /**
  * ChatGPT usage: Partial
@@ -507,6 +522,7 @@ app.use('/', (req, res, next) => {
   res.send('Hello from SSL server');
 });
 
+/*
 const sslServer = https.createServer(
   {
     key: fs.readFileSync(path.join(__dirname, 'certification', 'test_key.key')),
@@ -516,10 +532,24 @@ const sslServer = https.createServer(
   },
   app
 );
+*/
 
+function startSSLServer() {
+  const sslServer = https.createServer(
+    {
+      key: fs.readFileSync(path.join(__dirname, 'certification', 'test_key.key')),
+      cert: fs.readFileSync(path.join(__dirname, 'certification', 'certificate.pem')),
+    },
+    app
+  );
+
+  sslServer.listen(port, () => console.log('Secure server :) on port ' + port));
+}
+connectToDatabase();
+/*
 connectToDatabase();
 sslServer.listen(port, () => console.log('Secure server :) on port ' + port));
-
+*/
 // var dummy_schedule = {
 //   email: 'koltonluu@gmail.com',
 //   events: [

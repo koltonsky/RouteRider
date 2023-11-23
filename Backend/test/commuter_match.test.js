@@ -86,7 +86,7 @@ describe('getFirstEventsOfEachDay', () => {
 
   });
 
-    // INTERFACE GET https://20.163.28.92:8081/api/findMatchingUsers/:userEmail
+    
   describe('findOtherEmails', () => {
     // Mock user data for testing
     let userData;
@@ -267,13 +267,14 @@ test('should return an empty set for a user with matching startTime but differen
   
   });
 
+// Interface GET https://20.163.28.92:8081/api/findMatchingUsers/:userEmail
 
-    // Input: userEmail that doesn't exist
+  describe('GET /api/findMatchingUsers/:userEmail', () => {
+          // Input: userEmail that doesn't exist
     // Expected status code: 200
     // Expected behavior: should return an empty set
     // Expected output: {}
     // ChatGPT usage: Yes
-  describe('GET /api/findMatchingUsers/:userEmail', () => {
     test('should return matching users', async () => {
       // Mock data or use actual test data
       const mockUserEmail = 'user1@example.com';

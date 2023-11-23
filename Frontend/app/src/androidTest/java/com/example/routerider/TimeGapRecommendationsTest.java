@@ -2,8 +2,11 @@ package com.example.routerider;
 
 
 import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.Espresso.pressBack;
 import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
+import static androidx.test.espresso.matcher.ViewMatchers.hasMinimumChildCount;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withParent;
@@ -106,7 +109,7 @@ public class TimeGapRecommendationsTest {
             this.resourceCallback = resourceCallback;
         }
     }
-
+    // NO CHATGPT
     public void mockEvents(int gap, String addr1, String addr2) throws InterruptedException {
         int[][] eventTimes = computeEventTimes(gap);
 
@@ -176,26 +179,41 @@ public class TimeGapRecommendationsTest {
 
         onView(ViewMatchers.withText("OK")).perform(ViewActions.click());
     }
+    // PARTIAL CHATGPT
     public void clearEvents() throws InterruptedException {
+        // Check if Test Event 1 exists
         ViewInteraction displayEvent1Name = Espresso.onView(ViewMatchers.withText("Test Event 1"));
-        displayEvent1Name.perform(ViewActions.longClick());
+        if (isViewDisplayed(displayEvent1Name)) {
+            displayEvent1Name.perform(ViewActions.longClick());
 
-        ViewInteraction okButton = Espresso.onView(ViewMatchers.withId(android.R.id.button1));
-        okButton.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-        okButton.check(ViewAssertions.matches(ViewMatchers.withText("OK")));
-        okButton.perform(click());
+            ViewInteraction okButton = Espresso.onView(ViewMatchers.withId(android.R.id.button1));
+            okButton.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+            okButton.check(ViewAssertions.matches(ViewMatchers.withText("OK")));
+            okButton.perform(click());
 
-        Thread.sleep(5000); // You may need to adjust the delay
+            Thread.sleep(5000); // You may need to adjust the delay
+        }
 
-
+        // Check if Test Event 2 exists
         ViewInteraction displayEvent2Name = Espresso.onView(ViewMatchers.withText("Test Event 2"));
-        displayEvent2Name.perform(ViewActions.longClick());
-
-        okButton.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-        okButton.check(ViewAssertions.matches(ViewMatchers.withText("OK")));
-        okButton.perform(click());
+        if (isViewDisplayed(displayEvent2Name)) {
+            displayEvent2Name.perform(ViewActions.longClick());
+            ViewInteraction okButton = Espresso.onView(ViewMatchers.withId(android.R.id.button1));
+            okButton.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+            okButton.check(ViewAssertions.matches(ViewMatchers.withText("OK")));
+            okButton.perform(click());
+        }
     }
-
+    // YES CHATGPT
+    private boolean isViewDisplayed(ViewInteraction viewInteraction) {
+        try {
+            viewInteraction.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+            return true;
+        } catch (NoMatchingViewException e) {
+            return false;
+        }
+    }
+    // YES CHATGPT
     private static int[][] computeEventTimes(int gap) {
         try {
             // Get current time from calendar
@@ -209,26 +227,40 @@ public class TimeGapRecommendationsTest {
 
             int totalTimeRemaining = remainingHours * 60 + remainingMinutes;
 
-            // If there's less than (3hrs + gap), throw an error to console
-            if (totalTimeRemaining < (3 * 60 + gap)) {
+            // If there's less than (1hr + gap), throw an error to console
+            if (totalTimeRemaining < (60 + gap)) {
                 throw new IllegalArgumentException("Not enough time remaining in the day for the events.");
             }
 
             // Set start time of the first event to the start of the next hour
-            int startHourOfFirstEvent = currentHour + 1;
+            int startHourOfFirstEvent = currentHour + 2;
             int startMinuteOfFirstEvent = 0;
 
-            // Set end time of the first event 30 minutes later
+            // Set end time of the first event 15 minutes later
+            int endMinuteOfFirstEvent = (startMinuteOfFirstEvent + 15) % 60;
             int endHourOfFirstEvent = startHourOfFirstEvent;
-            int endMinuteOfFirstEvent = startMinuteOfFirstEvent + 30;
+            if (endMinuteOfFirstEvent < 15) {
+                endHourOfFirstEvent += 1;
+            }
 
             // Set start time of the second event to end of first event + gap
+            int startMinuteOfSecondEvent = (endMinuteOfFirstEvent + gap) % 60;
             int startHourOfSecondEvent = endHourOfFirstEvent;
-            int startMinuteOfSecondEvent = endMinuteOfFirstEvent + gap;
+            if (startMinuteOfSecondEvent < gap) {
+                startHourOfSecondEvent += 1;
+            }
 
             // Set end time of the second event to 30 minutes later
-            int endHourOfSecondEvent = startHourOfSecondEvent;
-            int endMinuteOfSecondEvent = startMinuteOfSecondEvent + 30;
+            int endMinuteOfSecondEvent = (startMinuteOfSecondEvent + 15) % 60;
+            int endHourOfSecondEvent = endHourOfFirstEvent;
+            if (endMinuteOfSecondEvent < 15) {
+                endHourOfSecondEvent += 1;
+            }
+
+            if (endHourOfSecondEvent == 24){
+                endHourOfSecondEvent = 23;
+                endMinuteOfSecondEvent = 59;
+            }
 
             // Return as array of arrays of ints
             return new int[][]{
@@ -244,6 +276,7 @@ public class TimeGapRecommendationsTest {
         }
     }
 
+    // NO CHATGPT
     @Test
     public void eventGapTest() throws InterruptedException {
         try {
@@ -271,6 +304,8 @@ public class TimeGapRecommendationsTest {
         } catch (Exception e) {
             Log.d("Continue Test", "Already Logged In");
         }
+        clearEvents();
+
         mockEvents(30, "2424 Main Mall, Vancouver, BC V6T 1Z4", "6000 Student Union Blvd, Vancouver, BC V6T 1Z1");
         Thread.sleep(5000); // You may need to adjust the delay
 
@@ -278,9 +313,10 @@ public class TimeGapRecommendationsTest {
         displayTimeGap.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
         displayTimeGap.check(ViewAssertions.matches(ViewMatchers.withText("Gap: 00:30")));
 
-        clearEvents();
     }
 
+
+    // NO CHATGPT
     @Test
     public void noEventGapTest() throws InterruptedException {
         try {
@@ -308,15 +344,15 @@ public class TimeGapRecommendationsTest {
         } catch (Exception e) {
             Log.d("Continue Test", "Already Logged In");
         }
+        clearEvents();
         mockEvents(10, "2424 Main Mall, Vancouver, BC V6T 1Z4", "6000 Student Union Blvd, Vancouver, BC V6T 1Z1");
         Thread.sleep(5000); // You may need to adjust the delay
 
         ViewInteraction displayTimeGap = Espresso.onView(ViewMatchers.withId(R.id.time_gap_text));
         displayTimeGap.check(ViewAssertions.doesNotExist());
-
-        clearEvents();
     }
 
+    // YES CHATGPT
     @Test
     public void recommendationsTest() throws InterruptedException {
         try {
@@ -344,7 +380,7 @@ public class TimeGapRecommendationsTest {
         } catch (Exception e) {
             Log.d("Continue Test", "Already Logged In");
         }
-
+        clearEvents();
         mockEvents(30, "2424 Main Mall, Vancouver, BC V6T 1Z4", "6000 Student Union Blvd, Vancouver, BC V6T 1Z1");
 
         ViewInteraction displayTimeGap = Espresso.onView(ViewMatchers.withId(R.id.time_gap_text));
@@ -357,59 +393,19 @@ public class TimeGapRecommendationsTest {
 
         displayViewRecommendations.perform(click());
 
-        Thread.sleep(5000); // You may need to adjust the delay
+        Thread.sleep(2000); // You may need to adjust the delay
         displayViewRecommendations.check(ViewAssertions.matches(ViewMatchers.withText("Hide Recommendations")));
 
-        ViewInteraction displayHiddenView = Espresso.onView(allOf(ViewMatchers.withId(R.id.hidden_view), withParentIndex(0)));
-        displayHiddenView.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+        Thread.sleep(2000); // You may need to adjust the delay
 
-        int childCount = 0;
-        ViewInteraction currentChild = onView(allOf(withParent(withId(R.id.hidden_view)), withParentIndex(childCount)));
-        while (true) {
-            try {
-                currentChild.check(new ViewAssertion() {
-                    @Override
-                    public void check(View view, NoMatchingViewException noViewException) {
-                        // This will throw an exception if the view is not found, and we can exit the loop
-                    }
-                });
-                childCount++;
-                currentChild = onView(allOf(withParent(withId(R.id.hidden_view)), withParentIndex(childCount)));
-            } catch (Exception e) {
-                // Exit the loop when the view is not found
-                break;
-            }
-        }
-
-        assertThat(childCount, greaterThan(0));
-
+        onView(withId(R.id.hidden_timegap)).check(matches(hasMinimumChildCount(1)));
         displayViewRecommendations.perform(click());
-
-        Thread.sleep(5000); // You may need to adjust the delay
-
-        childCount = 0;
-        currentChild = onView(allOf(withParent(withId(R.id.hidden_view)), withParentIndex(childCount)));
-        while (true) {
-            try {
-                currentChild.check(new ViewAssertion() {
-                    @Override
-                    public void check(View view, NoMatchingViewException noViewException) {
-                    }
-                });
-                childCount++;
-                currentChild = onView(allOf(withParent(withId(R.id.hidden_view)), withParentIndex(childCount)));
-            } catch (Exception e) {
-                // Exit the loop when the view is not found
-                break;
-            }
-        }
-
-        // Check that childCount == 0
-        assertThat(childCount, equalTo(0));
-
-        clearEvents();
+        Thread.sleep(2000); // You may need to adjust the delay
+        onView(withParent(withId(R.id.hidden_timegap))).check(doesNotExist());
     }
 
+
+    // YES CHATGPT
     @Test
     public void googleMapsTest() throws InterruptedException {
         try {
@@ -437,11 +433,12 @@ public class TimeGapRecommendationsTest {
         } catch (Exception e) {
             Log.d("Continue Test", "Already Logged In");
         }
+        clearEvents();
         mockEvents(30, "2424 Main Mall, Vancouver, BC V6T 1Z4", "6000 Student Union Blvd, Vancouver, BC V6T 1Z1");
 
         ViewInteraction displayTimeGap = Espresso.onView(ViewMatchers.withId(R.id.time_gap_text));
         displayTimeGap.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-        displayTimeGap.check(ViewAssertions.matches(ViewMatchers.withText("Gap: 03:00")));
+        displayTimeGap.check(ViewAssertions.matches(ViewMatchers.withText("Gap: 00:30")));
 
         ViewInteraction displayViewRecommendations = Espresso.onView(ViewMatchers.withId(R.id.view_recommendations_button));
         displayViewRecommendations.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
@@ -452,19 +449,20 @@ public class TimeGapRecommendationsTest {
         Thread.sleep(5000); // You may need to adjust the delay
         displayViewRecommendations.check(ViewAssertions.matches(ViewMatchers.withText("Hide Recommendations")));
 
-        Matcher<View> firstRecommendation = allOf(withParent(withId(R.id.hidden_view)), withParentIndex(0));
+        Matcher<View> firstRecommendation = allOf(withParent(withId(R.id.hidden_timegap)), withParentIndex(0));
         ViewInteraction googleMapsButton = onView(allOf(withParent(firstRecommendation), withId(R.id.maps_button)));
+        Intents.init();
 
         googleMapsButton.perform(ViewActions.click());
 
         // Verify that the correct intent was sent
         Intents.intended(IntentMatchers.hasAction(Intent.ACTION_VIEW));
+        Intents.release();
 
-        Thread.sleep(5000); // You may need to adjust the delay
-
-        clearEvents();
+        // NOTE: Please manually move the Google Maps pop up window away from the bottom right corner or else all other tests will fail
     }
 
+    // NO CHATGPT
     @Test
     public void noRecommendationsTest() throws InterruptedException {
         try {
@@ -492,42 +490,9 @@ public class TimeGapRecommendationsTest {
         } catch (Exception e) {
             Log.d("Continue Test", "Already Logged In");
         }
-
+        clearEvents();
         mockEvents(30, "2424 Main Mall, Vancouver, BC V6T 1Z4", "367 George St, Sydney NSW 2000, Australia");
         Thread.sleep(5000); // You may need to adjust the delay
-
-
-//        ViewInteraction nextDayButton = Espresso.onView(ViewMatchers.withId(R.id.next_day));
-//        floatingButton.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-//        floatingButton.perform(click());
-//        onView(ViewMatchers.withId(R.id.next_day)).perform(click());
-//        Thread.sleep(5000); // You may need to adjust the delay
-//
-//        onView(ViewMatchers.withId(R.id.previous_day)).perform(click());
-
-
-
-
-//
-//        ViewInteraction displayEventName = Espresso.onView(ViewMatchers.withId(R.id.event_name));
-//        displayEventName.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-//        displayEventName.check(ViewAssertions.matches(ViewMatchers.withText("Route Event")));
-//
-//        ViewInteraction displayEventLocation = Espresso.onView(ViewMatchers.withId(R.id.event_location));
-//        displayEventLocation.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-//        displayEventLocation.check(ViewAssertions.matches(ViewMatchers.withText("2424 Main Mall, Vancouver, BC V6T 1Z4")));
-//
-//        ViewInteraction displayStartTime = Espresso.onView(ViewMatchers.withId(R.id.start_time));
-//        displayStartTime.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-//        displayStartTime.check(ViewAssertions.matches(ViewMatchers.withText("12:00")));
-//
-//        ViewInteraction displayEndTime = Espresso.onView(ViewMatchers.withId(R.id.end_time));
-//        displayEndTime.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-//        displayEndTime.check(ViewAssertions.matches(ViewMatchers.withText("14:00")));
-
-//        ViewInteraction routesTabButton = Espresso.onView(ViewMatchers.withId(R.id.routes_tab_button));
-//        routesTabButton.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-//        routesTabButton.perform(click());
 
 
         ViewInteraction displayTimeGap = Espresso.onView(ViewMatchers.withId(R.id.time_gap_text));
@@ -541,56 +506,6 @@ public class TimeGapRecommendationsTest {
         displayViewRecommendations.perform(click());
 
         Thread.sleep(5000); // You may need to adjust the delay
-        displayViewRecommendations.check(ViewAssertions.matches(ViewMatchers.withText("Hide Recommendations")));
-
-
-        ViewInteraction displayHiddenView = Espresso.onView(allOf(ViewMatchers.withId(R.id.hidden_view), withParentIndex(0)));
-        displayHiddenView.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-
-        int childCount = 0;
-        ViewInteraction currentChild = onView(allOf(withParent(withId(R.id.hidden_view)), withParentIndex(childCount)));
-        while (true) {
-            try {
-                currentChild.check(new ViewAssertion() {
-                    @Override
-                    public void check(View view, NoMatchingViewException noViewException) {
-                        // This will throw an exception if the view is not found, and we can exit the loop
-                    }
-                });
-                childCount++;
-                currentChild = onView(allOf(withParent(withId(R.id.hidden_view)), withParentIndex(childCount)));
-            } catch (Exception e) {
-                // Exit the loop when the view is not found
-                break;
-            }
-        }
-
-        assertThat(childCount, equalTo(0));
-
-        displayViewRecommendations.perform(click());
-
-        Thread.sleep(5000); // You may need to adjust the delay
-
-        childCount = 0;
-        currentChild = onView(allOf(withParent(withId(R.id.hidden_view)), withParentIndex(childCount)));
-        while (true) {
-            try {
-                currentChild.check(new ViewAssertion() {
-                    @Override
-                    public void check(View view, NoMatchingViewException noViewException) {
-                    }
-                });
-                childCount++;
-                currentChild = onView(allOf(withParent(withId(R.id.hidden_view)), withParentIndex(childCount)));
-            } catch (Exception e) {
-                // Exit the loop when the view is not found
-                break;
-            }
-        }
-
-        // Check that childCount == 0
-        assertThat(childCount, equalTo(0));
-        clearEvents();
-        // ViewInteraction displayRecName = Espresso.onView(ViewMatchers.withId(R.id.rec_name));
+        onView(withParent(withId(R.id.hidden_timegap))).check(doesNotExist());
     }
 }

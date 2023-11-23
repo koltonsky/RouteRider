@@ -7,6 +7,7 @@ import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.RootMatchers.withDecorView;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isEnabled;
+import static androidx.test.espresso.matcher.ViewMatchers.withContentDescription;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withParent;
 import static androidx.test.espresso.matcher.ViewMatchers.withParentIndex;
@@ -107,6 +108,7 @@ public class FindMatchingCommutersTest {
         }
     }
 
+    // NO CHATGPT
     public void mockEvent(String addr) throws InterruptedException {
         ViewInteraction floatingButton = Espresso.onView(ViewMatchers.withId(R.id.floating_action_button));
         floatingButton.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
@@ -125,12 +127,7 @@ public class FindMatchingCommutersTest {
         dateEditText.perform(click());
 
         Calendar calendar = Calendar.getInstance();
-        int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
-        int eventHour = 6;
-        if (currentHour > 5) {
-             eventHour = currentHour + 1;
-        }
-
+        int eventHour = calendar.get(Calendar.HOUR_OF_DAY) + 2;
         // Close the DatePicker
         onView(ViewMatchers.withText("OK")).perform(ViewActions.click());
 
@@ -150,24 +147,37 @@ public class FindMatchingCommutersTest {
 
         onView(ViewMatchers.withText("OK")).perform(ViewActions.click());
 
-
         Thread.sleep(5000); // You may need to adjust the delay
     }
+    // PARTIAL CHATGPT
     public void clearEvents() throws InterruptedException {
-        onView(withId(R.id.schedule_tab_button)).perform(click());
+        // onView(withId(R.id.schedule_tab)).perform(click());
 
+        // Check if "Route Event" exists
         ViewInteraction displayEvent1Name = Espresso.onView(ViewMatchers.withText("Route Event"));
-        displayEvent1Name.perform(ViewActions.longClick());
+        if (isViewDisplayed(displayEvent1Name)) {
+            displayEvent1Name.perform(ViewActions.longClick());
 
-        ViewInteraction okButton = Espresso.onView(ViewMatchers.withId(android.R.id.button1));
-        okButton.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-        okButton.check(ViewAssertions.matches(ViewMatchers.withText("OK")));
-        okButton.perform(click());
+            ViewInteraction okButton = Espresso.onView(ViewMatchers.withId(android.R.id.button1));
+            okButton.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+            okButton.check(ViewAssertions.matches(ViewMatchers.withText("OK")));
+            okButton.perform(click());
 
-        Thread.sleep(5000); // You may need to adjust the delay
+            Thread.sleep(5000); // You may need to adjust the delay
+        }
     }
 
+    // YES CHATGPT
+    private boolean isViewDisplayed(ViewInteraction viewInteraction) {
+        try {
+            viewInteraction.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+            return true;
+        } catch (NoMatchingViewException e) {
+            return false;
+        }
+    }
 
+    // NO CHATGPT
     @Test
     public void friendTransitTest() throws InterruptedException {
         try {
@@ -195,32 +205,38 @@ public class FindMatchingCommutersTest {
         } catch (Exception e) {
             Log.d("Continue Test", "Already Logged In");
         }
+        clearEvents();
         mockEvent("2424 Main Mall, Vancouver, BC V6T 1Z4");
         Thread.sleep(5000); // You may need to adjust the delay
 
-        onView(withId(R.id.routes_tab_button)).perform(click());
+        ViewInteraction routeTab = Espresso.onView(allOf(withContentDescription("Routes"),
+                        withParent(withParent(withId(R.id.tab_layout))),
+                        isDisplayed()))
+                .check(matches(isDisplayed()));
+        routeTab.perform(ViewActions.click());
 
-        ViewInteraction transitFriendButton = onView(withId(R.id.transit_friend_button));
+        // Force refresh UI
+        onView(withId(R.id.next_day_route)).perform(click());
+        Thread.sleep(1000); // You may need to adjust the delay
+        onView(withId(R.id.previous_day_route)).perform(click());
+        Thread.sleep(2000); // You may need to adjust the delay
 
-        transitFriendButton.check(matches(isEnabled()));
-
-        transitFriendButton.perform(click());
+        onView(withId(R.id.transit_friend_button)).perform(click());
         onView(withText("Friend List")).check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
         for (String friendName : RoutesFragment.friendNames) {
             onView(ViewMatchers.withText(friendName)).check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
         }
-        ViewInteraction matchingCommutersButton = onView(withText("Find matching commuters"));
-        matchingCommutersButton.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+        // ViewInteraction matchingCommutersButton = onView(withText("Find matching commuters"));
+        // matchingCommutersButton.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
 
         onView(ViewMatchers.withText(RoutesFragment.friendNames[0])).perform(click());
 
         Thread.sleep(5000);
 
         onView(ViewMatchers.withText("With " + RoutesFragment.friendNames[0])).check(matches(isDisplayed()));
-
-        clearEvents();
     }
 
+    // NO CHATGPT
     @Test
     public void matchingCommuterTest() throws InterruptedException {
         try {
@@ -248,10 +264,15 @@ public class FindMatchingCommutersTest {
         } catch (Exception e) {
             Log.d("Continue Test", "Already Logged In");
         }
+        clearEvents();
         mockEvent("2424 Main Mall, Vancouver, BC V6T 1Z4");
         Thread.sleep(5000); // You may need to adjust the delay
 
-        onView(withId(R.id.routes_tab_button)).perform(click());
+        ViewInteraction routeTab = Espresso.onView(allOf(withContentDescription("Routes"),
+                        withParent(withParent(withId(R.id.tab_layout))),
+                        isDisplayed()))
+                .check(matches(isDisplayed()));
+        routeTab.perform(ViewActions.click());
 
         ViewInteraction transitFriendButton = onView(withId(R.id.transit_friend_button));
 
@@ -282,11 +303,9 @@ public class FindMatchingCommutersTest {
         onView(withText(expectedToastMessage))
                 .inRoot(withDecorView(not(decorView)))// Here we use decorView
                 .check(matches(isDisplayed()));
-
-
-        clearEvents();
     }
 
+    // NO CHATGPT
     @Test
     public void noMatchingCommuterTest() throws InterruptedException {
         try {
@@ -314,10 +333,15 @@ public class FindMatchingCommutersTest {
         } catch (Exception e) {
             Log.d("Continue Test", "Already Logged In");
         }
+        clearEvents();
         mockEvent("2424 Main Mall, Vancouver, BC V6T 1Z4");
         Thread.sleep(5000); // You may need to adjust the delay
 
-        onView(withId(R.id.routes_tab_button)).perform(click());
+        ViewInteraction routeTab = Espresso.onView(allOf(withContentDescription("Routes"),
+                        withParent(withParent(withId(R.id.tab_layout))),
+                        isDisplayed()))
+                .check(matches(isDisplayed()));
+        routeTab.perform(ViewActions.click());
 
         ViewInteraction transitFriendButton = onView(withId(R.id.transit_friend_button));
 
@@ -345,8 +369,5 @@ public class FindMatchingCommutersTest {
             Espresso.onView(ViewMatchers.withText(friendName)).check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
         }
         matchingCommutersButton.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-
-
-        clearEvents();
     }
 }

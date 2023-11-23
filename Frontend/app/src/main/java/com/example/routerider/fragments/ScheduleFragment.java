@@ -14,12 +14,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -63,7 +61,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 
 
 public class ScheduleFragment extends Fragment {
@@ -492,8 +489,8 @@ public class ScheduleFragment extends Fragment {
                 View timeGapView = inflater.inflate(R.layout.timegap_chip, eventListView, false);
                 TextView timeGapTextView = timeGapView.findViewById(R.id.time_gap_text);
                 timeGapTextView.setText("Gap: " + formatTimeDifference(timeDifference));
-                LinearLayout hiddenView = timeGapView.findViewById(R.id.hidden_view);
-                CardView cardView = timeGapView.findViewById(R.id.base_cardview);
+                LinearLayout hiddenView = timeGapView.findViewById(R.id.hidden_timegap);
+                CardView cardView = timeGapView.findViewById(R.id.base_timegap);
                 Button viewRecommendationsButton = timeGapView.findViewById(R.id.view_recommendations_button);
                 viewRecommendationsButton.setOnClickListener(v -> {
                     if (hiddenView.getVisibility() == View.VISIBLE) {

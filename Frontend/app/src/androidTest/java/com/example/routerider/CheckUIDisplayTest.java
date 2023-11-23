@@ -108,25 +108,25 @@ public class CheckUIDisplayTest {
         scheduleTab.perform(ViewActions.click());
 
         onView(allOf(withId(R.id.schedule_title), withText("Schedule"))).check(matches(isDisplayed()));
-        onView(allOf(withId(R.id.previousDay), withText("Back"))).check(matches(isDisplayed()));
-        onView(allOf(withId(R.id.nextDay), withText("Next"))).check(matches(isDisplayed()));
+        onView(allOf(withId(R.id.previous_day), withText("Back"))).check(matches(isDisplayed()));
+        onView(allOf(withId(R.id.next_day), withText("Next"))).check(matches(isDisplayed()));
         onView(withId(R.id.floating_action_button)).check(matches(isDisplayed()));
-        onView(withId(R.id.currentDayText)).check(matches(isDisplayed()));
+        onView(withId(R.id.current_day_text)).check(matches(isDisplayed()));
     }
 
     // NO CHATGPT
     @Test
     public void b_checkRouteTab() {
         loginToGoogle();
-        ViewInteraction routeTab = Espresso.onView(allOf(withContentDescription("Route"),
+        ViewInteraction routeTab = Espresso.onView(allOf(withContentDescription("Routes"),
                         withParent(withParent(withId(R.id.tab_layout))),
                         isDisplayed()))
                 .check(matches(isDisplayed()));
         routeTab.perform(ViewActions.click());
 
         onView(allOf(withId(R.id.route_title), withText("Routes"))).check(matches(isDisplayed()));
-        onView(allOf(withId(R.id.previous_day), withText("Back"))).check(matches(isDisplayed()));
-        onView(allOf(withId(R.id.next_day), withText("Next"))).check(matches(isDisplayed()));
+        onView(allOf(withId(R.id.previous_day_route), withText("Back"))).check(matches(isDisplayed()));
+        onView(allOf(withId(R.id.next_day_route), withText("Next"))).check(matches(isDisplayed()));
         onView(withId(R.id.current_day_text))
                 .check(matches(withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)));
 

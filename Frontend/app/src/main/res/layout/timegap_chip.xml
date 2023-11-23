@@ -5,7 +5,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
     <androidx.cardview.widget.CardView
-        android:id="@+id/base_cardview"
+        android:id="@+id/base_timegap"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -66,7 +66,7 @@
         </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
             <LinearLayout
-                android:id="@+id/hidden_view"
+                android:id="@+id/hidden_timegap"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"

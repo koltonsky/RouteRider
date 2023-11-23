@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">90.9% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>90/99</span>
+                <span class='fraction'>99/99</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">87.5% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>28/32</span>
+                <span class='fraction'>32/32</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">90.81% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>89/98</span>
+                <span class='fraction'>98/98</span>
             </div>
         
             
@@ -955,17 +955,17 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1618,25 +1618,25 @@
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1831,13 +1831,13 @@ const createNewSchedule = async (req, res) =&gt; {
       const errorMessageLength = Buffer.byteLength(errorMessage, 'utf8');
       res.set('Content-Length', errorMessageLength);
       res.status(409).json({ message: errorMessage });
-    } else <span class="missing-if-branch" title="else path not taken" >E</span>{
+    } else {
       // If the user doesn't exist, insert the new user document into the collection
-<span class="cstat-no" title="statement not covered" >      await collection.insertOne(scheduleData);</span>
-      const successMessage = <span class="cstat-no" title="statement not covered" >'Schedule created successfully';</span>
-      const successMessageLength = <span class="cstat-no" title="statement not covered" >Buffer.byteLength(successMessage, 'utf8');</span>
-<span class="cstat-no" title="statement not covered" >      res.set('Content-Length', successMessageLength);</span>
-<span class="cstat-no" title="statement not covered" >      res.status(201).json({ message: successMessage });</span>
+      await collection.insertOne(scheduleData);
+      const successMessage = 'Schedule created successfully';
+      const successMessageLength = Buffer.byteLength(successMessage, 'utf8');
+      res.set('Content-Length', successMessageLength);
+      res.status(201).json({ message: successMessage });
     }
   /*} catch (error) {
     console.error('Error:', error);
@@ -2497,18 +2497,18 @@ const getCalendarID = async (req, res) =&gt; {
     // Find the event in the user's schedule based on the event ID
     const event = schedule.events.find((event) =&gt; event.id === eventId);
 &nbsp;
-    <span class="missing-if-branch" title="else path not taken" >E</span>if (!event) {
+    if (!event) {
       res.status(404).json({ error: 'Event not found in the schedule' });
       return;
     }
 &nbsp;
     // Assuming the event has a calendar ID property, you can access it like this
-    const calendarID = <span class="cstat-no" title="statement not covered" >event.calendarID;</span>
+    const calendarID = event.calendarID;
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    if (calendarID) {</span>
-<span class="cstat-no" title="statement not covered" >      res.status(200).json({ calendarID });</span>
+    if (calendarID) {
+      res.status(200).json({ calendarID });
     } else {
-<span class="cstat-no" title="statement not covered" >      res.status(404).json({ error: 'Calendar ID not found for the event' });</span>
+      res.status(404).json({ error: 'Calendar ID not found for the event' });
     }
   /*} catch (error) {
     console.error('Error:', error);
@@ -2686,7 +2686,7 @@ module.exports = {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2023-11-22T19:41:32.452Z
+                at 2023-11-23T03:03:27.610Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

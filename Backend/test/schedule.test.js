@@ -414,7 +414,7 @@ expect(res.body.error).toBe('Event overlaps with existing events');
 
   });
 
-// Interface DETE https://20.163.28.92:8081/api/schedulelist/:email/:id
+// Interface DELETE https://20.163.28.92:8081/api/schedulelist/:email/:id
 describe('DELETE /api/schedulelist/:email/:id', () => {
   // Mock schedule data for testing
   const scheduleData = {

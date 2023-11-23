@@ -320,6 +320,11 @@ describe('Get User Friend List with Names', () => {
     expect(res.body.error).toBe('User not found');
   });
 
+  // Input: existing user email
+// Expected status code: 200
+// Expected behavior: return empty list for friends and friendRequests
+// Expected output: empty list for friends and friendRequests
+// ChatGPT usage: Yes
   test('get friendless', async () => {
     // Assuming client and request are properly initialized
     //const userEmailWithNoFriends = 'userwithnofriends@example.com';
@@ -335,6 +340,11 @@ describe('Get User Friend List with Names', () => {
     expect(res.body.friendRequestsWithNames).toEqual([]);
   });
 
+    // Input: existing user email
+// Expected status code: 200
+// Expected behavior: return list for friends empty list and friendRequests
+// Expected output: list for friends empty list and friendRequests
+// ChatGPT usage: Yes
   test('GET friends should handle case with friends but no friend requests', async () => {
     const res = await request
       .get(`/api/userlist/${userEmailWithFriendsNoRequests}/friends`);
@@ -345,6 +355,11 @@ describe('Get User Friend List with Names', () => {
     expect(res.body.friendRequestsWithNames).toEqual([]);
   });
 
+    // Input: existing user email
+// Expected status code: 200
+// Expected behavior: return empty list for friends and list and friendRequests
+// Expected output: empty list for friends list and friendRequests
+// ChatGPT usage: Yes
   test('GET friends should handle case with friend requests but no friends', async () => {
     const res = await request
       .get(`/api/userlist/${userEmailWithRequestsNoFriends}/friends`);

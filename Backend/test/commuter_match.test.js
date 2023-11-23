@@ -86,6 +86,7 @@ describe('getFirstEventsOfEachDay', () => {
 
   });
 
+    // INTERFACE GET https://20.163.28.92:8081/api/findMatchingUsers/:userEmail
   describe('findOtherEmails', () => {
     // Mock user data for testing
     let userData;
@@ -266,6 +267,7 @@ test('should return an empty set for a user with matching startTime but differen
   
   });
 
+
     // Input: userEmail that doesn't exist
     // Expected status code: 200
     // Expected behavior: should return an empty set
@@ -295,4 +297,6 @@ test('should return an empty set for a user with matching startTime but differen
   
     // Add more test cases as needed
   });
+
+
   

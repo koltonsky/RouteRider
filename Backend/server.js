@@ -176,10 +176,10 @@ app.post('/api/store_token', (req, res) => {
         });
       }
     })
-    .catch((error) => {
-      // console.log('Error: ' + error);
-      res.status(401).json({ message: error });
-    });
+    // .catch((error) => {
+    //   // console.log('Error: ' + error);
+    //   res.status(401).json({ message: error });
+    // });
 });
 
 /**
@@ -319,26 +319,18 @@ app.get('/api/findMatchingUsers/:userEmail', async (req, res) => {
  * ChatGPT usage: None
  */
 const getRecommendedRoutesWithFriends = async (req, res) => {
-  try {
-    const email = req.params.email;
-    const friendEmail = req.params.friendEmail;
-    const date = req.params.date;
-    await initRouteWithFriends(email, friendEmail, date).then(
-      (result) => {
-        return res.status(200).json({ routes: result });
-      }, 
-      (error) => {
-        // console.log('initRouteWithFriends rejected error');
-        return res.status(400).json({ message: error });
-      }
-    );
-  } catch (error) {
-    console.error(
-      'Error in /api/recommendation/routesWithFriends/:email/:friendEmail/:date',
-      error
-    );
-    return res.status(500).json({ error: 'An error occurred' });
-  }
+  const email = req.params.email;
+  const friendEmail = req.params.friendEmail;
+  const date = req.params.date;
+  await initRouteWithFriends(email, friendEmail, date).then(
+    (result) => {
+      return res.status(200).json({ routes: result });
+    }, 
+    (error) => {
+      // console.log('initRouteWithFriends rejected error');
+      return res.status(400).json({ message: error });
+    }
+  );
 };
 
 app.get(
@@ -349,25 +341,20 @@ app.get(
 // RecommendationFinder
 
 const getRecommendedRoutes = async (req, res) => {
-  try {
-    const email = req.params.email;
-    const date = req.params.date;
-    // const result = await initRoute(email, date);
-    // return res.status(200).json({ routes: result });
+  const email = req.params.email;
+  const date = req.params.date;
+  // const result = await initRoute(email, date);
+  // return res.status(200).json({ routes: result });
 
-    await initRoute(email, date).then(
-      (result) => {
-        return res.status(200).json({ routes: result });
-      }, 
-      (error) => {
-        // console.log('initRoute rejected error ' + error);
-        return res.status(400).json({ message: error });
-      }
-    );
-  } catch (error) {
-    console.error('Error in /api/recommendation/routes/:email/:date', error);
-    return res.status(500).json({ error: 'An error occurred' });
-  }
+  await initRoute(email, date).then(
+    (result) => {
+      return res.status(200).json({ routes: result });
+    }, 
+    (error) => {
+      // console.log('initRoute rejected error ' + error);
+      return res.status(400).json({ message: error });
+    }
+  );
 };
 
 app.get('/api/recommendation/routes/:email/:date', getRecommendedRoutes);
@@ -480,7 +467,7 @@ async function checkLiveTransitTime(
         });
 
         req.on('error', (error) => {
-          console.error(`API request error: ${error.message}`);
+          // console.error(`API request error: ${error.message}`);
         });
 
         req.end();
@@ -856,9 +843,9 @@ async function initRoute(userEmail, date) {
                 leaveTimeNum = step.transit_details.departure_time.value;
                 break;
               default:
-                type = 'default';
-                id = 'default';
-                break;
+                // type = 'default';
+                // id = 'default';
+                // break;
             }
           } else {
             type = 'Walk';
@@ -891,7 +878,7 @@ async function initRoute(userEmail, date) {
         resolve(returnList);
       })
       .catch((error) => {
-        reject(error);
+        // reject(error);
       });
   });
 }
@@ -1015,7 +1002,7 @@ async function initReminders(req, notificationCallback) {
             break;
           default:
             // console.log('initReminders(): hit default case');
-            break;
+            // break;
         }
         break;
       }
@@ -1250,7 +1237,7 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
         //     departureTimeFromStation_iso
         // );
         var azureTime = new Date(departureTimeFromStation_iso);
-        var azureTimeToPST = azureTime.setHours(azureTime.getHours() + 8);
+        var azureTimeToPST = azureTime.setHours(azureTime.getHours() + 7);
         
         planTransitTrip(locationOfOrigin_user, meetingPoint, new Date(azureTimeToPST))
           .then((trip) => {
@@ -1294,9 +1281,6 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
                     leaveTimeNum = step.transit_details.departure_time.value;
                     break;
                   default:
-                    type = 'default';
-                    id = 'default';
-                    break;
                 }
               } else {
                 type = 'Walk';
@@ -1349,7 +1333,7 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
           })
           .catch((error) => {
             // console.log(error);
-            reject(error);
+            // reject(error);
           });
       })
       .catch((error) => {
@@ -1400,8 +1384,8 @@ function getLatLong(address) {
         resolve(coords);
       })
       .catch((error) => {
-        console.log(error);
-        reject(error);
+        // console.log(error);
+        // reject(error);
       });
   });
 }
@@ -1470,7 +1454,7 @@ async function planTransitTrip(origin, destination, arriveTime) {
     });
     request.on('error', (err) => {
       // console.log('Error: ' + err.message);
-      reject('Error: ' + err.message);
+      // reject('Error: ' + err.message);
     });
   });
 }
@@ -1496,26 +1480,26 @@ function getMeetingPoint(address1, address2) {
   var distToCommercial_user = calcDist(
     addressCoords_user[0],
     addressCoords_user[1],
-    49.2624,
-    -123.0698
+    49.2629,
+    -123.0684
   );
   var distToJoyce_user = calcDist(
     addressCoords_user[0],
     addressCoords_user[1],
-    49.2412,
-    -123.0298
+    49.2382,
+    -123.0312
   );
   var distToCommercial_friend = calcDist(
     addressCoords_friend[0],
     addressCoords_friend[1],
-    49.2624,
-    -123.0698
+    49.2629,
+    -123.0684
   );
   var distToJoyce_friend = calcDist(
     addressCoords_friend[0],
     addressCoords_friend[1],
-    49.2412,
-    -123.0298
+    49.2382,
+    -123.0312
   );
   var meetingPoint = '';
   if (
@@ -1589,9 +1573,9 @@ function combineDateAndTime(dateString, timeString) {
 
   const timeComponents = timeString.match(/(\d+):(\d+)\s*(A|P)\s*M/);
   // const timeComponents = timeString.match(/(\d+):(\d+)\s*(A|P)\s*M/);
-  if (!timeComponents) {
-    throw new Error('Invalid time format');
-  }
+  // if (!timeComponents) {
+  //   throw new Error('Invalid time format');
+  // }
 
   var hours = parseInt(timeComponents[1], 10);
   var minutes = parseInt(timeComponents[2], 10);
@@ -1608,9 +1592,9 @@ function combineDateAndTime(dateString, timeString) {
   // console.log('output: ' + isoDateTimeString);
   const date = new Date(isoDateTimeString);
 
-  if (isNaN(date)) {
-    throw new Error('Invalid date or time format');
-  }
+  // if (isNaN(date)) {
+  //   throw new Error('Invalid date or time format');
+  // }
 
   return date.toISOString();
 }
@@ -1633,4 +1617,4 @@ function compareTimeStrings(timeStr1, timeStr2) {
   return formattedTimeStr1 === formattedTimeStr2;
 }
 
-module.exports = { app, sendNotification, findUserToken, closeServer };
+module.exports = { app, sendNotification, findUserToken, closeServer, checkLiveTransitTime };

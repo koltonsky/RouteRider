@@ -8,9 +8,9 @@
     "firebase-admin": "^11.11.0",
     "moment-timezone": "^0.5.43",
     "mongodb": "^6.2.0",
-    "node-cron": "^3.0.2"
+    "node-cron": "^3.0.2",
+    "sinon": "^17.0.1"
   },
-  
   "devDependencies": {
     "jest": "^29.7.0",
     "supertest": "^6.3.3"
@@ -18,6 +18,9 @@
   "scripts": {
     "test": "jest",
     "test:coverage": "jest --coverage",
-    "test:backend": "jest Backend/test"
+    "test:backend": "jest Backend/test",
+    "test:user": "jest Backend/test/user.test.js",
+    "test:schedule": "jest Backend/test/schedule.test.js",
+    "test:match": "jest Backend/test/commuter_match.test.js"
   }
 }

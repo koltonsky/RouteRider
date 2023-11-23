@@ -200,30 +200,31 @@ const getFriendListWithNames = async (req, res) => {
       const friendRequestsWithNames = [];
 
       // Retrieve names for friends
+      if (friendEmails.length > 0) {
+        hasFriends = true;
       for (const friendEmail of friendEmails) {
         const friend = await collection.findOne({ email: friendEmail });
-
-        if (friend) {
-          hasFriends = true;
+          
           friendsWithNames.push({
             email: friend.email,
             name: friend.name,
           });
-        }
       }
+    }
 
       // Retrieve names for friend requests
+      if (friendRequestEmails.length > 0) {
+        hasFriends = true;
       for (const friendRequestEmail of friendRequestEmails) {
         const friendRequestUser = await collection.findOne({ email: friendRequestEmail });
 
-        if (friendRequestUser) {
-          hasFriends = true;
           friendRequestsWithNames.push({
             email: friendRequestUser.email,
             name: friendRequestUser.name,
           });
-        }
+        
       }
+    }
 
       // Include the list of friendRequests and friends in the response
       if (hasFriends) {

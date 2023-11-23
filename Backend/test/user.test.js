@@ -20,7 +20,6 @@ const app = require('../server'); // Replace with the actual path to your Expres
 const supertest = require('supertest');
 const app = require('../server'); // Replace with the actual path to your Express app
 const request = supertest(app);
-const sinon = require('sinon');
 
 const user = {
     "email": "newuserlol3@example.com",
@@ -37,9 +36,11 @@ const user = {
 
 const userEmail = 'koltonluu@gmail.com';
 const nonExistingEmail = 'nonexistinguser@example.com';
+let server;
 
 
   beforeAll(async () => {
+    //server = app.listen(8081);
     // Set up MongoDB connection before tests
     try {
       const uri = 'mongodb://127.0.0.1:27017'; // Replace with your MongoDB connection string
@@ -54,8 +55,9 @@ const nonExistingEmail = 'nonexistinguser@example.com';
   afterAll(async () => {
     // Close MongoDB connection after all tests
     if (client) {
-      await client.close();
+      await client.close(true);
     }
+    //server.close();
   });
   
   beforeEach(() => {

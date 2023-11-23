@@ -42,7 +42,7 @@ describe('getFirstEventsOfEachDay', () => {
     // Set up the test data before running the tests
     beforeAll(async () => {
       userData = {
-        email: 'user@example.com',
+        email: 'userm@example.com',
         // Add other schedule data properties as needed
       };
   
@@ -93,7 +93,7 @@ describe('getFirstEventsOfEachDay', () => {
     // Set up the test data before running the tests
     beforeAll(async () => {
       userData = {
-        email: 'user@example.com',
+        email: 'users@example.com',
         // Add other schedule data properties as needed
       };
   
@@ -103,7 +103,7 @@ describe('getFirstEventsOfEachDay', () => {
       const collection = client.db('ScheduleDB').collection('schedulelist');
       // Add other schedules for testing
       await collection.insertMany([
-        { email: 'user@example.com' },
+        { email: 'users@example.com' },
         { email: 'user1@example.com' },
         { email: 'user2@example.com' },
         { email: 'user3@example.com' },
@@ -114,7 +114,7 @@ describe('getFirstEventsOfEachDay', () => {
     afterAll(async () => {
       // Assuming you have already connected to the MongoDB client
       const collection = client.db('ScheduleDB').collection('schedulelist');
-      await collection.deleteMany({ email: { $in: ['user@example.com', 'user1@example.com', 'user2@example.com', 'user3@example.com'] } });
+      await collection.deleteMany({ email: { $in: ['users@example.com', 'user1@example.com', 'user2@example.com', 'user3@example.com'] } });
     });
   
     // Input: userEmail
@@ -142,7 +142,7 @@ describe('getFirstEventsOfEachDay', () => {
     // Set up the test data before running the tests
     beforeAll(async () => {
       userData = {
-        email: 'user@example.com',
+        email: 'userf@example.com',
         // Add other schedule data properties as needed
       };
   

@@ -156,24 +156,29 @@ describe('GET /api/schedulelist/:email', () => {
 
   // Interface GET https://20.163.28.92:8081/api/schedulelist/:email/:id
   describe('GET /api/schedulelist/:email/:id', () => {
-    const userEmail = 'user1@example.com';
+
+    let scheduleData;
+
+    const userEmail = 'usergetfriends@example.com';
     const eventId = '12345'; // Event ID
   
     // Mock schedule data for testing
-    const scheduleData = {
-      email: userEmail,
-      events: [
-        {
-          id: eventId,
-          calendarID: 'calendar123',
-          // ... other event properties
-        },
-      ],
-      // ... other schedule properties
-    };
+
   
     // Before running the tests, add a sample schedule to the database
     beforeAll(async () => {
+      scheduleData = {
+        email: userEmail,
+        events: [
+          {
+            id: eventId,
+            calendarID: 'calendar123',
+            // ... other event properties
+          },
+        ],
+        // ... other schedule properties
+      };
+
       const collection = client.db('ScheduleDB').collection('schedulelist');
       await collection.insertOne(scheduleData);
     });

@@ -77,7 +77,7 @@ const getUserByEmail = async (req, res) => {
       // Assuming you have already connected to the MongoDB client
       const collection = client.db('UserDB').collection('userlist');
 
-      console.log(userEmail);
+      // console.log(userEmail);
   
       // Find the user by their email
       const user = await collection.findOne({ email: userEmail });

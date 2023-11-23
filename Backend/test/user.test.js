@@ -18,7 +18,7 @@ const app = require('../server'); // Replace with the actual path to your Expres
 //const user = require('../path/to/your/user');
 */
 const supertest = require('supertest');
-const { app } = require('../server'); // Replace with the actual path to your Express app
+const { app, closeServer } = require('../server'); // Replace with the actual path to your Express app
 const request = supertest(app);
 
 const user = {
@@ -57,7 +57,7 @@ let server;
     if (client) {
       await client.close(true);
     }
-    //server.close();
+    closeServer();
   });
   
   beforeEach(() => {

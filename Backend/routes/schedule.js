@@ -45,7 +45,7 @@ const getScheduleByEmail = async (req, res) => {
     // Assuming you have already connected to the MongoDB client
     const collection = client.db('ScheduleDB').collection('schedulelist');
 
-    console.log(userEmail);
+    // console.log(userEmail);
 
     // Find the schedule by their email
     const schedule = await collection.findOne({ email: userEmail });
@@ -308,13 +308,13 @@ const addEvent = async (req, res) => {
     //console.log(existingEventsCount + " " + schedule.events);
 
     if (existingEventsCount > 0) {
-      console.log("exist");
+      // console.log("exist");
       const isOverlap = schedule.events.some((event) => {
         const eventStart = new Date(event.startTime);
         const eventEnd = new Date(event.endTime);
 
-        console.log(eventStart + " " + eventEnd);
-        console.log(newEventStart + " " + newEventEnd);
+        // console.log(eventStart + " " + eventEnd);
+        // console.log(newEventStart + " " + newEventEnd);
 
 
         return (
@@ -325,7 +325,7 @@ const addEvent = async (req, res) => {
       });
 
       if (isOverlap) {
-        console.log(isOverlap);
+        // console.log(isOverlap);
         res.status(400).json({ error: 'Event overlaps with existing events' });
         return;
       }

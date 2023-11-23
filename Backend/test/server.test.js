@@ -1,7 +1,7 @@
 const { MongoClient } = require('mongodb');
 
 const supertest = require('supertest');
-const { app } = require('../server'); // Replace with the actual path to your Express app
+const { app, closeServer } = require('../server'); // Replace with the actual path to your Express app
 const request = supertest(app);
 
 const { findUserToken } = require('../server');
@@ -20,18 +20,19 @@ beforeAll(async () => {
 });
   
 afterAll(async () => {
-// Close MongoDB connection after all tests
-if (client) {
-    await client.close();
-}
+    // Close MongoDB connection after all tests
+    if (client) {
+        await client.close();
+    }
+    closeServer();
 });
   
 beforeEach(() => {
-// Log messages or perform setup before each test if needed
-// Avoid logging directly in beforeAll for async operations
+    // Log messages or perform setup before each test if needed
+    // Avoid logging directly in beforeAll for async operations
 });
 
-// Interface POST /api/store_token
+// Interface POST https://20.163.28.92:8081/api/store_token
 describe('Create/update firebasetokens for mobile notifications', () => {
     const userData = {
         email: 'user@example.com',
@@ -87,7 +88,7 @@ describe('Create/update firebasetokens for mobile notifications', () => {
     });
 });
 
-// Interface POST /api/send-friend-notification
+// Interface POST https://20.163.28.92:8081/api/send-friend-notification
 describe('Send friend request notifications', () => {
     const senderName = 'sender name';
     const receiverData = {
@@ -137,7 +138,7 @@ describe('Send friend request notifications', () => {
     });
 });
 
-// Interface POST /api/initReminders
+// Interface POST https://20.163.28.92:8081/api/initReminders
 describe('Initialize time to leave reminders', () => {
     const dummy_schedule = {
         email: 'dummy@example.com',
@@ -210,7 +211,7 @@ describe('Initialize time to leave reminders', () => {
     });
 });
 
-// Interface GET /api/recommendation/routesWithFriends/:email/:friendEmail/:date
+// Interface GET https://20.163.28.92:8081/api/recommendation/routesWithFriends/:email/:friendEmail/:date
 describe('Create a route shared between two users', () => {
     const dummy_schedule = {
         email: 'dummy@example.com',
@@ -374,7 +375,7 @@ describe('Create a route shared between two users', () => {
     });
 }); 
 
-// Interface GET /api/recommendation/routes/:email/:date
+// Interface GET https://20.163.28.92:8081/api/recommendation/routes/:email/:date
 describe('Create a transit route for a single user', () => {
     const dummy_schedule = {
         email: 'dummy@example.com',
@@ -445,7 +446,7 @@ describe('Create a transit route for a single user', () => {
         const email = 'dummy17@example.com';
         const date = '2023-12-03';
         const response = await request.get(`/api/recommendation/routes/${email}/${date}`);
-        console.log("!!!!!!!!" + response.body.message);
+        // console.log("!!!!!!!!" + response.body.message);
         expect(response.statusCode).toBe(400);
         expect(response.body).toEqual({message: 'No matching email exists in user database'});
     });
@@ -457,7 +458,7 @@ describe('Create a transit route for a single user', () => {
         const email = 'dummy2@example.com';
         const date = '2023-12-03';
         const response = await request.get(`/api/recommendation/routes/${email}/${date}`);
-        console.log("*******" + response.body.message);
+        // console.log("*******" + response.body.message);
         expect(response.statusCode).toBe(400);
         expect(response.body).toEqual({message: 'No matching schedule exists in schedule database'});
     });

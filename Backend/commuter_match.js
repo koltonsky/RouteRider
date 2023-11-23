@@ -93,7 +93,7 @@ async function getFirstEventsOfEachDay(userEmail) {
  const userSchedule = await client.db('ScheduleDB').collection('schedulelist').findOne({ email: userEmail });
 
  if (!userSchedule || !userSchedule.events || userSchedule.events.length === 0) {
-     console.log('User not found or schedule is empty.');
+    //  console.log('User not found or schedule is empty.');
      //console.log(userSchedule.events);
      return { events: [] };
  }
@@ -116,8 +116,8 @@ async function getFirstEventsOfEachDay(userEmail) {
      }
  }
 
- console.log('First events of each day:');
- console.log(firstEvents);
+//  console.log('First events of each day:');
+//  console.log(firstEvents);
 
  return { events: firstEvents };
     /*} catch (err) {

@@ -143,8 +143,8 @@ app.post('/api/store_token', (req, res) => {
   const token = req.body.token;
   const email = req.body.email;
   if (!token || !email) {
-    console.log('Invalid email or token');
-    console.log('token: ' + token);
+    // console.log('Invalid email or token');
+    // console.log('token: ' + token);
     res.status(400).json({ message: 'Invalid email or token' });
     return;
   }
@@ -162,14 +162,14 @@ app.post('/api/store_token', (req, res) => {
           .collection('userlist')
           .updateOne({ _id: user._id }, { $set: { fcmToken: token } })
           .then(() => {
-            console.log('fcmToken updated successfully');
+            // console.log('fcmToken updated successfully');
             res.status(200).json({
               message:
                 'fcmToken updated successfully',
             });
           });
       } else {
-        console.log('User not found');
+        // console.log('User not found');
         res.status(400).json({
           message:
             'User not found, failed to update fcmToken',
@@ -177,7 +177,7 @@ app.post('/api/store_token', (req, res) => {
       }
     })
     .catch((error) => {
-      console.log('Error: ' + error);
+      // console.log('Error: ' + error);
       res.status(401).json({ message: error });
     });
 });
@@ -189,7 +189,7 @@ app.post('/api/send-friend-notification', async (req, res) => {
   const senderName = req.body.senderName;
   const receiverEmail = req.body.receiverEmail;
 
-  console.log("friend notif email: " + receiverEmail);
+  // console.log("friend notif email: " + receiverEmail);
   // ret = await findUserToken(receiverEmail, senderName, sendNotification);
   // res.status(ret.status).json({ message: ret.message });
   findUserToken(receiverEmail, senderName, sendNotification).then((ret) => {
@@ -199,7 +199,7 @@ app.post('/api/send-friend-notification', async (req, res) => {
 function findUserToken(receiverEmail, senderName, notificationCallback) {
   return new Promise((resolve, reject) => {
     if (!senderName || !receiverEmail) {
-      console.log('null email or name');
+      // console.log('null email or name');
       resolve({ status: 400, message: 'Null receiver email or sender name'});
     }
   
@@ -209,17 +209,17 @@ function findUserToken(receiverEmail, senderName, notificationCallback) {
     .findOne({ email: receiverEmail })
     .then(async (receiver) => {
       if (receiver) {
-        console.log(
-          'grabbed user: ' +
-            receiver +
-            ' ' +
-            receiver.fcmToken +
-            ' ' +
-            receiver.email
-        );
+        // console.log(
+        //   'grabbed user: ' +
+        //     receiver +
+        //     ' ' +
+        //     receiver.fcmToken +
+        //     ' ' +
+        //     receiver.email
+        // );
         var receiverToken = receiver.fcmToken;
   
-        console.log(receiverToken);
+        // console.log(receiverToken);
   
         const message = {
           token: receiverToken,
@@ -228,11 +228,11 @@ function findUserToken(receiverEmail, senderName, notificationCallback) {
             body: `${senderName} has sent you a friend request!`,
           },
         };
-        console.log(message.token);
+        // console.log(message.token);
         
         ret = await notificationCallback(message);
         if (ret) {
-          console.log('Successfully sent friend request notification');
+          // console.log('Successfully sent friend request notification');
           // res.status(200).json({
           //   message:
           //     'Successfully sent friend request notification',
@@ -240,7 +240,7 @@ function findUserToken(receiverEmail, senderName, notificationCallback) {
           // return { status: 200, message: 'Successfully sent friend request notification'}
           resolve({ status: 200, message: 'Successfully sent friend request notification'});
         } else {
-          console.log('Failed to send friend request notification');
+          // console.log('Failed to send friend request notification');
           // res.status(400).json({
           //   message:
           //     'Failed to send friend request notification',
@@ -250,7 +250,7 @@ function findUserToken(receiverEmail, senderName, notificationCallback) {
         }
       }
       else {
-        console.log('Receiver not found');
+        // console.log('Receiver not found');
         // res.status(400).json({
         //   message:
         //     'Receiver not found, failed to send notification',
@@ -266,12 +266,12 @@ function sendNotification(message) {
     .messaging()
     .send(message)
     .then((response) => {
-      console.log('Successfully sent message:' + response);
+      // console.log('Successfully sent message:' + response);
       // res.status(200).json({message: 'Successfully sent friend request notification'});
       return 1;
     })
     .catch((error) => {
-      console.error('Error sending message:', error);
+      // console.error('Error sending message:', error);
       // res.status(400).json(error);
       return 0;
     });
@@ -281,7 +281,7 @@ function sendNotification(message) {
  * ChatGPT usage: None
  */
 app.post('/api/initReminders', async (req, res) => {
-  console.log('*****called initReminders api endpoint*****');
+  // console.log('*****called initReminders api endpoint*****');
   // initReminders(req, sendNotification)
   //   .then(() => {
   //     res.status(200).json({ message: 'Reminders initialized' });
@@ -328,7 +328,7 @@ const getRecommendedRoutesWithFriends = async (req, res) => {
         return res.status(200).json({ routes: result });
       }, 
       (error) => {
-        console.log('initRouteWithFriends rejected error');
+        // console.log('initRouteWithFriends rejected error');
         return res.status(400).json({ message: error });
       }
     );
@@ -360,7 +360,7 @@ const getRecommendedRoutes = async (req, res) => {
         return res.status(200).json({ routes: result });
       }, 
       (error) => {
-        console.log('initRoute rejected error ' + error);
+        // console.log('initRoute rejected error ' + error);
         return res.status(400).json({ message: error });
       }
     );
@@ -408,7 +408,7 @@ async function checkLiveTransitTime(
   notificationCallback
 ) {
   return new Promise((resolve, reject) => {
-    console.log('its time!');
+    // console.log('its time!');
     const apiKey = 'crj9j8Kj97pbPkkc61dX';
     client
       .db('UserDB')
@@ -438,10 +438,10 @@ async function checkLiveTransitTime(
           res.on('end', () => {
             if (res.statusCode === 200) {
               const realTimeData = JSON.parse(data);
-              console.log(realTimeData);
-              console.log(realTimeData[0].Schedules);
-              console.log(realTimeData[0].Schedules[0].ExpectedLeaveTime);
-              console.log(realTimeData[0].Schedules[0].ExpectedCountdown);
+              // console.log(realTimeData);
+              // console.log(realTimeData[0].Schedules);
+              // console.log(realTimeData[0].Schedules[0].ExpectedLeaveTime);
+              // console.log(realTimeData[0].Schedules[0].ExpectedCountdown);
 
               if (
                 !compareTimeStrings(
@@ -449,7 +449,7 @@ async function checkLiveTransitTime(
                   scheduledLeaveTime
                 )
               ) {
-                console.log('bus is off schedule');
+                // console.log('bus is off schedule');
 
                 const message = {
                   token: userToken,
@@ -461,10 +461,10 @@ async function checkLiveTransitTime(
                 
                 let ret = notificationCallback(message) 
                 if (ret) {
-                  console.log('Successfully sent notification');
+                  // console.log('Successfully sent notification');
                   resolve(true);
                 } else {
-                  console.log('Failed to send notification');
+                  // console.log('Failed to send notification');
                   resolve(false);
                 }
               } else {
@@ -593,9 +593,9 @@ const sslServer = https.createServer(
   app
 );
 */
-
+let sslServer;
 function startSSLServer() {
-  const sslServer = https.createServer(
+  sslServer = https.createServer(
     {
       key: fs.readFileSync(path.join(__dirname, 'certification', 'test_key.key')),
       cert: fs.readFileSync(path.join(__dirname, 'certification', 'certificate.pem')),
@@ -606,6 +606,14 @@ function startSSLServer() {
   sslServer.listen(port, () => console.log('Secure server :) on port ' + port));
 }
 connectToDatabase();
+
+function closeServer() {
+  if (sslServer) {
+    sslServer.close(() => {
+      // console.log('Server closed');
+    });
+  }
+}
 /*
 connectToDatabase();
 sslServer.listen(port, () => console.log('Secure server :) on port ' + port));
@@ -747,7 +755,7 @@ commuters.findMatchingUsers("koltonluu@gmail.com").then(result => {
  * ChatGPT usage: Partial
  */
 async function initRoute(userEmail, date) {
-  console.log('called initRoute()');
+  // console.log('called initRoute()');
   var errorString = '';
 
   var schedule = await client
@@ -789,14 +797,14 @@ async function initRoute(userEmail, date) {
     if (timeOfFirstEvent == '' && errorString == '') {
       errorString = 'No matching date exists in user schedule';
     }
-    console.log('initRoute(): returned timeOfFirstEvent: ' + timeOfFirstEvent);
-    console.log('initRoute(): returned locationOfFirstEvent: ' + locationOfFirstEvent);
-    console.log('initRoute(): returned locationOfOrigin: ' + locationOfOrigin);
+    // console.log('initRoute(): returned timeOfFirstEvent: ' + timeOfFirstEvent);
+    // console.log('initRoute(): returned locationOfFirstEvent: ' + locationOfFirstEvent);
+    // console.log('initRoute(): returned locationOfOrigin: ' + locationOfOrigin);
   }
 
   return new Promise((resolve, reject) => {
     if (errorString != '') {
-      console.log("error in initRoute(): " + errorString)
+      // console.log("error in initRoute(): " + errorString)
       reject(errorString);
     }
 
@@ -807,12 +815,12 @@ async function initRoute(userEmail, date) {
     )
       .then((trip) => {
         if (trip.routes.length === 0) return;
-        console.log(
-          'initRoute(): returned trip: ' +
-            trip +
-            ' ' +
-            trip.routes[0].legs[0].steps[0].travel_mode
-        );
+        // console.log(
+        //   'initRoute(): returned trip: ' +
+        //     trip +
+        //     ' ' +
+        //     trip.routes[0].legs[0].steps[0].travel_mode
+        // );
 
         /* fields for object to be returned to frontend */
         var id = '';
@@ -860,14 +868,14 @@ async function initRoute(userEmail, date) {
           }
 
           more.steps.push(step.html_instructions);
-          console.log(
-            'initRoute(): adding curStep to returnList ' +
-              id +
-              ' | ' +
-              leaveTime +
-              ' | ' +
-              type
-          );
+          // console.log(
+          //   'initRoute(): adding curStep to returnList ' +
+          //     id +
+          //     ' | ' +
+          //     leaveTime +
+          //     ' | ' +
+          //     type
+          // );
           curStep = {
             _id: id,
             _leaveTime: leaveTime,
@@ -902,8 +910,8 @@ async function initRoute(userEmail, date) {
  * ChatGPT usage: Partial
  */
 async function initReminders(req, notificationCallback) {
-  console.log('called initReminders()');
-  console.log('initReminders(): req.body.email: ' + req.body.email);
+  // console.log('called initReminders()');
+  // console.log('initReminders(): req.body.email: ' + req.body.email);
   var returnList = [];
 
   var errorString = '';
@@ -919,16 +927,16 @@ async function initReminders(req, notificationCallback) {
   if (user == null) {
     errorString =
       'No matching email exists in user database';
-    console.log(errorString);
+    // console.log(errorString);
     return {status: 400, message: errorString};
   } else if (schedule == null) {
     errorString =
       'No schedule associated with email';
-    console.log(errorString);
+    // console.log(errorString);
     return {status: 400, message: errorString};
   }
-  console.log('initReminders(): returned schedule: ' + schedule);
-  console.log(schedule.events[0].eventName);
+  // console.log('initReminders(): returned schedule: ' + schedule);
+  // console.log(schedule.events[0].eventName);
 
   /* Get an array that contains the first event of each day */
   var firstEvents = [];
@@ -946,29 +954,29 @@ async function initReminders(req, notificationCallback) {
       date = schedule.events[i].startTime.split('T')[0];
     }
   }
-  console.log('initReminders(): returned firstEvents: ' + firstEvents.length);
+  // console.log('initReminders(): returned firstEvents: ' + firstEvents.length);
   // console.log(firstEvents[1].timeOfFirstEvent);
   var trip = {};
   for (i = 0; i < firstEvents.length; i++) {
-    console.log(
-      'planTrip inputs :' +
-        firstEvents[i].locationOfOrigin +
-        ' ' +
-        firstEvents[i].locationOfFirstEvent +
-        ' ' +
-        firstEvents[i].timeOfFirstEvent
-    );
+    // console.log(
+    //   'planTrip inputs :' +
+    //     firstEvents[i].locationOfOrigin +
+    //     ' ' +
+    //     firstEvents[i].locationOfFirstEvent +
+    //     ' ' +
+    //     firstEvents[i].timeOfFirstEvent
+    // );
     trip = await planTransitTrip(
       firstEvents[i].locationOfOrigin,
       firstEvents[i].locationOfFirstEvent,
       new Date(firstEvents[i].timeOfFirstEvent)
     );
-    console.log(
-      'initReminders(): returned trip: ' +
-        trip +
-        ' ' +
-        trip.routes[0].legs[0].steps[0].travel_mode
-    );
+    // console.log(
+    //   'initReminders(): returned trip: ' +
+    //     trip +
+    //     ' ' +
+    //     trip.routes[0].legs[0].steps[0].travel_mode
+    // );
     /* fields for object to be returned to frontend */
     const reminder = {
       date: 'default',
@@ -1006,7 +1014,7 @@ async function initReminders(req, notificationCallback) {
               step.transit_details.departure_time.text;
             break;
           default:
-            console.log('initReminders(): hit default case');
+            // console.log('initReminders(): hit default case');
             break;
         }
         break;
@@ -1022,7 +1030,7 @@ async function initReminders(req, notificationCallback) {
 
     returnList.push(reminder);
   }
-  console.log('initReminders(): returned returnList: ' + returnList.length);
+  // console.log('initReminders(): returned returnList: ' + returnList.length);
   // for (var i = 0; i < returnList.length; i++) {
   //   console.log("initReminders(): returned returnList: " + returnList[i].date + " " + returnList[i].leaveTime);
   // }
@@ -1089,9 +1097,9 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
     .collection('schedulelist')
     .findOne({ email: userEmail });
   if (schedule_user == null) {
-    console.log(
-      'initRouteWithFriends(): no matching user schedule exists in schedule database'
-    );
+    // console.log(
+    //   'initRouteWithFriends(): no matching user schedule exists in schedule database'
+    // );
     error = true;
     errorMessage =
       'No matching user schedule exists in schedule database';
@@ -1101,9 +1109,9 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
     .collection('schedulelist')
     .findOne({ email: friendEmail });
   if (schedule_friend == null) {
-    console.log(
-      'initRouteWithFriends(): no matching friend schedule exists in schedule database'
-    );
+    // console.log(
+    //   'initRouteWithFriends(): no matching friend schedule exists in schedule database'
+    // );
     error = true;
     errorMessage =
       'No matching friend schedule exists in schedule database';
@@ -1114,9 +1122,9 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
   .collection('userlist')
   .findOne({ email: userEmail });
   if (user == null) {
-    console.log(
-      'initRouteWithFriends(): no matching user email exists in user database'
-    );
+    // console.log(
+    //   'initRouteWithFriends(): no matching user email exists in user database'
+    // );
     error = true;
     errorMessage =
       'No matching user email exists in user database';
@@ -1126,9 +1134,9 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
     .collection('userlist')
     .findOne({ email: friendEmail });
   if (friend == null) {
-    console.log(
-      'initRouteWithFriends(): no matching friend email exists in user database'
-    );
+    // console.log(
+    //   'initRouteWithFriends(): no matching friend email exists in user database'
+    // );
     error = true;
     errorMessage =
       'No matching friend email exists in user database';
@@ -1157,9 +1165,9 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
       }
     }
     if (timeOfFirstEvent_user == '') {
-      console.log(
-        'initRouteWithFriends(): no matching date exists in user schedule'
-      );
+      // console.log(
+      //   'initRouteWithFriends(): no matching date exists in user schedule'
+      // );
       reject(
         'No matching date exists in user schedule'
       );
@@ -1177,9 +1185,9 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
       }
     }
     if (timeOfFirstEvent_friend == '') {
-      console.log(
-        'initRouteWithFriends(): no matching date exists in friend schedule'
-      );
+      // console.log(
+      //   'initRouteWithFriends(): no matching date exists in friend schedule'
+      // );
       reject(
         'No matching date exists in friend schedule'
       );
@@ -1625,4 +1633,4 @@ function compareTimeStrings(timeStr1, timeStr2) {
   return formattedTimeStr1 === formattedTimeStr2;
 }
 
-module.exports = { app, sendNotification, findUserToken };
+module.exports = { app, sendNotification, findUserToken, closeServer };

@@ -144,6 +144,17 @@ describe('Send friend request notifications', () => {
         expect(response.message).toEqual('Null receiver email or sender name');
     });
 
+    // Input: provided email has invalid fcmToken
+    // Expected status code: 400
+    // Expected behavior: notification is not sent and an error message is returned
+    // ChatGPT usage: Yes
+    test('null email or sender name', async () => {
+        const response = await findUserToken(receiverData.email, senderName, mockSendNotification2);
+        expect(mockSendNotification2).toHaveBeenCalled();
+        expect(response.status).toBe(400);
+        expect(response.message).toEqual('Failed to send friend request notification');
+    });
+
     // Input: provided email matches a user in the database
     // Expected status code: 400
     // Expected behavior: a friend request notification is sent to the specified user and a success message is returned

@@ -84,7 +84,7 @@ async function connectToDatabase() {
     // Start the SSL server after successfully connecting to MongoDB
     startSSLServer();
   } catch (error) {
-    console.error('MongoDB Connection Error:', error);
+    // console.error('MongoDB Connection Error:', error);
   }
 }
 

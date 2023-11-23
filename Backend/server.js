@@ -764,12 +764,10 @@ async function initRoute(userEmail, date) {
   if (user == null) {
     errorString =
       'No matching email exists in user database';
-    console.log('initRoute(): ' + errorString);
   } 
   else if (schedule == null) {
     errorString =
       'No matching schedule exists in schedule database';
-    console.log('initRoute() ' + errorString);
   }
 
   // console.log('initRoute(): returned schedule: ' + schedule);
@@ -793,9 +791,6 @@ async function initRoute(userEmail, date) {
     }
     if (timeOfFirstEvent == '' && errorString == '') {
       errorString = 'No matching date exists in user schedule';
-      console.log(
-        'initRoute(): ' + errorString
-      );
     }
     console.log('initRoute(): returned timeOfFirstEvent: ' + timeOfFirstEvent);
     console.log('initRoute(): returned locationOfFirstEvent: ' + locationOfFirstEvent);
@@ -803,9 +798,8 @@ async function initRoute(userEmail, date) {
   }
 
   return new Promise((resolve, reject) => {
-    console.log('initRoute(): WEYUKGVRWEVFLUHWBEFYUWEVFYUEVWEJKFVWEVFHJKV ' + errorString)
     if (errorString != '') {
-      console.log("@@@@@@@@@@");
+      console.log("error in initRoute(): " + errorString)
       reject(errorString);
     }
 

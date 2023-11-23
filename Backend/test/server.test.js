@@ -1,14 +1,10 @@
 const { MongoClient } = require('mongodb');
-/*
-const request = require('supertest');
-const app = require('../server'); // Replace with the actual path to your Express app
-//const user = require('../path/to/your/user');
-*/
+
 const supertest = require('supertest');
-const { app } = require('./server.js'); // Replace with the actual path to your Express app
+const { app } = require('../server'); // Replace with the actual path to your Express app
 const request = supertest(app);
 
-const { findUserToken } = require('./server');
+const { findUserToken } = require('../server');
 const mockSendNotification = jest.fn(() => 1);
 
 beforeAll(async () => {
@@ -378,9 +374,6 @@ describe('Create a route shared between two users', () => {
     });
 }); 
 
-// could also test invalid location
-
-// params email, date
 // Interface GET /api/recommendation/routes/:email/:date
 describe('Create a transit route for a single user', () => {
     const dummy_schedule = {

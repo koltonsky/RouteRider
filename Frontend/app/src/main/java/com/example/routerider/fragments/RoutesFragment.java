@@ -52,6 +52,10 @@ public class RoutesFragment extends Fragment {
     private GoogleSignInAccount account;
     private APICaller apiCall;
 
+    public static String[] friendNames;
+    public static String[] matchingCommuters;
+
+
 
     // YES CHATGPT
     private void displayRoutes(View view, Context context) {
@@ -159,7 +163,7 @@ public class RoutesFragment extends Fragment {
         apiCall = new APICaller();
     }
 
-    private String[] fetchFriendsList() {
+    public String[] fetchFriendsList() {
         apiCall.APICall("api/userlist/" + account.getEmail() + "/friends", "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
             @Override
             public void onResponse(final String responseBody) throws JSONException {
@@ -281,18 +285,18 @@ public class RoutesFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view =  inflater.inflate(R.layout.fragment_routes, container, false);
-        previousDayButton = view.findViewById(R.id.previous_day);
+        previousDayButton = view.findViewById(R.id.previous_day_route);
         previousDayButton.setEnabled(false);
-        Button nextDayButton = view.findViewById(R.id.next_day);
+        Button nextDayButton = view.findViewById(R.id.next_day_route);
         nextDayButton.setEnabled(true);
-        currentDayText = view.findViewById(R.id.current_day_text);
+        currentDayText = view.findViewById(R.id.current_day_text_route);
         currentDayText.setText(dayTextFormatter.format(currentDay));
         transitFriendButton = view.findViewById(R.id.transit_friend_button);
 
         transitFriendButton.setOnClickListener(v -> {
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(requireContext());
             alertDialogBuilder.setTitle("Friend List");
-            String[] friendNames = fetchFriendsList();
+            friendNames = fetchFriendsList();
             alertDialogBuilder.setItems(friendNames, (dialog, which) -> {
                 String selectedFriend = friendNames[which];
                 fetchFriendRoutes(parseEmail(selectedFriend), () -> {

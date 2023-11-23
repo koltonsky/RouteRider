@@ -43,7 +43,7 @@
             android:background="#E9EBF0">
 
             <Button
-                android:id="@+id/previous_day"
+                android:id="@+id/previous_day_route"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -52,7 +52,7 @@
                 />
 
             <TextView
-                android:id="@+id/current_day_text"
+                android:id="@+id/current_day_text_route"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="Day"
@@ -63,7 +63,7 @@
                 android:layout_weight="2.5" />
 
             <Button
-                android:id="@+id/next_day"
+                android:id="@+id/next_day_route"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"

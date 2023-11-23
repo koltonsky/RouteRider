@@ -28,7 +28,7 @@
             android:id="@+id/route_tab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Route"/>
+            android:text="Routes"/>
 
         <com.google.android.material.tabs.TabItem
             android:id="@+id/profile_tab"

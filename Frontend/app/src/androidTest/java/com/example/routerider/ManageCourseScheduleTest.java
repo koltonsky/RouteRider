@@ -162,20 +162,20 @@ public class ManageCourseScheduleTest {
         Espresso.onView(ViewMatchers.withId(R.id.event_start_time))
                 .perform(ViewActions.click());
         Espresso.onView(ViewMatchers.withClassName(Matchers.equalTo(TimePicker.class.getName())))
-                .perform(ViewActions.actionWithAssertions(PickerActions.setTime(17, 0)));
+                .perform(ViewActions.actionWithAssertions(PickerActions.setTime(23, 40)));
         Espresso.onView(ViewMatchers.withText("OK"))
                 .perform(ViewActions.click());
         Espresso.onView(ViewMatchers.withId(R.id.event_start_time))
-                .check(ViewAssertions.matches(ViewMatchers.withText("17:00")));
+                .check(ViewAssertions.matches(ViewMatchers.withText("23:40")));
 
         Espresso.onView(ViewMatchers.withId(R.id.event_end_time))
                 .perform(ViewActions.click());
         Espresso.onView(ViewMatchers.withClassName(Matchers.equalTo(TimePicker.class.getName())))
-                .perform(ViewActions.actionWithAssertions(PickerActions.setTime(19, 0)));
+                .perform(ViewActions.actionWithAssertions(PickerActions.setTime(23, 45)));
         Espresso.onView(ViewMatchers.withText("OK"))
                 .perform(ViewActions.click());
         Espresso.onView(ViewMatchers.withId(R.id.event_end_time))
-                .check(ViewAssertions.matches(ViewMatchers.withText("19:00")));
+                .check(ViewAssertions.matches(ViewMatchers.withText("23:45")));
 
         onView(ViewMatchers.withText("OK")).perform(ViewActions.click());
 
@@ -192,11 +192,11 @@ public class ManageCourseScheduleTest {
 
         ViewInteraction displayStartTime = Espresso.onView(ViewMatchers.withId(R.id.start_time));
         displayStartTime.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-        displayStartTime.check(ViewAssertions.matches(ViewMatchers.withText("16:00")));
+        displayStartTime.check(ViewAssertions.matches(ViewMatchers.withText("22:40")));
 
         ViewInteraction displayEndTime = Espresso.onView(ViewMatchers.withId(R.id.end_time));
         displayEndTime.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-        displayEndTime.check(ViewAssertions.matches(ViewMatchers.withText("18:00")));
+        displayEndTime.check(ViewAssertions.matches(ViewMatchers.withText("22:45")));
     }
 
     // YES CHATGPT
@@ -222,20 +222,20 @@ public class ManageCourseScheduleTest {
         Espresso.onView(ViewMatchers.withId(R.id.event_start_time))
                 .perform(ViewActions.click());
         Espresso.onView(ViewMatchers.withClassName(Matchers.equalTo(TimePicker.class.getName())))
-                .perform(ViewActions.actionWithAssertions(PickerActions.setTime(18, 0)));
+                .perform(ViewActions.actionWithAssertions(PickerActions.setTime(23, 41)));
         Espresso.onView(ViewMatchers.withText("OK"))
                 .perform(ViewActions.click());
         Espresso.onView(ViewMatchers.withId(R.id.event_start_time))
-                .check(ViewAssertions.matches(ViewMatchers.withText("18:00")));
+                .check(ViewAssertions.matches(ViewMatchers.withText("23:41")));
 
         Espresso.onView(ViewMatchers.withId(R.id.event_end_time))
                 .perform(ViewActions.click());
         Espresso.onView(ViewMatchers.withClassName(Matchers.equalTo(TimePicker.class.getName())))
-                .perform(ViewActions.actionWithAssertions(PickerActions.setTime(20, 0)));
+                .perform(ViewActions.actionWithAssertions(PickerActions.setTime(23, 46)));
         Espresso.onView(ViewMatchers.withText("OK"))
                 .perform(ViewActions.click());
         Espresso.onView(ViewMatchers.withId(R.id.event_end_time))
-                .check(ViewAssertions.matches(ViewMatchers.withText("20:00")));
+                .check(ViewAssertions.matches(ViewMatchers.withText("23:46")));
 
         onView(ViewMatchers.withText("OK")).perform(ViewActions.click());
 
@@ -250,11 +250,11 @@ public class ManageCourseScheduleTest {
 
         ViewInteraction displayStartTime = Espresso.onView(ViewMatchers.withId(R.id.start_time));
         displayStartTime.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-        displayStartTime.check(ViewAssertions.matches(ViewMatchers.withText("18:00")));
+        displayStartTime.check(ViewAssertions.matches(ViewMatchers.withText("23:41")));
 
         ViewInteraction displayEndTime = Espresso.onView(ViewMatchers.withId(R.id.end_time));
         displayEndTime.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-        displayEndTime.check(ViewAssertions.matches(ViewMatchers.withText("20:00")));
+        displayEndTime.check(ViewAssertions.matches(ViewMatchers.withText("23:46")));
     }
 
     // YES CHATGPT
@@ -309,20 +309,20 @@ public class ManageCourseScheduleTest {
         Espresso.onView(ViewMatchers.withId(R.id.event_start_time))
                 .perform(ViewActions.click());
         Espresso.onView(ViewMatchers.withClassName(Matchers.equalTo(TimePicker.class.getName())))
-                .perform(ViewActions.actionWithAssertions(PickerActions.setTime(17, 0)));
+                .perform(ViewActions.actionWithAssertions(PickerActions.setTime(23, 50)));
         Espresso.onView(ViewMatchers.withText("OK"))
                 .perform(ViewActions.click());
         Espresso.onView(ViewMatchers.withId(R.id.event_start_time))
-                .check(ViewAssertions.matches(ViewMatchers.withText("17:00")));
+                .check(ViewAssertions.matches(ViewMatchers.withText("23:50")));
 
         Espresso.onView(ViewMatchers.withId(R.id.event_end_time))
                 .perform(ViewActions.click());
         Espresso.onView(ViewMatchers.withClassName(Matchers.equalTo(TimePicker.class.getName())))
-                .perform(ViewActions.actionWithAssertions(PickerActions.setTime(19, 0)));
+                .perform(ViewActions.actionWithAssertions(PickerActions.setTime(23, 52)));
         Espresso.onView(ViewMatchers.withText("OK"))
                 .perform(ViewActions.click());
         Espresso.onView(ViewMatchers.withId(R.id.event_end_time))
-                .check(ViewAssertions.matches(ViewMatchers.withText("19:00")));
+                .check(ViewAssertions.matches(ViewMatchers.withText("23:52")));
 
         onView(ViewMatchers.withText("OK")).perform(ViewActions.click());
 
@@ -339,11 +339,11 @@ public class ManageCourseScheduleTest {
 
         ViewInteraction displayStartTime = Espresso.onView(ViewMatchers.withId(R.id.start_time));
         displayStartTime.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-        displayStartTime.check(ViewAssertions.matches(ViewMatchers.withText("16:00")));
+        displayStartTime.check(ViewAssertions.matches(ViewMatchers.withText("22:50")));
 
         ViewInteraction displayEndTime = Espresso.onView(ViewMatchers.withId(R.id.end_time));
         displayEndTime.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-        displayEndTime.check(ViewAssertions.matches(ViewMatchers.withText("18:00")));
+        displayEndTime.check(ViewAssertions.matches(ViewMatchers.withText("22:52")));
 
         displayEventName.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
         displayEventName.check(ViewAssertions.matches(ViewMatchers.withText("Test Event")));
@@ -366,7 +366,7 @@ public class ManageCourseScheduleTest {
         currentDate.add(Calendar.DAY_OF_MONTH, 1);
 
         int year = currentDate.get(Calendar.YEAR);
-        int monthOfYear = currentDate.get(Calendar.MONTH);
+        int monthOfYear = currentDate.get(Calendar.MONTH) + 1;
         int dayOfMonth = currentDate.get(Calendar.DAY_OF_MONTH);
 
         Espresso.onView(ViewMatchers.withClassName(Matchers.equalTo(DatePicker.class.getName())))
@@ -379,26 +379,26 @@ public class ManageCourseScheduleTest {
         Espresso.onView(ViewMatchers.withId(R.id.event_start_time))
                 .perform(ViewActions.click());
         Espresso.onView(ViewMatchers.withClassName(Matchers.equalTo(TimePicker.class.getName())))
-                .perform(ViewActions.actionWithAssertions(PickerActions.setTime(17, 0)));
+                .perform(ViewActions.actionWithAssertions(PickerActions.setTime(23, 54)));
         Espresso.onView(ViewMatchers.withText("OK"))
                 .perform(ViewActions.click());
         Espresso.onView(ViewMatchers.withId(R.id.event_start_time))
-                .check(ViewAssertions.matches(ViewMatchers.withText("17:00")));
+                .check(ViewAssertions.matches(ViewMatchers.withText("23:54")));
 
         Espresso.onView(ViewMatchers.withId(R.id.event_end_time))
                 .perform(ViewActions.click());
         Espresso.onView(ViewMatchers.withClassName(Matchers.equalTo(TimePicker.class.getName())))
-                .perform(ViewActions.actionWithAssertions(PickerActions.setTime(19, 0)));
+                .perform(ViewActions.actionWithAssertions(PickerActions.setTime(23, 57)));
         Espresso.onView(ViewMatchers.withText("OK"))
                 .perform(ViewActions.click());
         Espresso.onView(ViewMatchers.withId(R.id.event_end_time))
-                .check(ViewAssertions.matches(ViewMatchers.withText("19:00")));
+                .check(ViewAssertions.matches(ViewMatchers.withText("23:57")));
 
         onView(ViewMatchers.withText("OK")).perform(ViewActions.click());
 
         displayEventName.check(ViewAssertions.doesNotExist());
 
-        ViewInteraction nextDay = Espresso.onView(ViewMatchers.withId(R.id.nextDay));
+        ViewInteraction nextDay = Espresso.onView(ViewMatchers.withId(R.id.next_day));
         nextDay.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
     }
 
@@ -439,20 +439,20 @@ public class ManageCourseScheduleTest {
         Espresso.onView(ViewMatchers.withId(R.id.event_start_time))
                 .perform(ViewActions.click());
         Espresso.onView(ViewMatchers.withClassName(Matchers.equalTo(TimePicker.class.getName())))
-                .perform(ViewActions.actionWithAssertions(PickerActions.setTime(17, 0)));
+                .perform(ViewActions.actionWithAssertions(PickerActions.setTime(11, 0)));
         Espresso.onView(ViewMatchers.withText("OK"))
                 .perform(ViewActions.click());
         Espresso.onView(ViewMatchers.withId(R.id.event_start_time))
-                .check(ViewAssertions.matches(ViewMatchers.withText("17:00")));
+                .check(ViewAssertions.matches(ViewMatchers.withText("11:00")));
 
         Espresso.onView(ViewMatchers.withId(R.id.event_end_time))
                 .perform(ViewActions.click());
         Espresso.onView(ViewMatchers.withClassName(Matchers.equalTo(TimePicker.class.getName())))
-                .perform(ViewActions.actionWithAssertions(PickerActions.setTime(16, 0)));
+                .perform(ViewActions.actionWithAssertions(PickerActions.setTime(11, 30)));
         Espresso.onView(ViewMatchers.withText("OK"))
                 .perform(ViewActions.click());
         Espresso.onView(ViewMatchers.withId(R.id.event_end_time))
-                .check(ViewAssertions.matches(ViewMatchers.withText("16:00")));
+                .check(ViewAssertions.matches(ViewMatchers.withText("11:30")));
 
         onView(ViewMatchers.withText("OK")).perform(ViewActions.click());
         onView(ViewMatchers.withText("Cancel")).perform(ViewActions.click());

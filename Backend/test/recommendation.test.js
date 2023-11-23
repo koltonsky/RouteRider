@@ -60,6 +60,12 @@ describe('recommendation function', () => {
 
 // Interface GET https://20.163.28.92:8081/api/recommendation/timegap/:addr1/:addr2
 describe('GET /api/recommendation/timegap/:addr1/:addr2', () => {
+
+    // Input: addr1, addr2
+// Expected status code: 200
+// Expected behavior: Retrieve 6 nearby events
+// Expected output: 6 nearby events
+// ChatGPT usage: Yes
     test('should return a list of suggestions for valid addresses', async () => {
         const addr1 = 'UBC MacMillan, Room 360';
         const addr2 = 'UBC MacLeod, Room 4006';
@@ -71,6 +77,11 @@ describe('GET /api/recommendation/timegap/:addr1/:addr2', () => {
     });
 
     
+        // Input: addr1, addr2 (both invalid)
+// Expected status code: 500
+// Expected behavior: No nearby events displayed
+// Expected output: error{"An error occured"}
+// ChatGPT usage: Yes
   test('should handle errors for invalid addresses', async () => {
     const response = await request.get('/api/recommendation/timegap/Invalid%20Address%201/Invalid%20Address%202');
 
@@ -78,6 +89,11 @@ describe('GET /api/recommendation/timegap/:addr1/:addr2', () => {
     expect(response.body.error).toBe('An error occurred');
   });
 
+          // Input: addr1, addr2 (network error invoked)
+// Expected status code: 500
+// Expected behavior: No nearby events displayed
+// Expected output: error{"An error occured"}
+// ChatGPT usage: Yes
   test('should handle network errors', async () => {
     // Mocking a network error by rejecting the geocode promise
     jest.spyOn(Promise, 'all').mockRejectedValueOnce('Network error');
@@ -88,6 +104,11 @@ describe('GET /api/recommendation/timegap/:addr1/:addr2', () => {
     expect(response.body.error).toBe('An error occurred');
   });
 
+    // Input: addr1, addr2 (Google Maps API error invoked)
+// Expected status code: 500
+// Expected behavior: No nearby events displayed
+// Expected output: error{"Address not found"}
+// ChatGPT usage: Yes
   test('should handle Google Maps API errors', async () => {
     // Mocking an API error by setting response status to NOT_FOUND
     jest.spyOn(Promise, 'all').mockResolvedValueOnce([

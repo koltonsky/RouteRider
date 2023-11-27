@@ -23,8 +23,39 @@ const recommendation = require('./recommendation.js');
 const admin = require('firebase-admin');
 
 // Retrieve the private key from the environment variable
-const privateKey = process.env.PRIVATE_KEY;
+//const privateKey = process.env.PRIVATE_KEY;
 const serviceAccountType = process.env.SERVICE_ACCOUNT_TYPE;
+
+const privateKeyPart1 = "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDWxaIVXYR7Tb4Z";
+const privateKeyPart2 = "ASAdm0+qupaOq1rRNReRDLSdOgexVMgsef2wGis74oI/Vtneg/iIqxPrAVbKwHTp";
+const privateKeyPart3 = "WSMntGoZUV2aRPOiAgBlHu5cXN0Ql0++r5nhAImRgsKxnsbIJZaX9L1huU8xzAlA";
+const privateKeyPart4 = "2LZCoHkSacLmFsVzfTzU0mOKBBc/AzqH99ucTNiQljEsaatRUdnGg6z7B91O7d/V";
+const privateKeyPart5 = "3K6E/RefXicJ1lfntWVYxc5tmkPArM56Sqq/DesaLlIEodt8HRBbXemmXz9PXpQz";
+const privateKeyPart6 = "4fmth95XzD1mBXwI+YZ8ffaedMN6FOjkSvWrhvtdHeO13vwlBA1GC7xDykCEuoY7";
+const privateKeyPart7 = "V7vfWoOFAgMBAAECggEASQfJFrTHENqdsoj0b7zZOTfbbEYOSqdgDR2h6PjLltw6";
+const privateKeyPart8 = "eQ0+W3x6iRF7sqgIy6Zag7aQvk+lQKpy1spNrvmlPlixmHyrz8IYekorSVL2hOa+";
+const privateKeyPart9 = "4ht6Gs2A+e7Z32YbOAG4FJHPOAS4TjmQR/GpADzrDnzSHkVN/PhwD/o+iLbdZLpH";
+const privateKeyPart10 = "trprP0vcQSIY45SkDXj7Z7eBU3pH6I9r4uCwIAP8WUmP2wKswFLtC/ceDm6Va/pZ";
+const privateKeyPart11 = "dDZWKTxQiz5RpM6kuIRwMkjCQorFzPaLAoZtjCtbysnipPXAB9zNtL3jrT5TVrMA";
+const privateKeyPart12 = "/bqdEFSuPvs6OaclfPn3Ih56wGJdCSLjwxcZpdAVPQKBgQD0weCGaWtIWg/E/142";
+const privateKeyPart13 = "mj9OpWQmgNS1v9uWudkDrP2/S86urvVJt0v3lrFNeOTFzMsdoxFFNzkRGg+db33n";
+const privateKeyPart14 = "pg1RJKU81oBMh+s6Fnxg7Q1Wt+/7QBqjiznKVNU1fCo5CM0223viojE+PJfl2Spn";
+const privateKeyPart15 = "CFS1woDUZ/WYm+SIAKf+UWd7NwKBgQDgoyfuvp1JWKxsUUgpC5vg5hzWM3yrnx2h";
+const privateKeyPart16 = "UaGwpfq5DGVmrjoHevswolaOj/SvymoIEhms2abbowPTaejU3Sizf+i4oRTspdWG";
+const privateKeyPart17 = "YCVedQp9/wblK3A3WSytJVrXUJvjkAc+DDa3p1Zr4ScUQ6QbkofM6mUi2U1W2P7V";
+const privateKeyPart18 = "HZQgnNQtIwKBgQCB23dXeQj9iyMAvwhqae4auO9o6kNw5okH8DSumZLLctoGnjbv";
+const privateKeyPart19 = "1HtOsjoBw5mFRIGjiMf59DGn3C7atbOUOuqn2Yx9ucS6Vga8e/+joUHJd6+wmzNG";
+const privateKeyPart20 = "//A6ZEX2qZjxR7UxXMPe23TK83UX8t9naOkgwkB98WZBgLyAV/DJosEHgwKBgQDN";
+const privateKeyPart21 = "zy3q4uEgLgnrQ50lXel2591LsuhqJOH0xuGpAqjvmZfdt4qbB+XT7Sf4fZPk60Ky";
+const privateKeyPart22 = "GkNDxjXFzVjX/ZTAUc/UhUAmyA5vspArCTOzkvAF9/3NQTsSurTf/fV4h/YLTA4W";
+const privateKeyPart23 = "nwISyVG4jRRM0JwuVtXsvGPkxcrB4xW3E95+8rDCmQKBgARMkmxwl3Q9InjAPONr";
+const privateKeyPart24 = "CtLaYdjeZdRtKQOic4092lRdtAIrZvZ7SHlaFUp8LULFY6BzxzdjydMa2BiPb9mA";
+const privateKeyPart25 = "mXHQVdvGv5x30soQ3EtQocPkj7xyY4glrG7hSKYHPtFpHlkakQWBrvCjeYJb0g+E";
+const privateKeyPart26 = "+EsDxo7zRKeT+9mNDQYTSX7S\n-----END PRIVATE KEY-----\n";
+
+const privateKey = `${privateKeyPart1}\n${privateKeyPart2}\n${privateKeyPart3}\n${privateKeyPart4}\n${privateKeyPart5}\n${privateKeyPart6}\n${privateKeyPart7}\n${privateKeyPart8}\n${privateKeyPart9}\n${privateKeyPart10}\n${privateKeyPart11}\n${privateKeyPart12}\n${privateKeyPart13}\n${privateKeyPart14}\n${privateKeyPart15}\n${privateKeyPart16}\n${privateKeyPart17}\n${privateKeyPart18}\n${privateKeyPart19}\n${privateKeyPart20}\n${privateKeyPart21}\n${privateKeyPart22}\n${privateKeyPart23}\n${privateKeyPart24}\n${privateKeyPart25}\n${privateKeyPart26}`;
+
+console.log(privateKey);
 
 // Create the serviceAccount object
 const serviceAccount =

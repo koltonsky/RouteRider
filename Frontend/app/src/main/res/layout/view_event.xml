@@ -17,6 +17,14 @@
         app:layout_constraintTop_toTopOf="parent"
         app:cardBackgroundColor="#C3CEF0"
         app:cardCornerRadius="10dp">
+
+        <ImageButton
+            android:id="@+id/deleteButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@null"
+            android:layout_gravity="right"
+            android:src="@drawable/baseline_close_24"/>
         <LinearLayout
             android:padding="10dp"
             android:layout_width="match_parent"
@@ -49,8 +57,7 @@
         android:orientation="horizontal"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        >
+        android:layout_marginBottom="8dp">
         <TextView
             android:id="@+id/start_time"
             android:layout_width="wrap_content"

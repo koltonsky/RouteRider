@@ -875,6 +875,8 @@ async function initRoute(userEmail, date) {
 
         /* Directions API doesn't include leaveTime in "WALKING" steps, so we need to calculate ourselves */
         returnList = calcWalkingTimes(returnList);
+        
+        returnList.push({_destination: locationOfFirstEvent});
         resolve(returnList);
       })
       .catch((error) => {
@@ -1318,6 +1320,8 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
 
             /* Directions API doesn't include leaveTime in "WALKING" steps, so we need to calculate ourselves */
             returnList = calcWalkingTimes(returnList);
+
+            returnList.push({_destination: locationOfFirstEvent});
             resolve(returnList);
             
             // returnList.forEach((element) => {

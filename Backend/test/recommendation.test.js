@@ -1,6 +1,6 @@
-const recommendation = require('../recommendation');
+//const recommendation = require('../recommendation');
 const supertest = require('supertest');
-const { app, closeServer } = require('../server'); // Replace with the actual path to your Express app
+const { app } = require('../server'); // Replace with the actual path to your Express app
 const request = supertest(app);
 // Mocking the Google Maps API responses
 /*

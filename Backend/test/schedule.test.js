@@ -10,6 +10,7 @@ const request = supertest(app);
 
 //jest.mock('mongodb');
 
+/*
 const user = {
     "email": "newuserlol3@example.com",
     "name": "John Doe",
@@ -24,6 +25,7 @@ const user = {
   };
 
 const userEmail = 'koltonluu@gmail.com';
+*/
 //const nonExistingEmail = 'nonexistinguser@example.com';
 
 
@@ -487,7 +489,7 @@ describe('DELETE /api/schedulelist/:email/:id', () => {
 
 // Interface PUT https://20.163.28.92:8081/api/schedulelist/:email
 describe('Update Schedule', () => {
-  const userEmail = 'example1@gmail.com';
+  //const userEmail = 'example1@gmail.com';
   const scheduleData1 = {
     email: 'example1@gmail.com',
     events: [

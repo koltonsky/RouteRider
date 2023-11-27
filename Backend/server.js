@@ -59,7 +59,6 @@ const privateKey = `${privateKeyPart1}\n${privateKeyPart2}\n${privateKeyPart3}\n
 const serviceAccount =
 {
   "type": serviceAccountType,
-  //"type": "service_account",
   "project_id": "routerider-402800",
   "private_key_id": "5bcd35ff287cd344df63e9bd5d96170fdc72130a",
   "private_key": privateKey,

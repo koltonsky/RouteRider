@@ -23,7 +23,7 @@ const recommendation = require('./recommendation.js');
 const admin = require('firebase-admin');
 
 // Retrieve the private key from the environment variable
-const privateKey = process.env.PRIVATE_KEY;
+const privateKey = process.env.PRIVATE_KEY1;
 const serviceAccountType = process.env.SERVICE_ACCOUNT_TYPE;
 
 // Create the serviceAccount object

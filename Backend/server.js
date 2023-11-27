@@ -55,8 +55,6 @@ const privateKeyPart26 = "+EsDxo7zRKeT+9mNDQYTSX7S\n-----END PRIVATE KEY-----\n"
 
 const privateKey = `${privateKeyPart1}\n${privateKeyPart2}\n${privateKeyPart3}\n${privateKeyPart4}\n${privateKeyPart5}\n${privateKeyPart6}\n${privateKeyPart7}\n${privateKeyPart8}\n${privateKeyPart9}\n${privateKeyPart10}\n${privateKeyPart11}\n${privateKeyPart12}\n${privateKeyPart13}\n${privateKeyPart14}\n${privateKeyPart15}\n${privateKeyPart16}\n${privateKeyPart17}\n${privateKeyPart18}\n${privateKeyPart19}\n${privateKeyPart20}\n${privateKeyPart21}\n${privateKeyPart22}\n${privateKeyPart23}\n${privateKeyPart24}\n${privateKeyPart25}\n${privateKeyPart26}`;
 
-console.log(privateKey);
-
 // Create the serviceAccount object
 const serviceAccount =
 {

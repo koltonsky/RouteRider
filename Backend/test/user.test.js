@@ -57,8 +57,12 @@ const nonExistingEmail = 'nonexistinguser@example.com';
   
   afterAll(async () => {
     // Close MongoDB connection after all tests
+    console.log("CLOSING CONNECTION!");
+    //console.log(client);
     if (client) {
+      console.log(client);
       await client.close(true);
+      console.log(client);
     }
     closeServer();
   });

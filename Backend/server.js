@@ -596,11 +596,18 @@ connectToDatabase();
 
 function closeServer() {
   if (sslServer) {
-    sslServer.close(() => {
-      // console.log('Server closed');
+    console.log("CLOSING SERVER");
+
+    sslServer.close((err) => {
+      if (err) {
+        console.error('Error closing server:', err);
+      } else {
+        console.log('Server closed');
+      }
     });
   }
 }
+
 /*
 connectToDatabase();
 sslServer.listen(port, () => console.log('Secure server :) on port ' + port));

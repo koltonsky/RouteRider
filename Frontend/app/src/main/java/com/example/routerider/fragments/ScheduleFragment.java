@@ -68,7 +68,7 @@ import java.util.Objects;
 
 public class ScheduleFragment extends Fragment {
     public static List<ScheduleItem> eventList;
-    private Date currentDay;
+    private static Date currentDay;
     private TextView currentDayText;
     private DateFormat formatter;
     private Button previousDayButton;
@@ -84,7 +84,12 @@ public class ScheduleFragment extends Fragment {
         Button nextDayButton = view.findViewById(R.id.nextDay);
         nextDayButton.setEnabled(true);
         Date today = new Date();
-        updateDisplay(today);
+        if(currentDay != null) {
+            updateDisplay(currentDay);
+        } else {
+            updateDisplay(today);
+        }
+
     }
 
     @Override
@@ -394,6 +399,7 @@ public class ScheduleFragment extends Fragment {
                                 item.getId(),
                                 item.getCalendarId());
 
+                        new UpdateEventTask(calendarService, newEvent).execute();
                         String jsonUpdateEvent = new Gson().toJson(newEvent);
                         apiCall.APICall("api/schedulelist/" + account.getEmail() + "/" + item.getId(), "", APICaller.HttpMethod.DELETE, new APICaller.ApiCallback() {
                             @Override
@@ -426,7 +432,8 @@ public class ScheduleFragment extends Fragment {
                             }
                         });
 
-                        new UpdateEventTask(calendarService, newEvent).execute();
+
+                        new CalendarAsyncTask(account).execute(calendarService);
 
                         dialog.dismiss();
                     } else {
@@ -438,38 +445,12 @@ public class ScheduleFragment extends Fragment {
             });
 
             LinearLayout finalEventListView = eventListView;
+
+            ImageButton deleteButton = view.findViewById(R.id.deleteButton);
+            deleteButton.setOnClickListener(v -> showDeleteConfirmationDialog(view, item, finalEventListView));
+
             view.setOnLongClickListener(v -> {
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(view.getContext());
-                alertDialogBuilder.setTitle("Delete Event");
-                alertDialogBuilder.setMessage("Are you sure you want to delete this event?");
-
-                alertDialogBuilder.setPositiveButton("OK", null);
-
-                alertDialogBuilder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
-
-                final AlertDialog dialog = alertDialogBuilder.create();
-                dialog.setOnShowListener(dialogInterface -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view1 -> {
-                    APICaller apiCall = new APICaller();
-
-                    apiCall.APICall("api/schedulelist/" + account.getEmail() + "/" + item.getId(), "", APICaller.HttpMethod.DELETE, new APICaller.ApiCallback() {
-                        @Override
-                        public void onResponse(String responseBody) {
-                            System.out.println("BODY: " + responseBody);
-
-                        }
-
-                        @Override
-                        public void onError(String errorMessage) {
-                            System.out.println("Error " + errorMessage);
-                        }
-                    });
-                    finalEventListView.removeView(view);
-                    new DeleteEventTask(calendarService, item, activity.getApplicationContext()).execute();
-                    dialog.dismiss();
-                }));
-
-                dialog.show();
-
+                showDeleteConfirmationDialog(view, item, finalEventListView);
                 return true;
             });
 
@@ -635,6 +616,38 @@ public class ScheduleFragment extends Fragment {
 
         // Show the TimePickerDialog
         timePickerDialog.show();
+    }
+
+    private static void showDeleteConfirmationDialog(View view, ScheduleItem item, LinearLayout finalEventListView) {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(view.getContext());
+        alertDialogBuilder.setTitle("Delete Event");
+        alertDialogBuilder.setMessage("Are you sure you want to delete this event?");
+
+        alertDialogBuilder.setPositiveButton("OK", null);
+
+        alertDialogBuilder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+
+        final AlertDialog dialog = alertDialogBuilder.create();
+        dialog.setOnShowListener(dialogInterface -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view1 -> {
+            new DeleteEventTask(calendarService, item, activity.getApplicationContext()).execute();
+            APICaller apiCall = new APICaller();
+            apiCall.APICall("api/schedulelist/" + account.getEmail() + "/" + item.getId(), "", APICaller.HttpMethod.DELETE, new APICaller.ApiCallback() {
+                @Override
+                public void onResponse(String responseBody) {
+                    System.out.println("BODY: " + responseBody);
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    System.out.println("Error " + errorMessage);
+                }
+            });
+            finalEventListView.removeView(view);
+            new CalendarAsyncTask(account).execute(calendarService);
+            dialog.dismiss();
+        }));
+
+        dialog.show();
     }
 
 

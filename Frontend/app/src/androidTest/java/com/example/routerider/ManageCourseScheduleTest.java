@@ -400,6 +400,9 @@ public class ManageCourseScheduleTest {
 
         ViewInteraction nextDay = Espresso.onView(ViewMatchers.withId(R.id.nextDay));
         nextDay.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+        nextDay.perform(click());
+
+        displayEventName.check(ViewAssertions.matches(ViewMatchers.withText("Test Edit Event")));
     }
 
     // YES CHATGPT

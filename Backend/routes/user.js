@@ -364,8 +364,8 @@ const getFriendListWithNames = async (req, res) => {
       
   
       if (!friend) {
-        console.error(`Friend with email ${friendEmail} not found in the userlist.`);
-        return res.status(222).json({ error: 'Friend not found in the userlist' });
+        console.log(`Friend with email ${friendEmail} not found in the userlist.`);
+        return res.status(222).json({ message: 'Friend not found in the userlist' });
       }
   
       /*

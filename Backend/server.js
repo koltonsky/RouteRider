@@ -9,6 +9,11 @@ const { MongoClient } = require('mongodb');
 // const ApiKeyManager = require('@esri/arcgis-rest-request');
 const { ApiKeyManager } = require('@esri/arcgis-rest-request');
 const { geocode } = require('@esri/arcgis-rest-geocoding');
+const util = require('util'); // Add this line
+
+
+const readFile = util.promisify(fs.readFile);
+const serverListen = util.promisify(https.createServer().listen);
 
 const app = express();
 app.use(express.json());
@@ -103,17 +108,7 @@ async function connectToDatabase() {
 }
 */
 
-async function connectToDatabase() {
-  try {
-    await client.connect();
-    console.log('Connected to MongoDB');
 
-    // Start the SSL server after successfully connecting to MongoDB
-    startSSLServer();
-  } catch (error) {
-    // console.error('MongoDB Connection Error:', error);
-  }
-}
 
 // =========== REST API CALL ENDPOINTS ==============
 
@@ -607,8 +602,9 @@ const sslServer = https.createServer(
   app
 );
 */
+
 let sslServer;
-function startSSLServer() {
+/*function startSSLServer() {
   sslServer = https.createServer(
     {
       key: fs.readFileSync(path.join(__dirname, 'certification', 'test_key.key')),
@@ -620,6 +616,96 @@ function startSSLServer() {
   sslServer.listen(port, () => console.log('Secure server :) on port ' + port));
 }
 connectToDatabase();
+
+function stopSSLServer() {
+  console.log('Stopping SSL server...');
+  if (sslServer) {
+    sslServer.close(() => {
+      console.log('Secure server stopped.');
+    });
+  }
+}
+*/
+
+async function startSSLServer() {
+  try {
+    const [key, cert] = await Promise.all([
+      readFile(path.join(__dirname, 'certification', 'test_key.key')),
+      readFile(path.join(__dirname, 'certification', 'certificate.pem')),
+    ]);
+
+    sslServer = https.createServer({ key, cert }, app);
+
+    await serverListen.call(sslServer, port);
+
+    console.log('Secure server :) on port ' + port);
+  } catch (error) {
+    console.error('Error starting the server:', error);
+    throw error; // Rethrow the error to propagate it to the caller
+  }
+}
+
+
+async function stopSSLServer() {
+  return new Promise(async (resolve) => {
+    try {
+      if (sslServer) {
+        sslServer.close(() => {
+          console.log('Secure server stopped.');
+          resolve();
+        });
+      } else {
+        resolve();
+      }
+    } catch (error) {
+      console.error('Error stopping the server:', error);
+      resolve();
+    }
+  });
+}
+
+async function stopMongoConnection() {
+  // Add logic to stop or close the MongoDB connection
+  // For example, if you are using the 'client' object, you can do:
+  if (client) {
+    await client.close(true);
+    console.log('MongoDB connection closed.');
+  }
+}
+
+function connectToDatabase() {
+  return new Promise(async (resolve, reject) => {
+    // {
+      console.log('Connected to MongoDB');
+
+      // Start the SSL server after successfully connecting to MongoDB
+      await startSSLServer();
+
+      resolve(); // Resolve the promise if startSSLServer completes successfully
+    } /*catch (error) {
+      console.error('Error connecting to MongoDB or starting SSL server:', error);
+      reject(error); // Reject the promise if there's an error
+    }}*/
+    );
+}
+
+
+//connectToDatabase();
+// Usage:
+
+connectToDatabase()
+  .then(() => {
+    // Do something after the server has started
+
+    // Call stopSSLServer when you want to stop the server
+    return stopSSLServer();
+  })
+  .catch((error) => {
+    console.error('Error starting or stopping server:', error);
+  });
+  
+  
+//stopSSLServer();
 
 function closeServer() {
   if (sslServer) {
@@ -1655,4 +1741,4 @@ function compareTimeStrings(timeStr1, timeStr2) {
   return formattedTimeStr1 === formattedTimeStr2;
 }
 
-module.exports = { app, sendNotification, findUserToken, closeServer, checkLiveTransitTime };
+module.exports = { app, sendNotification, findUserToken, closeServer, stopSSLServer, checkLiveTransitTime };

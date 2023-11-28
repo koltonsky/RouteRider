@@ -1,7 +1,7 @@
 const { MongoClient } = require('mongodb');
 
 const supertest = require('supertest');
-const { app, closeServer } = require('../server'); // Replace with the actual path to your Express app
+const { app, stopSSLServer } = require('../server'); // Replace with the actual path to your Express app
 const request = supertest(app);
 
 const { findUserToken, checkLiveTransitTime } = require('../server');
@@ -25,7 +25,8 @@ afterAll(async () => {
     if (client) {
         await client.close();
     }
-    closeServer();
+    //closeServer();
+    stopSSLServer();
 });
   
 beforeEach(() => {
@@ -36,7 +37,7 @@ beforeEach(() => {
 // Interface POST https://20.163.28.92:8081/api/store_token
 describe('Create/update firebasetokens for mobile notifications', () => {
     const userData = {
-        email: 'user@example.com',
+        email: 'userserver@example.com',
         token: '1234567890'
     };
   
@@ -58,7 +59,7 @@ describe('Create/update firebasetokens for mobile notifications', () => {
     // ChatGPT usage: Yes
     test('Matching email and valid token', async () => {
         const response = await request.post('/api/store_token').send({
-            email: 'user@example.com', 
+            email: 'userserver@example.com', 
             token: '54321'
         });
         expect(response.statusCode).toBe(200);

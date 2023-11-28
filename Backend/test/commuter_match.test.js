@@ -6,7 +6,7 @@ const app = require('../server'); // Replace with the actual path to your Expres
 */
 const supertest = require('supertest');
 const match = require('../commuter_match')
-const { app, closeServer } = require('../server'); // Replace with the actual path to your Express app
+const { app, stopSSLServer } = require('../server'); // Replace with the actual path to your Express app
 const request = supertest(app);
 
 beforeAll(async () => {
@@ -26,7 +26,8 @@ beforeAll(async () => {
     if (client) {
       await client.close();
     }
-    closeServer();
+    //closeServer();
+    stopSSLServer();
   });
   
   beforeEach(() => {

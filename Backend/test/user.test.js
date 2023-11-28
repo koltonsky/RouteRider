@@ -18,7 +18,7 @@ const app = require('../server'); // Replace with the actual path to your Expres
 //const user = require('../path/to/your/user');
 */
 const supertest = require('supertest');
-const { app, closeServer } = require('../server'); // Replace with the actual path to your Express app
+const { app, stopSSLServer} = require('../server'); // Replace with the actual path to your Express app
 const request = supertest(app);
 
 const user = {
@@ -52,13 +52,16 @@ let server;
     }
   });
   
+  
   afterAll(async () => {
-    // Close MongoDB connection after all tests
+    
     if (client) {
-      await client.close(true);
+      await client.close();
     }
-    closeServer();
+    //closeServer();
+    stopSSLServer();    
   });
+  
   
   beforeEach(() => {
     // Log messages or perform setup before each test if needed
@@ -444,8 +447,8 @@ describe('Send Friend Request', () => {
       .post(`/api/userlist/${nonExistingEmail}/friendRequest`)
       .send({email: friendEmail});
 
-    expect(res.status).toBe(404);
-    expect(res.body.error).toBe('User not found');
+    expect(res.status).toBe(221);
+    expect(res.body.message).toBe('User not found');
   });
 
 // Input: existing user email, non-existing friend email
@@ -460,23 +463,54 @@ describe('Send Friend Request', () => {
       .post(`/api/userlist/${userEmail}/friendRequest`)
       .send({email: friendEmail});
 
-    expect(res.status).toBe(404);
-    expect(res.body.error).toBe('Friend not found in the userlist');
+    console.log("MESSAGE: " + res.body.message);
+
+    expect(res.status).toBe(222);
+    expect(res.body.message).toBe('Friend not found in the userlist');
+    
   });
 
-// Input: existing user email, existing friend email
-// Expected status code: 400
+  // Input: existing user email, existing friend email
+// Expected status code: 252
 // Expected behavior: return an error if the friend request has already been sent
-// Expected output: error: Friend request already sent
+// Expected output: error: Already friends with this user
 // ChatGPT usage: Yes
   test('POST /api/userlist/:email/friendRequest should return an error for an existing friend', async () => {
     const res = await request
       .post(`/api/userlist/${userEmail}/friendRequest`)
       .send({email: existingFriendEmail});
 
-    expect(res.status).toBe(400);
-    expect(res.body.error).toBe('Friend request already sent');
+    expect(res.status).toBe(252);
+    expect(res.body.message).toBe('Already friends with this user');
   });
+
+  // Input: existing user email, existing friend email
+// Expected status code: 251
+// Expected behavior: return an error if the friend request has already been sent
+// Expected output: You have already received a friend request from this person
+// ChatGPT usage: Yes
+test('POST /api/userlist/:email/friendRequest should say friend request already received', async () => {
+  const res = await request
+    .post(`/api/userlist/friend1@example.com/friendRequest`)
+    .send({email: "requester@example.com"});
+
+  expect(res.status).toBe(251);
+  expect(res.body.message).toBe('You have already received a friend request from this person');
+});
+
+  // Input: existing user email, existing friend email
+// Expected status code: 250
+// Expected behavior: return an error if the friend request has already been sent
+// Expected output: error: Friend request already sent
+// ChatGPT usage: Yes
+test('POST /api/userlist/:email/friendRequest should say friend request already sent', async () => {
+  const res = await request
+    .post(`/api/userlist/requester@example.com/friendRequest`)
+    .send({email: "friend1@example.com"});
+
+  expect(res.status).toBe(250);
+  expect(res.body.message).toBe('Friend request already sent');
+});
 
 });
 

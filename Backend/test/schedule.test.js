@@ -5,7 +5,7 @@ const app = require('../server'); // Replace with the actual path to your Expres
 //const user = require('../path/to/your/user');
 */
 const supertest = require('supertest');
-const { app, closeServer } = require('../server'); // Replace with the actual path to your Express app
+const { app } = require('../server'); // Replace with the actual path to your Express app
 const request = supertest(app);
 
 //jest.mock('mongodb');
@@ -46,7 +46,8 @@ const userEmail = 'koltonluu@gmail.com';
     if (client) {
       await client.close();
     }
-    closeServer();
+    //closeServer();
+    //stopSSLServer();
   });
   
   beforeEach(() => {
@@ -114,7 +115,7 @@ const userEmail = 'koltonluu@gmail.com';
 describe('GET /api/schedulelist/:email', () => {
     // Mock schedule data for testing
     const scheduleData = {
-      email: 'test@example.com',
+      email: 'testschedule@example.com',
       // ... other schedule properties
     };
   
@@ -253,7 +254,7 @@ describe('GET /api/schedulelist/:email', () => {
   describe('POST /api/schedulelist/:email', () => {
     // Mock user data for testing
     const scheduleData = {
-      email: 'test@example.com',
+      email: 'testschedule@example.com',
       events: [],
       // ... other user properties
     };

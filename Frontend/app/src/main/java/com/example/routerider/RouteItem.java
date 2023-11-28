@@ -6,11 +6,13 @@ import java.util.List;
 public class RouteItem {
     private List<TransitItem> transitItems;
     private List<String> steps;
+    private String destination;
 
 
-    public RouteItem(List<TransitItem> transitItems, List<String> steps){
+    public RouteItem(List<TransitItem> transitItems, List<String> steps, String destination){
         this.transitItems = transitItems;
         this.steps = steps;
+        this.destination = destination;
     }
 
     public String getLeaveBy() {
@@ -24,5 +26,7 @@ public class RouteItem {
     public List<String> getSteps() {
         return steps;
     }
+
+    public String getDestination() { return destination; }
 }
 

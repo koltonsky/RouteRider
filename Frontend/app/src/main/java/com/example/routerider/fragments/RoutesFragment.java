@@ -4,10 +4,13 @@ import static com.example.routerider.HomeActivity.fetchRoutes;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Looper;
 import android.transition.AutoTransition;
 import android.transition.TransitionManager;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +38,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @FunctionalInterface
 interface FetchFriendRoutesCallback {
@@ -58,7 +63,7 @@ public class RoutesFragment extends Fragment {
 
 
     // YES CHATGPT
-    private void displayRoutes(View view, Context context) {
+    private void displayRoutes(View view, Context context, String friendIndicator) {
         LayoutInflater inflater = LayoutInflater.from(context);
         routesView = view.findViewById(R.id.routes_view);
         transitFriendButton = view.findViewById(R.id.transit_friend_button);
@@ -94,6 +99,13 @@ public class RoutesFragment extends Fragment {
             TextView leaveByTimeText = singleRouteView.findViewById(R.id.leave_by_time);
             leaveByTimeText.setText("Leave by " + item.getLeaveBy());
 
+            ImageButton recMapsButton = singleRouteView.findViewById(R.id.maps_button);
+            recMapsButton.setOnClickListener(v2 -> {
+                Intent intent = new Intent(Intent.ACTION_VIEW,
+                        Uri.parse("google.navigation:q=" + item.getDestination()));
+                view.getContext().startActivity(intent);
+            });
+
             LinearLayout transitIdsView = singleRouteView.findViewById(R.id.transit_ids);
             for (TransitItem transitItem: item.getTransitItems()){
                 View transitChipView;
@@ -109,22 +121,88 @@ public class RoutesFragment extends Fragment {
                     transitChipView  = inflater.inflate(R.layout.walk_chip, transitIdsView, false);
                 }
                 transitIdsView.addView(transitChipView);
+                if (item.getTransitItems().indexOf(transitItem) != item.getTransitItems().size() - 1){
+                    TextView bulletTextView = new TextView(getContext());
+                    bulletTextView.setText(" • ");
+                    bulletTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24);
+                    transitIdsView.addView(bulletTextView);
+                }
             }
             for (String step: item.getSteps()) {
                 int index = item.getSteps().indexOf(step) + 1;
                 TextView stepText = new TextView(context);
-                stepText.setText(index + ". " + step);
+                stepText.setText(index + ". " + step + " ↗");
                 int paddingInDp = 8;
                 int leftPaddingDp = 16;
                 float scale = context.getResources().getDisplayMetrics().density;
                 int paddingInPx = (int) (paddingInDp * scale + 0.5f);
                 int leftPaddingPx = (int) (leftPaddingDp * scale + 0.5f);
                 stepText.setPadding(leftPaddingPx, paddingInPx, paddingInPx, paddingInPx);
+                stepText.setOnClickListener(v -> {
+                    Uri gmmIntentUri = Uri.parse("geo:0,0?q=" + extractLocation(step));
+                    Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+                    mapIntent.setPackage("com.google.android.apps.maps");
+                    view.getContext().startActivity(mapIntent);
+                }
+                );
                 hiddenView.addView(stepText);
 
             }
             routesView.addView(singleRouteView);
+            Button transitFriendButton = singleRouteView.findViewById(R.id.friend_button);
+            transitFriendButton.setOnClickListener(v -> {
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(requireContext());
+                alertDialogBuilder.setTitle("Friend List");
+                friendNames = fetchFriendsList();
+                alertDialogBuilder.setItems(friendNames, (dialog, which) -> {
+                    String selectedFriend = friendNames[which];
+                    fetchFriendRoutes("", parseEmail(selectedFriend), () -> {
+                        routesView = view.findViewById(R.id.routes_view);
+                        routesView.removeAllViewsInLayout();
+                        displayRoutes(view, getContext(), "With " + selectedFriend);
+                    });
+                });
+
+                alertDialogBuilder.setPositiveButton("Find matching commuters", (dialog, which) -> {
+                    // Add logic to handle the button click
+                    // You can perform any actions you need when the button is clicked
+                    // For example, start the process of finding matching commuters
+                    System.out.println("MATCHING COMMUTERS");
+                });
+
+                // Create and show the AlertDialog
+                AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.show();
+
+            });
+            if (!friendIndicator.equals("")) {
+                TextView friendText = singleRouteView.findViewById(R.id.friend_indicator);
+                friendText.setText(friendIndicator);
+                friendText.setVisibility(View.VISIBLE);
+                transitFriendButton.setVisibility(View.GONE);
+            }
         }
+    }
+
+    public static String extractLocation(String direction) {
+        // Define the pattern for the location information
+        Pattern pattern = Pattern.compile("Walk to (.+)|Bus towards (.+)|Subway towards (.+)|(.+)");
+
+        // Match the pattern against the input direction
+        Matcher matcher = pattern.matcher(direction);
+
+        // Find the location information
+        if (matcher.find()) {
+            // Choose the group that has a non-null match (non-empty location)
+            for (int i = 1; i <= matcher.groupCount(); i++) {
+                if (matcher.group(i) != null) {
+                    return matcher.group(i).trim();
+                }
+            }
+        }
+
+        // Return null if no location information is found
+        return null;
     }
 
     public FetchRoutesCallback createFetchRoutesCallback(View view) {
@@ -136,7 +214,7 @@ public class RoutesFragment extends Fragment {
                     dayRoutes.add(routeItem);
                     routesView = view.findViewById(R.id.routes_view);
                     routesView.removeAllViewsInLayout();
-                    displayRoutes(view, getContext());
+                    displayRoutes(view, getContext(),"");
                 });
             }
 
@@ -218,9 +296,13 @@ public class RoutesFragment extends Fragment {
         return friendArray.toArray(new String[friendArray.size()]);
     }
 
-    private void fetchFriendRoutes(String email, FetchFriendRoutesCallback callback) {
+    private void fetchFriendRoutes(String date, String email, FetchFriendRoutesCallback callback) {
         DateFormat apiDateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-        apiCall.APICall("api/recommendation/routesWithFriends/" + account.getEmail() + "/" + email + "/" + apiDateFormatter.format(currentDay), "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
+        String apiDate = apiDateFormatter.format(currentDay);
+        if (date != ""){
+            apiDate = date;
+        }
+        apiCall.APICall("api/recommendation/routesWithFriends/" + account.getEmail() + "/" + email + "/" + apiDate, "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
             @Override
             public void onResponse(String responseBody) {
                 try {
@@ -232,6 +314,7 @@ public class RoutesFragment extends Fragment {
                     dayRoutes = new ArrayList<>();
                     List<TransitItem> transitItemList = new ArrayList<>();
                     List<String> stepsList = new ArrayList<>();
+                    String destinationAddress = "";
                     for (int i = 0; i < routes.length(); i++) {
                         JSONObject item = (JSONObject) routes.get(i);
                         if (item.has("_id")) {
@@ -240,29 +323,36 @@ public class RoutesFragment extends Fragment {
                             String leaveTime = item.getString("_leaveTime");
                             TransitItem transitItem = new TransitItem(id, type, leaveTime);
                             transitItemList.add(transitItem);
-                        } else {
+                        } else if (item.has("steps")){
                             JSONArray steps = item.getJSONArray("steps");
                             for (int j = 0; j < steps.length(); j++) {
                                 String element = steps.getString(j);
                                 stepsList.add(element);
                             }
                         }
+                        else {
+                            destinationAddress = item.getString("_destination");
+                        }
                     }
-                    RouteItem routeItem = new RouteItem(transitItemList, stepsList);
+                    RouteItem routeItem = new RouteItem(transitItemList, stepsList, destinationAddress);
                     System.out.println("DAYROUTES WITH FRIEND");
                     dayRoutes.add(routeItem);
                     getActivity().runOnUiThread(() -> {
                         callback.execute();
                     });
                 } catch (Exception e){
-                    showFriendRouteError();
+                    getActivity().runOnUiThread(() -> {
+                        showFriendRouteError();
+                    });
                     e.printStackTrace();
                 }
             }
 
             @Override
             public void onError(String errorMessage) {
-                showFriendRouteError();
+                getActivity().runOnUiThread(() -> {
+                    showFriendRouteError();
+                });
                 System.out.println("Error " + errorMessage);
             }
         });
@@ -299,14 +389,19 @@ public class RoutesFragment extends Fragment {
             friendNames = fetchFriendsList();
             alertDialogBuilder.setItems(friendNames, (dialog, which) -> {
                 String selectedFriend = friendNames[which];
-                fetchFriendRoutes(parseEmail(selectedFriend), () -> {
+                fetchFriendRoutes("", parseEmail(selectedFriend), () -> {
                     routesView = view.findViewById(R.id.routes_view);
                     routesView.removeAllViewsInLayout();
-                    TextView friendText = new TextView(getContext());
-                    friendText.setText("With " + selectedFriend);
-                    routesView.addView(friendText);
-                    displayRoutes(view, getContext());
+                    displayRoutes(view, getContext(), "With " + selectedFriend);
+
                 });
+            });
+
+            alertDialogBuilder.setPositiveButton("Find matching commuters", (dialog, which) -> {
+                // Add logic to handle the button click
+                // You can perform any actions you need when the button is clicked
+                // For example, start the process of finding matching commuters
+                System.out.println("MATCHING COMMUTERS");
             });
 
             // Create and show the AlertDialog
@@ -339,7 +434,7 @@ public class RoutesFragment extends Fragment {
     }
 
     private void showFriendRouteError() {
-        Looper.prepare();
+        System.out.println("SHOW FRIEND ROUTE ERROR CALLED");
         Toast errorToast = Toast.makeText(getContext(), "Error finding a matching route.", Toast.LENGTH_SHORT);
         errorToast.show();
     }

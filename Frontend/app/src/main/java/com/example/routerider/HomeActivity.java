@@ -49,6 +49,7 @@ public class HomeActivity extends AppCompatActivity {
                     dayRoutes = new ArrayList<>();
                     List<TransitItem> transitItemList = new ArrayList<>();
                     List<String> stepsList = new ArrayList<>();
+                    String destinationAddress = "";
                     for (int i = 0; i < routes.length(); i++) {
                         JSONObject item = (JSONObject) routes.get(i);
                         if ( item.has("_id")) {
@@ -57,15 +58,18 @@ public class HomeActivity extends AppCompatActivity {
                             String leaveTime = item.getString("_leaveTime");
                             TransitItem transitItem = new TransitItem(id, type, leaveTime);
                             transitItemList.add(transitItem);
-                        } else {
+                        } else if (item.has("steps")){
                             JSONArray steps = item.getJSONArray("steps");
                             for (int j = 0; j < steps.length(); j++) {
                                 String element = steps.getString(j);
                                 stepsList.add(element);
                             }
                         }
+                        else {
+                            destinationAddress = item.getString("_destination");
+                        }
                     }
-                    RouteItem routeItem = new RouteItem(transitItemList, stepsList);
+                    RouteItem routeItem = new RouteItem(transitItemList, stepsList, destinationAddress);
                     callback.onResponse(routeItem);
                     // dayRoutes.add(routeItem);
                     //Log.d("DAY ROUTES", "ADDED DAY ROUTE");

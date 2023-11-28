@@ -562,9 +562,10 @@ public class ScheduleFragment extends Fragment {
                 recAddressText.setText(rec.getAddress());
                 ImageButton recMapsButton = timeGapRecView.findViewById(R.id.maps_button);
                 recMapsButton.setOnClickListener(v2 -> {
-                    Intent intent = new Intent(Intent.ACTION_VIEW,
-                            Uri.parse("google.navigation:q=" + rec.getAddress()));
-                    view.getContext().startActivity(intent);
+                    Uri gmmIntentUri = Uri.parse("geo:0,0?q=" + rec.getName() + " " + rec.getAddress());
+                    Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+                    mapIntent.setPackage("com.google.android.apps.maps");
+                    view.getContext().startActivity(mapIntent);
                 });
                 activity.runOnUiThread( () -> {
                     hiddenView.addView(timeGapRecView);

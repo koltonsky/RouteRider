@@ -628,7 +628,7 @@ function stopSSLServer() {
 */
 
 async function startSSLServer() {
-  try {
+  //try {
     const [key, cert] = await Promise.all([
       readFile(path.join(__dirname, 'certification', 'test_key.key')),
       readFile(path.join(__dirname, 'certification', 'certificate.pem')),
@@ -639,31 +639,32 @@ async function startSSLServer() {
     await serverListen.call(sslServer, port);
 
     console.log('Secure server :) on port ' + port);
-  } catch (error) {
-    console.error('Error starting the server:', error);
-    throw error; // Rethrow the error to propagate it to the caller
-  } 
+  //} catch (error) {
+  //  console.error('Error starting the server:', error);
+  //  throw error; // Rethrow the error to propagate it to the caller
+  //} 
 }
 
 
 async function stopSSLServer() {
   return new Promise(async (resolve) => {
-    try {
+    //try {
       if (sslServer) {
         sslServer.close(() => {
           console.log('Secure server stopped.');
           resolve();
         });
-      } else {
-        resolve();
-      }
-    } catch (error) {
-      console.error('Error stopping the server:', error);
-      resolve();
-    }
+      }// else {
+      //  resolve();
+      //}
+    //} catch (error) {
+    //  console.error('Error stopping the server:', error);
+    //  resolve();
+    //}
   });
 }
 
+/*
 async function stopMongoConnection() {
   // Add logic to stop or close the MongoDB connection
   // For example, if you are using the 'client' object, you can do:
@@ -672,6 +673,7 @@ async function stopMongoConnection() {
     console.log('MongoDB connection closed.');
   }
 }
+*/
 
 function connectToDatabase() {
   return new Promise(async (resolve, reject) => {
@@ -694,19 +696,22 @@ function connectToDatabase() {
 // Usage:
 
 connectToDatabase()
+
   .then(() => {
     // Do something after the server has started
 
     // Call stopSSLServer when you want to stop the server
     return stopSSLServer();
-  })
-  .catch((error) => {
-    console.error('Error starting or stopping server:', error);
-  });
+  }//)
+  //.catch((error) => {
+  //  console.error('Error starting or stopping server:', error);
+  //}
+  );
   
   
 //stopSSLServer();
 
+/*
 function closeServer() {
   if (sslServer) {
     console.log("CLOSING SERVER");
@@ -720,6 +725,7 @@ function closeServer() {
     });
   }
 }
+*/
 
 /*
 connectToDatabase();
@@ -1741,4 +1747,4 @@ function compareTimeStrings(timeStr1, timeStr2) {
   return formattedTimeStr1 === formattedTimeStr2;
 }
 
-module.exports = { app, sendNotification, findUserToken, closeServer, stopSSLServer, checkLiveTransitTime };
+module.exports = { app, sendNotification, findUserToken, stopSSLServer, checkLiveTransitTime };

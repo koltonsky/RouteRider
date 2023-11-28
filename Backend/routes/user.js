@@ -359,13 +359,13 @@ const getFriendListWithNames = async (req, res) => {
   
       
       if (!user) {
-        return res.status(404).json({ error: 'User not found' });
+        return res.status(221).json({ message: 'User not found' });
       }
       
   
       if (!friend) {
         console.error(`Friend with email ${friendEmail} not found in the userlist.`);
-        return res.status(404).json({ error: 'Friend not found in the userlist' });
+        return res.status(222).json({ error: 'Friend not found in the userlist' });
       }
   
       /*
@@ -376,7 +376,18 @@ const getFriendListWithNames = async (req, res) => {
       */
   
       // Check if the friend's email is already in the user's friend requests or friends
-      if (!user.friendRequests.includes(friendEmail) && !user.friends.includes(friendEmail)) {
+
+      if (friend.friendRequests.includes(userEmail)){
+        return res.status(250).json({ message: 'Friend request already sent' });
+      }
+        else if (user.friendRequests.includes(friendEmail)){
+        return res.status(251).json({ message: 'You have already received a friend request from this person' });
+      }
+      else if (user.friends.includes(friendEmail)){
+        return res.status(252).json({ message: 'Already friends with this user' });
+      }
+      else {
+
         // Friend not found in friend requests, add the friend's email
         user.friendRequests.push(friendEmail);
   
@@ -391,9 +402,7 @@ const getFriendListWithNames = async (req, res) => {
         //} else {
         //  return res.status(500).json({ error: 'Failed to send friend request' });
         //}
-      } else {
-        return res.status(400).json({ error: 'Friend request already sent' });
-      }
+      } 
     /*} catch (error) {
       console.error('Error:', error);
       return res.status(500).json({ error: 'Internal server error' });

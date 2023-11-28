@@ -642,7 +642,7 @@ async function startSSLServer() {
   } catch (error) {
     console.error('Error starting the server:', error);
     throw error; // Rethrow the error to propagate it to the caller
-  }
+  } 
 }
 
 

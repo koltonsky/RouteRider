@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">98.13% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>103/103</span>
+                <span class='fraction'>105/107</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">93.75% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>30/30</span>
+                <span class='fraction'>30/32</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">98.07% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>100/100</span>
+                <span class='fraction'>102/104</span>
             </div>
         
             
@@ -744,7 +744,16 @@
 <a name='L679'></a><a href='#L679'>679</a>
 <a name='L680'></a><a href='#L680'>680</a>
 <a name='L681'></a><a href='#L681'>681</a>
-<a name='L682'></a><a href='#L682'>682</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L682'></a><a href='#L682'>682</a>
+<a name='L683'></a><a href='#L683'>683</a>
+<a name='L684'></a><a href='#L684'>684</a>
+<a name='L685'></a><a href='#L685'>685</a>
+<a name='L686'></a><a href='#L686'>686</a>
+<a name='L687'></a><a href='#L687'>687</a>
+<a name='L688'></a><a href='#L688'>688</a>
+<a name='L689'></a><a href='#L689'>689</a>
+<a name='L690'></a><a href='#L690'>690</a>
+<a name='L691'></a><a href='#L691'>691</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">5x</span>
@@ -1122,23 +1131,32 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1786,13 +1804,13 @@ const getFriendListWithNames = async (req, res) =&gt; {
   
       
       if (!user) {
-        return res.status(404).json({ error: 'User not found' });
+        return res.status(221).json({ message: 'User not found' });
       }
       
   
       if (!friend) {
         console.error(`Friend with email ${friendEmail} not found in the userlist.`);
-        return res.status(404).json({ error: 'Friend not found in the userlist' });
+        return res.status(222).json({ error: 'Friend not found in the userlist' });
       }
   
       /*
@@ -1803,7 +1821,18 @@ const getFriendListWithNames = async (req, res) =&gt; {
       */
   
       // Check if the friend's email is already in the user's friend requests or friends
-      if (!user.friendRequests.includes(friendEmail) &amp;&amp; !user.friends.includes(friendEmail)) {
+&nbsp;
+      <span class="missing-if-branch" title="if path not taken" >I</span>if (friend.friendRequests.includes(userEmail)){
+<span class="cstat-no" title="statement not covered" >        return res.status(250).json({ message: 'Friend request already sent' });</span>
+      }
+        else <span class="missing-if-branch" title="if path not taken" >I</span>if (user.friendRequests.includes(friendEmail)){
+<span class="cstat-no" title="statement not covered" >        return res.status(251).json({ message: 'You have already received a friend request from this person' });</span>
+      }
+      else if (user.friends.includes(friendEmail)){
+        return res.status(252).json({ message: 'Already friends with this user' });
+      }
+      else {
+&nbsp;
         // Friend not found in friend requests, add the friend's email
         user.friendRequests.push(friendEmail);
   
@@ -1818,9 +1847,7 @@ const getFriendListWithNames = async (req, res) =&gt; {
         //} else {
         //  return res.status(500).json({ error: 'Failed to send friend request' });
         //}
-      } else {
-        return res.status(400).json({ error: 'Friend request already sent' });
-      }
+      } 
     /*} catch (error) {
       console.error('Error:', error);
       return res.status(500).json({ error: 'Internal server error' });
@@ -2113,7 +2140,7 @@ const deleteUser = async (req, res) =&gt; {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2023-11-27T19:33:34.517Z
+                at 2023-11-28T01:25:33.071Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

@@ -388,13 +388,17 @@ const getFriendListWithNames = async (req, res) => {
       }
       else {
 
+        //const friendFound = userCollection.findOne({ email: friendEmail });
+
+
         // Friend not found in friend requests, add the friend's email
-        user.friendRequests.push(friendEmail);
+        //user.friendRequests.push(friendEmail);
+        friend.friendRequests.push(userEmail);
   
         // Update the user's document in the collection
         const updateResult = await userCollection.updateOne(
-          { _id: user._id },
-          { $set: { friendRequests: user.friendRequests } }
+          { _id: friend._id },
+          { $set: { friendRequests: friend.friendRequests } }
         );
   
         //if (updateResult.modifiedCount > 0) {

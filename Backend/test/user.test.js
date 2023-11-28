@@ -21,7 +21,6 @@ const supertest = require('supertest');
 const { app, closeServer } = require('../server'); // Replace with the actual path to your Express app
 const request = supertest(app);
 
-/*
 const user = {
     "email": "newuserlol3@example.com",
     "name": "John Doe",
@@ -37,9 +36,7 @@ const user = {
 
 const userEmail = 'koltonluu@gmail.com';
 const nonExistingEmail = 'nonexistinguser@example.com';
-*/
-
-//let server;
+let server;
 
 
   beforeAll(async () => {
@@ -57,12 +54,8 @@ const nonExistingEmail = 'nonexistinguser@example.com';
   
   afterAll(async () => {
     // Close MongoDB connection after all tests
-    console.log("CLOSING CONNECTION!");
-    //console.log(client);
     if (client) {
-      console.log(client);
       await client.close(true);
-      console.log(client);
     }
     closeServer();
   });

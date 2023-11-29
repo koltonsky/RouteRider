@@ -1364,13 +1364,9 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
         //     departureTimeFromStation_iso
         // );
         var azureTime = new Date(departureTimeFromStation_iso);
-        var azureTimeToPST = azureTime.setHours(azureTime.getHours() + 7);
-
-        planTransitTrip(
-          locationOfOrigin_user,
-          meetingPoint,
-          new Date(azureTimeToPST)
-        )
+        var azureTimeToPST = azureTime.setHours(azureTime.getHours() + 8);
+        
+        planTransitTrip(locationOfOrigin_user, meetingPoint, new Date(azureTimeToPST))
           .then((trip) => {
             // console.log(
             //   'initRoute(): returned trip: ' +

@@ -57,7 +57,7 @@ public class HomeActivity extends AppCompatActivity {
                             String leaveTime = item.getString("_leaveTime");
                             TransitItem transitItem = new TransitItem(id, type, leaveTime);
                             transitItemList.add(transitItem);
-                        } else {
+                        } else if (item.has("steps")){
                             JSONArray steps = item.getJSONArray("steps");
                             for (int j = 0; j < steps.length(); j++) {
                                 String element = steps.getString(j);

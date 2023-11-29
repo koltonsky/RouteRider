@@ -1,5 +1,6 @@
 package com.example.routerider.fragments;
 
+import static androidx.test.internal.runner.junit4.statement.UiThreadStatement.runOnUiThread;
 import static com.example.routerider.FriendsActivity.sendFriendRequest;
 import static com.example.routerider.HomeActivity.fetchRoutes;
 import static com.example.routerider.HomeActivity.fetchWeeklyRoutes;
@@ -30,6 +31,8 @@ import androidx.fragment.app.Fragment;
 import com.example.routerider.APICaller;
 import com.example.routerider.FetchRoutesCallback;
 import com.example.routerider.FetchWeeklyRoutesCallback;
+import com.example.routerider.FriendRequestErrorCallback;
+import com.example.routerider.FriendsActivity;
 import com.example.routerider.R;
 import com.example.routerider.RouteItem;
 import com.example.routerider.TransitItem;
@@ -408,7 +411,11 @@ public class RoutesFragment extends Fragment {
                     String[] matchingCommuterNames = fetchMatchingCommuters();
                     otherAlertDialogBuilder.setItems(matchingCommuterNames, (dialog2, which2) -> {
                         String selectedFriend = matchingCommuterNames[which2];
-                        sendFriendRequest(selectedFriend);
+                        sendFriendRequest(selectedFriend, (String message) -> {
+                            getActivity().runOnUiThread(() -> {
+                                Toast.makeText(this.getContext(), message, Toast.LENGTH_SHORT).show();
+                            });
+                        });
                     });
                 });
 

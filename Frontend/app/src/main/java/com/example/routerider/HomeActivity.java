@@ -19,6 +19,7 @@ import org.json.JSONObject;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +32,7 @@ public class HomeActivity extends AppCompatActivity {
     ViewPager2 viewPager;
     private long backPressedTime;
     public static List<RouteItem> dayRoutes;
+    public static List<RouteItem> weeklyRoutes;
 
     // YES CHATGPT
     public static void fetchRoutes(Date day, FetchRoutesCallback callback) {
@@ -87,6 +89,111 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
     }
+
+
+        public static String[] getWeekRange(Date inputDate) {
+            String[] weekRange = new String[2];
+
+            // Create a calendar instance and set it to the input date
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(inputDate);
+
+            // Check if the input date is earlier than the start of the week
+            if (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
+                // If so, set weekRange[0] to the current day
+                setToMinimumTime(calendar);
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                weekRange[0] = dateFormat.format(calendar.getTime());
+            } else {
+                // Otherwise, set the calendar to the start of the week (Sunday)
+                setToMinimumTime(calendar);
+                weekRange[0] = new SimpleDateFormat("yyyy-MM-dd").format(calendar.getTime());
+            }
+
+            // Set the calendar to the end of the week (Saturday)
+            calendar.add(Calendar.DAY_OF_WEEK, 6);
+            setToMaximumTime(calendar);
+
+            // Format the end date
+            weekRange[1] = new SimpleDateFormat("yyyy-MM-dd").format(calendar.getTime());
+
+            return weekRange;
+        }
+
+        public static void setToMinimumTime(Calendar calendar) {
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+        }
+
+        private static void setToMaximumTime(Calendar calendar) {
+            calendar.set(Calendar.HOUR_OF_DAY, 23);
+            calendar.set(Calendar.MINUTE, 59);
+            calendar.set(Calendar.SECOND, 59);
+            calendar.set(Calendar.MILLISECOND, 999);
+        }
+
+    public static void fetchWeeklyRoutes(Date day, FetchWeeklyRoutesCallback callback) {
+        GoogleSignInAccount account = User.getCurrentAccount();
+        APICaller apiCall = new APICaller();
+        String[] weekRange = getWeekRange(day);
+        apiCall.APICall("api/recommendation/routes/" + account.getEmail() + "/" + weekRange[0] + "/" + weekRange[1], "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
+            @Override
+            public void onResponse(final String responseBody) {
+                // handler.removeCallbacksAndMessages(null);
+                System.out.println("BODY WEEKLY ROUTES: " + responseBody);
+                try {
+                    JSONObject json = new JSONObject(responseBody);
+                    JSONArray routes =  json.getJSONArray("weeklyRoutes");
+                    System.out.println(routes);
+                    weeklyRoutes = new ArrayList<>();
+                    for (int i = 0; i < routes.length(); i++) {
+                        JSONObject dayRouteObject = routes.getJSONObject(i);
+                        String routeDate = dayRouteObject.getString("date");
+                        JSONArray dayRoute = dayRouteObject.getJSONArray("routes");
+                        List<TransitItem> transitItemList = new ArrayList<>();
+                        List<String> stepsList = new ArrayList<>();
+                        String destinationAddress = "";
+                        for (int j = 0; j < dayRoute.length(); j++) {
+                            JSONObject item = (JSONObject) dayRoute.get(j);
+                            if (item.has("_id")) {
+                                String id = item.getString("_id");
+                                String type = item.getString("_type");
+                                String leaveTime = item.getString("_leaveTime");
+                                TransitItem transitItem = new TransitItem(id, type, leaveTime);
+                                transitItemList.add(transitItem);
+                            } else if (item.has("steps")) {
+                                JSONArray steps = item.getJSONArray("steps");
+                                for (int k = 0; k < steps.length(); k++) {
+                                    String element = steps.getString(k);
+                                    stepsList.add(element);
+                                }
+                            } else {
+                                destinationAddress = item.getString("_destination");
+                            }
+                        }
+                        RouteItem routeItem = new RouteItem(routeDate, transitItemList, stepsList, destinationAddress);
+                        weeklyRoutes.add(routeItem);
+                    }
+                    callback.onResponse(weeklyRoutes);
+                    // dayRoutes.add(routeItem);
+                    //Log.d("DAY ROUTES", "ADDED DAY ROUTE");
+                    //System.out.println(dayRoutes);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    callback.onError();
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                System.out.println("Error " + errorMessage);
+                callback.onError();
+            }
+        });
+    }
+
 
     // NO CHATGPT
     @Override

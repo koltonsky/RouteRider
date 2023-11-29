@@ -27,26 +27,27 @@ const privateKey = process.env.PRIVATE_KEY;
 const serviceAccountType = process.env.SERVICE_ACCOUNT_TYPE;
 
 // Create the serviceAccount object
-const serviceAccount =
-{
+const serviceAccount = {
   //"type": serviceAccountType,
-  "type": "service_account",
-  "project_id": "routerider-402800",
-  "private_key_id": "5bcd35ff287cd344df63e9bd5d96170fdc72130a",
+  type: 'service_account',
+  project_id: 'routerider-402800',
+  private_key_id: '5bcd35ff287cd344df63e9bd5d96170fdc72130a',
   //"private_key": privateKey,
-  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDWxaIVXYR7Tb4Z\nASAdm0+qupaOq1rRNReRDLSdOgexVMgsef2wGis74oI/Vtneg/iIqxPrAVbKwHTp\nWSMntGoZUV2aRPOiAgBlHu5cXN0Ql0++r5nhAImRgsKxnsbIJZaX9L1huU8xzAlA\n2LZCoHkSacLmFsVzfTzU0mOKBBc/AzqH99ucTNiQljEsaatRUdnGg6z7B91O7d/V\n3K6E/RefXicJ1lfntWVYxc5tmkPArM56Sqq/DesaLlIEodt8HRBbXemmXz9PXpQz\n4fmth95XzD1mBXwI+YZ8ffaedMN6FOjkSvWrhvtdHeO13vwlBA1GC7xDykCEuoY7\nV7vfWoOFAgMBAAECggEASQfJFrTHENqdsoj0b7zZOTfbbEYOSqdgDR2h6PjLltw6\neQ0+W3x6iRF7sqgIy6Zag7aQvk+lQKpy1spNrvmlPlixmHyrz8IYekorSVL2hOa+\n4ht6Gs2A+e7Z32YbOAG4FJHPOAS4TjmQR/GpADzrDnzSHkVN/PhwD/o+iLbdZLpH\ntrprP0vcQSIY45SkDXj7Z7eBU3pH6I9r4uCwIAP8WUmP2wKswFLtC/ceDm6Va/pZ\ndDZWKTxQiz5RpM6kuIRwMkjCQorFzPaLAoZtjCtbysnipPXAB9zNtL3jrT5TVrMA\n/bqdEFSuPvs6OaclfPn3Ih56wGJdCSLjwxcZpdAVPQKBgQD0weCGaWtIWg/E/142\nmj9OpWQmgNS1v9uWudkDrP2/S86urvVJt0v3lrFNeOTFzMsdoxFFNzkRGg+db33n\npg1RJKU81oBMh+s6Fnxg7Q1Wt+/7QBqjiznKVNU1fCo5CM0223viojE+PJfl2Spn\nCFS1woDUZ/WYm+SIAKf+UWd7NwKBgQDgoyfuvp1JWKxsUUgpC5vg5hzWM3yrnx2h\nUaGwpfq5DGVmrjoHevswolaOj/SvymoIEhms2abbowPTaejU3Sizf+i4oRTspdWG\nYCVedQp9/wblK3A3WSytJVrXUJvjkAc+DDa3p1Zr4ScUQ6QbkofM6mUi2U1W2P7V\nHZQgnNQtIwKBgQCB23dXeQj9iyMAvwhqae4auO9o6kNw5okH8DSumZLLctoGnjbv\n1HtOsjoBw5mFRIGjiMf59DGn3C7atbOUOuqn2Yx9ucS6Vga8e/+joUHJd6+wmzNG\n//A6ZEX2qZjxR7UxXMPe23TK83UX8t9naOkgwkB98WZBgLyAV/DJosEHgwKBgQDN\nzy3q4uEgLgnrQ50lXel2591LsuhqJOH0xuGpAqjvmZfdt4qbB+XT7Sf4fZPk60Ky\nGkNDxjXFzVjX/ZTAUc/UhUAmyA5vspArCTOzkvAF9/3NQTsSurTf/fV4h/YLTA4W\nnwISyVG4jRRM0JwuVtXsvGPkxcrB4xW3E95+8rDCmQKBgARMkmxwl3Q9InjAPONr\nCtLaYdjeZdRtKQOic4092lRdtAIrZvZ7SHlaFUp8LULFY6BzxzdjydMa2BiPb9mA\nmXHQVdvGv5x30soQ3EtQocPkj7xyY4glrG7hSKYHPtFpHlkakQWBrvCjeYJb0g+E\n+EsDxo7zRKeT+9mNDQYTSX7S\n-----END PRIVATE KEY-----\n",
-  "client_email": "firebase-adminsdk-stvy2@routerider-402800.iam.gserviceaccount.com",
-  "client_id": "107472218462534326183",
-  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-  "token_uri": "https://oauth2.googleapis.com/token",
-  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-stvy2%40routerider-402800.iam.gserviceaccount.com",
-  "universe_domain": "googleapis.com"
+  private_key:
+    '-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDWxaIVXYR7Tb4Z\nASAdm0+qupaOq1rRNReRDLSdOgexVMgsef2wGis74oI/Vtneg/iIqxPrAVbKwHTp\nWSMntGoZUV2aRPOiAgBlHu5cXN0Ql0++r5nhAImRgsKxnsbIJZaX9L1huU8xzAlA\n2LZCoHkSacLmFsVzfTzU0mOKBBc/AzqH99ucTNiQljEsaatRUdnGg6z7B91O7d/V\n3K6E/RefXicJ1lfntWVYxc5tmkPArM56Sqq/DesaLlIEodt8HRBbXemmXz9PXpQz\n4fmth95XzD1mBXwI+YZ8ffaedMN6FOjkSvWrhvtdHeO13vwlBA1GC7xDykCEuoY7\nV7vfWoOFAgMBAAECggEASQfJFrTHENqdsoj0b7zZOTfbbEYOSqdgDR2h6PjLltw6\neQ0+W3x6iRF7sqgIy6Zag7aQvk+lQKpy1spNrvmlPlixmHyrz8IYekorSVL2hOa+\n4ht6Gs2A+e7Z32YbOAG4FJHPOAS4TjmQR/GpADzrDnzSHkVN/PhwD/o+iLbdZLpH\ntrprP0vcQSIY45SkDXj7Z7eBU3pH6I9r4uCwIAP8WUmP2wKswFLtC/ceDm6Va/pZ\ndDZWKTxQiz5RpM6kuIRwMkjCQorFzPaLAoZtjCtbysnipPXAB9zNtL3jrT5TVrMA\n/bqdEFSuPvs6OaclfPn3Ih56wGJdCSLjwxcZpdAVPQKBgQD0weCGaWtIWg/E/142\nmj9OpWQmgNS1v9uWudkDrP2/S86urvVJt0v3lrFNeOTFzMsdoxFFNzkRGg+db33n\npg1RJKU81oBMh+s6Fnxg7Q1Wt+/7QBqjiznKVNU1fCo5CM0223viojE+PJfl2Spn\nCFS1woDUZ/WYm+SIAKf+UWd7NwKBgQDgoyfuvp1JWKxsUUgpC5vg5hzWM3yrnx2h\nUaGwpfq5DGVmrjoHevswolaOj/SvymoIEhms2abbowPTaejU3Sizf+i4oRTspdWG\nYCVedQp9/wblK3A3WSytJVrXUJvjkAc+DDa3p1Zr4ScUQ6QbkofM6mUi2U1W2P7V\nHZQgnNQtIwKBgQCB23dXeQj9iyMAvwhqae4auO9o6kNw5okH8DSumZLLctoGnjbv\n1HtOsjoBw5mFRIGjiMf59DGn3C7atbOUOuqn2Yx9ucS6Vga8e/+joUHJd6+wmzNG\n//A6ZEX2qZjxR7UxXMPe23TK83UX8t9naOkgwkB98WZBgLyAV/DJosEHgwKBgQDN\nzy3q4uEgLgnrQ50lXel2591LsuhqJOH0xuGpAqjvmZfdt4qbB+XT7Sf4fZPk60Ky\nGkNDxjXFzVjX/ZTAUc/UhUAmyA5vspArCTOzkvAF9/3NQTsSurTf/fV4h/YLTA4W\nnwISyVG4jRRM0JwuVtXsvGPkxcrB4xW3E95+8rDCmQKBgARMkmxwl3Q9InjAPONr\nCtLaYdjeZdRtKQOic4092lRdtAIrZvZ7SHlaFUp8LULFY6BzxzdjydMa2BiPb9mA\nmXHQVdvGv5x30soQ3EtQocPkj7xyY4glrG7hSKYHPtFpHlkakQWBrvCjeYJb0g+E\n+EsDxo7zRKeT+9mNDQYTSX7S\n-----END PRIVATE KEY-----\n',
+  client_email:
+    'firebase-adminsdk-stvy2@routerider-402800.iam.gserviceaccount.com',
+  client_id: '107472218462534326183',
+  auth_uri: 'https://accounts.google.com/o/oauth2/auth',
+  token_uri: 'https://oauth2.googleapis.com/token',
+  auth_provider_x509_cert_url: 'https://www.googleapis.com/oauth2/v1/certs',
+  client_x509_cert_url:
+    'https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-stvy2%40routerider-402800.iam.gserviceaccount.com',
+  universe_domain: 'googleapis.com',
 };
 
 //console.log(privateKey);
 // Use the serviceAccount object in your code
-
 
 //const serviceAccount = require('./serviceAccountKey.json');
 
@@ -131,7 +132,6 @@ app.post('/api/schedulelist/:email', schedule.addEvent);
 //app.put('/api/schedulelist/:email/:id', schedule.editEventByID);
 app.delete('/api/schedulelist/:email/:id', schedule.deleteEventByID);
 
-
 //app.put('/api/schedulelist/:email/:index/geolocation', schedule.editEventGeolocation);
 
 //app.delete('/api/schedulelist/:email/', schedule.deleteSchedule);
@@ -164,22 +164,20 @@ app.post('/api/store_token', (req, res) => {
           .then(() => {
             // console.log('fcmToken updated successfully');
             res.status(200).json({
-              message:
-                'fcmToken updated successfully',
+              message: 'fcmToken updated successfully',
             });
           });
       } else {
         // console.log('User not found');
         res.status(400).json({
-          message:
-            'User not found, failed to update fcmToken',
+          message: 'User not found, failed to update fcmToken',
         });
       }
-    })
-    // .catch((error) => {
-    //   // console.log('Error: ' + error);
-    //   res.status(401).json({ message: error });
-    // });
+    });
+  // .catch((error) => {
+  //   // console.log('Error: ' + error);
+  //   res.status(401).json({ message: error });
+  // });
 });
 
 /**
@@ -200,65 +198,73 @@ function findUserToken(receiverEmail, senderName, notificationCallback) {
   return new Promise((resolve, reject) => {
     if (!senderName || !receiverEmail) {
       // console.log('null email or name');
-      resolve({ status: 400, message: 'Null receiver email or sender name'});
+      resolve({ status: 400, message: 'Null receiver email or sender name' });
     }
-  
+
     client
-    .db('UserDB')
-    .collection('userlist')
-    .findOne({ email: receiverEmail })
-    .then(async (receiver) => {
-      if (receiver) {
-        // console.log(
-        //   'grabbed user: ' +
-        //     receiver +
-        //     ' ' +
-        //     receiver.fcmToken +
-        //     ' ' +
-        //     receiver.email
-        // );
-        var receiverToken = receiver.fcmToken;
-  
-        // console.log(receiverToken);
-  
-        const message = {
-          token: receiverToken,
-          notification: {
-            title: 'New Friend Request',
-            body: `${senderName} has sent you a friend request!`,
-          },
-        };
-        // console.log(message.token);
-        
-        ret = await notificationCallback(message);
-        if (ret) {
-          // console.log('Successfully sent friend request notification');
-          // res.status(200).json({
-          //   message:
-          //     'Successfully sent friend request notification',
-          // });
-          // return { status: 200, message: 'Successfully sent friend request notification'}
-          resolve({ status: 200, message: 'Successfully sent friend request notification'});
+      .db('UserDB')
+      .collection('userlist')
+      .findOne({ email: receiverEmail })
+      .then(async (receiver) => {
+        if (receiver) {
+          // console.log(
+          //   'grabbed user: ' +
+          //     receiver +
+          //     ' ' +
+          //     receiver.fcmToken +
+          //     ' ' +
+          //     receiver.email
+          // );
+          var receiverToken = receiver.fcmToken;
+
+          // console.log(receiverToken);
+
+          const message = {
+            token: receiverToken,
+            notification: {
+              title: 'New Friend Request',
+              body: `${senderName} has sent you a friend request!`,
+            },
+          };
+          // console.log(message.token);
+
+          ret = await notificationCallback(message);
+          if (ret) {
+            // console.log('Successfully sent friend request notification');
+            // res.status(200).json({
+            //   message:
+            //     'Successfully sent friend request notification',
+            // });
+            // return { status: 200, message: 'Successfully sent friend request notification'}
+            resolve({
+              status: 200,
+              message: 'Successfully sent friend request notification',
+            });
+          } else {
+            // console.log('Failed to send friend request notification');
+            // res.status(400).json({
+            //   message:
+            //     'Failed to send friend request notification',
+            // });
+            // return { status: 400, message: 'Failed to send friend request notification'}
+            resolve({
+              status: 400,
+              message: 'Failed to send friend request notification',
+            });
+          }
         } else {
-          // console.log('Failed to send friend request notification');
+          // console.log('Receiver not found');
           // res.status(400).json({
           //   message:
-          //     'Failed to send friend request notification',
+          //     'Receiver not found, failed to send notification',
           // });
-          // return { status: 400, message: 'Failed to send friend request notification'}
-          resolve({ status: 400, message: 'Failed to send friend request notification'});
+          // return { status: 400, message: 'Receiver not found, failed to send notification'}
+          resolve({
+            status: 400,
+            message: 'Receiver not found, failed to send notification',
+          });
         }
-      }
-      else {
-        // console.log('Receiver not found');
-        // res.status(400).json({
-        //   message:
-        //     'Receiver not found, failed to send notification',
-        // });
-        // return { status: 400, message: 'Receiver not found, failed to send notification'}
-        resolve({ status: 400, message: 'Receiver not found, failed to send notification'});
-      }
-    });
+      });
   });
 }
 function sendNotification(message) {
@@ -297,9 +303,8 @@ app.post('/api/initReminders', async (req, res) => {
 // Find commute buddy
 app.get('/api/findMatchingUsers/:userEmail', async (req, res) => {
   const userEmail = req.params.userEmail;
-    const matchingUsers = await commuters.findMatchingUsers(userEmail);
-    res.status(200).json({ matchingUsers });
-  
+  const matchingUsers = await commuters.findMatchingUsers(userEmail);
+  res.status(200).json({ matchingUsers });
 });
 
 // app.get('/api/initRouteWithFriends', async (req, res) => {
@@ -325,7 +330,7 @@ const getRecommendedRoutesWithFriends = async (req, res) => {
   await initRouteWithFriends(email, friendEmail, date).then(
     (result) => {
       return res.status(200).json({ routes: result });
-    }, 
+    },
     (error) => {
       // console.log('initRouteWithFriends rejected error');
       return res.status(400).json({ message: error });
@@ -349,7 +354,7 @@ const getRecommendedRoutes = async (req, res) => {
   await initRoute(email, date).then(
     (result) => {
       return res.status(200).json({ routes: result });
-    }, 
+    },
     (error) => {
       // console.log('initRoute rejected error ' + error);
       return res.status(400).json({ message: error });
@@ -357,7 +362,33 @@ const getRecommendedRoutes = async (req, res) => {
   );
 };
 
+const getWeeklyRecommendedRoutes = async (req, res) => {
+  const email = req.params.email;
+  const date1 = new Date(req.params.date1);
+  const date2 = new Date(req.params.date2);
+
+  const result = [];
+
+  for (var d = date1; d <= date2; d.setDate(d.getDate() + 1)) {
+    var date = d.toISOString().split('T')[0];
+    await initRoute(email, date).then(
+      (routes) => {
+        result.push({ date, routes });
+      },
+      (error) => {
+        // console.log('initRoute rejected error ' + error);
+        return res.status(400).json({ message: error });
+      }
+    );
+  }
+  return res.status(200).json({ weeklyRoutes: result });
+};
+
 app.get('/api/recommendation/routes/:email/:date', getRecommendedRoutes);
+app.get(
+  '/api/recommendation/routes/:email/:date1/:date2',
+  getWeeklyRecommendedRoutes
+);
 
 const getTimeGapRecommendations = async (req, res) => {
   try {
@@ -445,8 +476,8 @@ async function checkLiveTransitTime(
                     body: `The expected vs. actual ETA is ${realTimeData[0].Schedules[0].ExpectedLeaveTime} vs ${scheduledLeaveTime}`,
                   },
                 };
-                
-                let ret = notificationCallback(message) 
+
+                let ret = notificationCallback(message);
                 if (ret) {
                   // console.log('Successfully sent notification');
                   resolve(true);
@@ -584,8 +615,12 @@ let sslServer;
 function startSSLServer() {
   sslServer = https.createServer(
     {
-      key: fs.readFileSync(path.join(__dirname, 'certification', 'test_key.key')),
-      cert: fs.readFileSync(path.join(__dirname, 'certification', 'certificate.pem')),
+      key: fs.readFileSync(
+        path.join(__dirname, 'certification', 'test_key.key')
+      ),
+      cert: fs.readFileSync(
+        path.join(__dirname, 'certification', 'certificate.pem')
+      ),
     },
     app
   );
@@ -754,12 +789,9 @@ async function initRoute(userEmail, date) {
     .collection('userlist')
     .findOne({ email: userEmail });
   if (user == null) {
-    errorString =
-      'No matching email exists in user database';
-  } 
-  else if (schedule == null) {
-    errorString =
-      'No matching schedule exists in schedule database';
+    errorString = 'No matching email exists in user database';
+  } else if (schedule == null) {
+    errorString = 'No matching schedule exists in schedule database';
   }
 
   // console.log('initRoute(): returned schedule: ' + schedule);
@@ -823,7 +855,7 @@ async function initRoute(userEmail, date) {
         more.arrival_time = trip.routes[0].legs[0].arrival_time.text;
         more.departure_time = trip.routes[0].legs[0].departure_time.text;
         more.steps = [];
-        
+
         var travelMode = '';
         trip.routes[0].legs[0].steps.forEach((step, stepIndex) => {
           travelMode = step.travel_mode;
@@ -843,9 +875,9 @@ async function initRoute(userEmail, date) {
                 leaveTimeNum = step.transit_details.departure_time.value;
                 break;
               default:
-                // type = 'default';
-                // id = 'default';
-                // break;
+              // type = 'default';
+              // id = 'default';
+              // break;
             }
           } else {
             type = 'Walk';
@@ -912,15 +944,13 @@ async function initReminders(req, notificationCallback) {
     .findOne({ email: req.body.email });
 
   if (user == null) {
-    errorString =
-      'No matching email exists in user database';
+    errorString = 'No matching email exists in user database';
     // console.log(errorString);
-    return {status: 400, message: errorString};
+    return { status: 400, message: errorString };
   } else if (schedule == null) {
-    errorString =
-      'No schedule associated with email';
+    errorString = 'No schedule associated with email';
     // console.log(errorString);
-    return {status: 400, message: errorString};
+    return { status: 400, message: errorString };
   }
   // console.log('initReminders(): returned schedule: ' + schedule);
   // console.log(schedule.events[0].eventName);
@@ -1001,8 +1031,8 @@ async function initReminders(req, notificationCallback) {
               step.transit_details.departure_time.text;
             break;
           default:
-            // console.log('initReminders(): hit default case');
-            // break;
+          // console.log('initReminders(): hit default case');
+          // break;
         }
         break;
       }
@@ -1040,7 +1070,8 @@ async function initReminders(req, notificationCallback) {
             returnList[i].firstBus.leaveTime,
             notificationCallback
           ).then((ret) => {
-            if (ret) { // deschedule other checks if a notification is already sent 
+            if (ret) {
+              // deschedule other checks if a notification is already sent
               cronTasks.forEach((task) => {
                 task.stop();
               });
@@ -1050,7 +1081,7 @@ async function initReminders(req, notificationCallback) {
       }
     }
   }
-  return {status: 200, message: "Reminders initialized"};
+  return { status: 200, message: 'Reminders initialized' };
 }
 // const xdding = {
 //   body: {
@@ -1088,8 +1119,7 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
     //   'initRouteWithFriends(): no matching user schedule exists in schedule database'
     // );
     error = true;
-    errorMessage =
-      'No matching user schedule exists in schedule database';
+    errorMessage = 'No matching user schedule exists in schedule database';
   }
   var schedule_friend = await client
     .db('ScheduleDB')
@@ -1100,21 +1130,19 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
     //   'initRouteWithFriends(): no matching friend schedule exists in schedule database'
     // );
     error = true;
-    errorMessage =
-      'No matching friend schedule exists in schedule database';
+    errorMessage = 'No matching friend schedule exists in schedule database';
   }
 
   var user = await client
-  .db('UserDB')
-  .collection('userlist')
-  .findOne({ email: userEmail });
+    .db('UserDB')
+    .collection('userlist')
+    .findOne({ email: userEmail });
   if (user == null) {
     // console.log(
     //   'initRouteWithFriends(): no matching user email exists in user database'
     // );
     error = true;
-    errorMessage =
-      'No matching user email exists in user database';
+    errorMessage = 'No matching user email exists in user database';
   }
   var friend = await client
     .db('UserDB')
@@ -1125,8 +1153,7 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
     //   'initRouteWithFriends(): no matching friend email exists in user database'
     // );
     error = true;
-    errorMessage =
-      'No matching friend email exists in user database';
+    errorMessage = 'No matching friend email exists in user database';
   }
 
   return new Promise((resolve, reject) => {
@@ -1155,9 +1182,7 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
       // console.log(
       //   'initRouteWithFriends(): no matching date exists in user schedule'
       // );
-      reject(
-        'No matching date exists in user schedule'
-      );
+      reject('No matching date exists in user schedule');
     }
 
     for (i = 0; i < schedule_friend.events.length; i++) {
@@ -1175,9 +1200,7 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
       // console.log(
       //   'initRouteWithFriends(): no matching date exists in friend schedule'
       // );
-      reject(
-        'No matching date exists in friend schedule'
-      );
+      reject('No matching date exists in friend schedule');
     }
 
     // const twoHoursInMilliseconds = 2 * 60 * 60 * 1000;
@@ -1185,8 +1208,11 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
     // if (timeDifference > twoHoursInMilliseconds) {
     //   reject("time gap too big");
     // }
-    var meetingPoint = getMeetingPoint(locationOfOrigin_user, locationOfOrigin_friend);
-    
+    var meetingPoint = getMeetingPoint(
+      locationOfOrigin_user,
+      locationOfOrigin_friend
+    );
+
     var timeOfFirstEvent = '';
     var locationOfFirstEvent = '';
     if (new Date(timeOfFirstEvent_user) < new Date(timeOfFirstEvent_friend)) {
@@ -1212,8 +1238,11 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
         };
         var curStep2 = {
           _id: trip.routes[0].legs[0].steps[1].transit_details.line.short_name,
-          _leaveTime: trip.routes[0].legs[0].steps[1].transit_details.departure_time.text,
-          _leaveTimeNum: trip.routes[0].legs[0].steps[1].transit_details.departure_time.value,
+          _leaveTime:
+            trip.routes[0].legs[0].steps[1].transit_details.departure_time.text,
+          _leaveTimeNum:
+            trip.routes[0].legs[0].steps[1].transit_details.departure_time
+              .value,
           _type: 'Bus',
         };
 
@@ -1223,7 +1252,7 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
         var step2 = trip.routes[0].legs[0].steps[1].html_instructions;
 
         var departureTimeFromStation =
-        trip.routes[0].legs[0].departure_time.text;
+          trip.routes[0].legs[0].departure_time.text;
         // console.log(
         //   'initRouteWithFriends(): departureTimeFromStation: ' +
         //     departureTimeFromStation
@@ -1238,8 +1267,12 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
         // );
         var azureTime = new Date(departureTimeFromStation_iso);
         var azureTimeToPST = azureTime.setHours(azureTime.getHours() + 7);
-        
-        planTransitTrip(locationOfOrigin_user, meetingPoint, new Date(azureTimeToPST))
+
+        planTransitTrip(
+          locationOfOrigin_user,
+          meetingPoint,
+          new Date(azureTimeToPST)
+        )
           .then((trip) => {
             // console.log(
             //   'initRoute(): returned trip: ' +
@@ -1262,7 +1295,7 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
             more.arrival_time = arrive_time_ubc;
             more.departure_time = trip.routes[0].legs[0].departure_time.text;
             more.steps = [];
-            
+
             trip.routes[0].legs[0].steps.forEach((step, stepIndex) => {
               travelMode = step.travel_mode;
 
@@ -1319,7 +1352,7 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
             /* Directions API doesn't include leaveTime in "WALKING" steps, so we need to calculate ourselves */
             returnList = calcWalkingTimes(returnList);
             resolve(returnList);
-            
+
             // returnList.forEach((element) => {
             //   console.log(
             //     'initRouteWithFriends(): returnList: ' +
@@ -1469,9 +1502,9 @@ function calcDist(x1, y1, x2, y2) {
 
 /**
  * Determine whether to take 99 B-Line or R4 based on addresses of user and friend
- * @param {*} address1 
- * @param {*} address2 
- * 
+ * @param {*} address1
+ * @param {*} address2
+ *
  * ChatGPT usage: No
  */
 function getMeetingPoint(address1, address2) {
@@ -1516,24 +1549,20 @@ function getMeetingPoint(address1, address2) {
 /**
  * Impute missing data in 'Walk' steps of a transit route
  * @param {*} commuteInfo
- * 
- * ChatGPT usage: No  
+ *
+ * ChatGPT usage: No
  */
 function calcWalkingTimes(commuteInfo) {
   var returnList = commuteInfo;
   for (var i = 0; i < returnList.length - 1; i++) {
-    if (i == 0 && returnList[i]._type == 'Walk') { 
+    if (i == 0 && returnList[i]._type == 'Walk') {
       returnList[i]._leaveTime =
         returnList[returnList.length - 1].departure_time;
       returnList[i]._leaveTimeNum = timeToTimestamp(
         returnList[returnList.length - 1].departure_time
       );
-    } else if (
-      i == returnList.length - 2 &&
-      returnList[i]._type == 'Walk'
-    ) {
-      returnList[i]._leaveTime =
-        returnList[returnList.length - 1].arrival_time;
+    } else if (i == returnList.length - 2 && returnList[i]._type == 'Walk') {
+      returnList[i]._leaveTime = returnList[returnList.length - 1].arrival_time;
       returnList[i]._leaveTimeNum = timeToTimestamp(
         returnList[returnList.length - 2].arrival_time
       );
@@ -1617,4 +1646,10 @@ function compareTimeStrings(timeStr1, timeStr2) {
   return formattedTimeStr1 === formattedTimeStr2;
 }
 
-module.exports = { app, sendNotification, findUserToken, closeServer, checkLiveTransitTime };
+module.exports = {
+  app,
+  sendNotification,
+  findUserToken,
+  closeServer,
+  checkLiveTransitTime,
+};

@@ -1,6 +1,8 @@
 package com.example.routerider.fragments;
 
 import static com.example.routerider.HomeActivity.fetchRoutes;
+import static com.example.routerider.HomeActivity.fetchWeeklyRoutes;
+import static com.example.routerider.HomeActivity.setToMinimumTime;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -11,6 +13,7 @@ import android.os.Looper;
 import android.transition.AutoTransition;
 import android.transition.TransitionManager;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +28,7 @@ import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import com.example.routerider.APICaller;
 import com.example.routerider.FetchRoutesCallback;
+import com.example.routerider.FetchWeeklyRoutesCallback;
 import com.example.routerider.R;
 import com.example.routerider.RouteItem;
 import com.example.routerider.TransitItem;
@@ -36,6 +40,7 @@ import org.json.JSONObject;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -43,12 +48,13 @@ import java.util.regex.Pattern;
 
 @FunctionalInterface
 interface FetchFriendRoutesCallback {
-    void execute();
+    void execute(RouteItem routeItem);
 }
 
 public class RoutesFragment extends Fragment {
     private Date currentDay;
     private List<RouteItem> dayRoutes;
+    private List<RouteItem> weeklyRoutes;
     private LinearLayout routesView;
     private Button previousDayButton;
     private TextView currentDayText;
@@ -63,25 +69,195 @@ public class RoutesFragment extends Fragment {
 
 
     // YES CHATGPT
-    private void displayRoutes(View view, Context context, String friendIndicator) {
+//    private void displayRoutes(View view, Context context, String friendIndicator) {
+//        LayoutInflater inflater = LayoutInflater.from(context);
+//        routesView = view.findViewById(R.id.routes_view);
+//        transitFriendButton = view.findViewById(R.id.transit_friend_button);
+//
+//        if (dayRoutes == null || dayRoutes.isEmpty()){
+//            TextView emptyRoutes = new TextView(context);
+//            emptyRoutes.setText("There are no routes for this day");
+//            routesView.addView(emptyRoutes);
+//            transitFriendButton.setEnabled(false);
+//            return;
+//        }
+//
+//        transitFriendButton.setEnabled(true);
+//        for (RouteItem item: dayRoutes) {
+//            View singleRouteView  = inflater.inflate(R.layout.view_route, routesView, false);
+//            ImageButton expandButton = singleRouteView.findViewById(R.id.expand_button);
+//            LinearLayout hiddenView = singleRouteView.findViewById(R.id.hidden_view);
+//            CardView cardView = singleRouteView.findViewById(R.id.base_cardview);
+//
+//            expandButton.setOnClickListener(v -> {
+//                if (hiddenView.getVisibility() == View.VISIBLE) {
+//                    TransitionManager.beginDelayedTransition(cardView, new AutoTransition());
+//                    hiddenView.setVisibility(View.GONE);
+//                    expandButton.setImageResource(R.drawable.baseline_expand_more_24);
+//                }
+//                else {
+//                    TransitionManager.beginDelayedTransition(cardView, new AutoTransition());
+//                    hiddenView.setVisibility(View.VISIBLE);
+//                    expandButton.setImageResource(R.drawable.baseline_expand_less_24);
+//                }
+//            });
+//
+//            TextView leaveByTimeText = singleRouteView.findViewById(R.id.leave_by_time);
+//            leaveByTimeText.setText("Leave by " + item.getLeaveBy());
+//
+//            ImageButton recMapsButton = singleRouteView.findViewById(R.id.maps_button);
+//            recMapsButton.setOnClickListener(v2 -> {
+//                Intent intent = new Intent(Intent.ACTION_VIEW,
+//                        Uri.parse("google.navigation:q=" + item.getDestination()));
+//                view.getContext().startActivity(intent);
+//            });
+//
+//            LinearLayout transitIdsView = singleRouteView.findViewById(R.id.transit_ids);
+//            for (TransitItem transitItem: item.getTransitItems()){
+//                View transitChipView;
+//                if (transitItem.getType().equalsIgnoreCase("bus")){
+//                    transitChipView  = inflater.inflate(R.layout.bus_chip, transitIdsView, false);
+//                    TextView busIdText = transitChipView.findViewById(R.id.bus_id);
+//                    busIdText.setText(transitItem.getId());
+//                } else if (transitItem.getType().equalsIgnoreCase("skytrain")){
+//                    transitChipView  = inflater.inflate(R.layout.train_chip, transitIdsView, false);
+//                    TextView busIdText = transitChipView.findViewById(R.id.train_id);
+//                    busIdText.setText(transitItem.getId());
+//                } else {
+//                    transitChipView  = inflater.inflate(R.layout.walk_chip, transitIdsView, false);
+//                }
+//                transitIdsView.addView(transitChipView);
+//                if (item.getTransitItems().indexOf(transitItem) != item.getTransitItems().size() - 1){
+//                    TextView bulletTextView = new TextView(getContext());
+//                    bulletTextView.setText(" • ");
+//                    bulletTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24);
+//                    transitIdsView.addView(bulletTextView);
+//                }
+//            }
+//            for (String step: item.getSteps()) {
+//                int index = item.getSteps().indexOf(step) + 1;
+//                TextView stepText = new TextView(context);
+//                stepText.setText(index + ". " + step + " ↗");
+//                int paddingInDp = 8;
+//                int leftPaddingDp = 16;
+//                float scale = context.getResources().getDisplayMetrics().density;
+//                int paddingInPx = (int) (paddingInDp * scale + 0.5f);
+//                int leftPaddingPx = (int) (leftPaddingDp * scale + 0.5f);
+//                stepText.setPadding(leftPaddingPx, paddingInPx, paddingInPx, paddingInPx);
+//                stepText.setOnClickListener(v -> {
+//                    Uri gmmIntentUri = Uri.parse("geo:0,0?q=" + extractLocation(step));
+//                    Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+//                    mapIntent.setPackage("com.google.android.apps.maps");
+//                    view.getContext().startActivity(mapIntent);
+//                }
+//                );
+//                hiddenView.addView(stepText);
+//
+//            }
+//            routesView.addView(singleRouteView);
+//            Button transitFriendButton = singleRouteView.findViewById(R.id.friend_button);
+//            transitFriendButton.setOnClickListener(v -> {
+//                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(requireContext());
+//                alertDialogBuilder.setTitle("Friend List");
+//                friendNames = fetchFriendsList();
+//                alertDialogBuilder.setItems(friendNames, (dialog, which) -> {
+//                    String selectedFriend = friendNames[which];
+//                    fetchFriendRoutes("", parseEmail(selectedFriend), () -> {
+//                        routesView = view.findViewById(R.id.routes_view);
+//                        routesView.removeAllViewsInLayout();
+//                        displayRoutes(view, getContext(), "With " + selectedFriend);
+//                    });
+//                });
+//
+//                alertDialogBuilder.setPositiveButton("Find matching commuters", (dialog, which) -> {
+//                    // Add logic to handle the button click
+//                    // You can perform any actions you need when the button is clicked
+//                    // For example, start the process of finding matching commuters
+//                    System.out.println("MATCHING COMMUTERS");
+//                });
+//
+//                // Create and show the AlertDialog
+//                AlertDialog alertDialog = alertDialogBuilder.create();
+//                alertDialog.show();
+//
+//            });
+//            if (!friendIndicator.equals("")) {
+//                TextView friendText = singleRouteView.findViewById(R.id.friend_indicator);
+//                friendText.setText(friendIndicator);
+//                friendText.setVisibility(View.VISIBLE);
+//                transitFriendButton.setVisibility(View.GONE);
+//            }
+//        }
+//    }
+
+    public static String extractLocation(String direction) {
+        // Define the pattern for the location information
+        Pattern pattern = Pattern.compile("Walk to (.+)|Bus towards (.+)|Subway towards (.+)|(.+)");
+
+        // Match the pattern against the input direction
+        Matcher matcher = pattern.matcher(direction);
+
+        // Find the location information
+        if (matcher.find()) {
+            // Choose the group that has a non-null match (non-empty location)
+            for (int i = 1; i <= matcher.groupCount(); i++) {
+                if (matcher.group(i) != null) {
+                    return matcher.group(i).trim();
+                }
+            }
+        }
+
+        // Return null if no location information is found
+        return null;
+    }
+
+    public FetchWeeklyRoutesCallback createFetchWeeklyRoutesCallback(View view) {
+        return new FetchWeeklyRoutesCallback() {
+            @Override
+            public void onResponse(List<RouteItem> routes) {
+                getActivity().runOnUiThread(() -> {
+                    routesView = view.findViewById(R.id.routes_view);
+                    routesView.removeAllViewsInLayout();
+                    displayWeeklyRoutes(routes, view, getContext());
+                });
+            }
+
+            @Override
+            public void onError() {
+                getActivity().runOnUiThread(() -> {
+                    TextView emptyRoutes = new TextView(getContext());
+                    emptyRoutes.setText("There are no routes for this week.");
+                    emptyRoutes.setGravity(Gravity.CENTER);
+                    routesView = view.findViewById(R.id.routes_view);
+                    routesView.removeAllViewsInLayout();
+                    routesView.addView(emptyRoutes);
+                });
+            }
+        };
+    }
+
+    private void displayWeeklyRoutes(List<RouteItem> routes, View view, Context context) {
         LayoutInflater inflater = LayoutInflater.from(context);
         routesView = view.findViewById(R.id.routes_view);
-        transitFriendButton = view.findViewById(R.id.transit_friend_button);
 
-        if (dayRoutes == null || dayRoutes.isEmpty()){
+        if (routes == null || routes.isEmpty()){
             TextView emptyRoutes = new TextView(context);
-            emptyRoutes.setText("There are no routes for this day");
+            emptyRoutes.setText("There are no routes for this week");
             routesView.addView(emptyRoutes);
             transitFriendButton.setEnabled(false);
             return;
         }
 
         transitFriendButton.setEnabled(true);
-        for (RouteItem item: dayRoutes) {
+        for (RouteItem item: routes) {
             View singleRouteView  = inflater.inflate(R.layout.view_route, routesView, false);
             ImageButton expandButton = singleRouteView.findViewById(R.id.expand_button);
             LinearLayout hiddenView = singleRouteView.findViewById(R.id.hidden_view);
             CardView cardView = singleRouteView.findViewById(R.id.base_cardview);
+
+            TextView dateText = new TextView(context);
+            dateText.setText(item.getDate());
+            routesView.addView(dateText);
 
             expandButton.setOnClickListener(v -> {
                 if (hiddenView.getVisibility() == View.VISIBLE) {
@@ -139,11 +315,11 @@ public class RoutesFragment extends Fragment {
                 int leftPaddingPx = (int) (leftPaddingDp * scale + 0.5f);
                 stepText.setPadding(leftPaddingPx, paddingInPx, paddingInPx, paddingInPx);
                 stepText.setOnClickListener(v -> {
-                    Uri gmmIntentUri = Uri.parse("geo:0,0?q=" + extractLocation(step));
-                    Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
-                    mapIntent.setPackage("com.google.android.apps.maps");
-                    view.getContext().startActivity(mapIntent);
-                }
+                            Uri gmmIntentUri = Uri.parse("geo:0,0?q=" + extractLocation(step));
+                            Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+                            mapIntent.setPackage("com.google.android.apps.maps");
+                            view.getContext().startActivity(mapIntent);
+                        }
                 );
                 hiddenView.addView(stepText);
 
@@ -156,10 +332,11 @@ public class RoutesFragment extends Fragment {
                 friendNames = fetchFriendsList();
                 alertDialogBuilder.setItems(friendNames, (dialog, which) -> {
                     String selectedFriend = friendNames[which];
-                    fetchFriendRoutes("", parseEmail(selectedFriend), () -> {
+                    fetchFriendRoutes(item.getDate(), parseEmail(selectedFriend), (RouteItem newRouteItem) -> {
                         routesView = view.findViewById(R.id.routes_view);
                         routesView.removeAllViewsInLayout();
-                        displayRoutes(view, getContext(), "With " + selectedFriend);
+                        item.setFriend(parseEmail(selectedFriend), newRouteItem.getTransitItems(), newRouteItem.getSteps());
+                        // displayRoutes(view, getContext(), "With " + selectedFriend);
                     });
                 });
 
@@ -175,68 +352,47 @@ public class RoutesFragment extends Fragment {
                 alertDialog.show();
 
             });
-            if (!friendIndicator.equals("")) {
+            if (!item.getFriendEmail().equals("")) {
                 TextView friendText = singleRouteView.findViewById(R.id.friend_indicator);
-                friendText.setText(friendIndicator);
+                friendText.setText("With " + item.getFriendEmail());
                 friendText.setVisibility(View.VISIBLE);
                 transitFriendButton.setVisibility(View.GONE);
             }
         }
     }
 
-    public static String extractLocation(String direction) {
-        // Define the pattern for the location information
-        Pattern pattern = Pattern.compile("Walk to (.+)|Bus towards (.+)|Subway towards (.+)|(.+)");
-
-        // Match the pattern against the input direction
-        Matcher matcher = pattern.matcher(direction);
-
-        // Find the location information
-        if (matcher.find()) {
-            // Choose the group that has a non-null match (non-empty location)
-            for (int i = 1; i <= matcher.groupCount(); i++) {
-                if (matcher.group(i) != null) {
-                    return matcher.group(i).trim();
-                }
-            }
-        }
-
-        // Return null if no location information is found
-        return null;
-    }
-
-    public FetchRoutesCallback createFetchRoutesCallback(View view) {
-        return new FetchRoutesCallback() {
-            @Override
-            public void onResponse(RouteItem routeItem) {
-                getActivity().runOnUiThread(() -> {
-                    dayRoutes = new ArrayList<>();
-                    dayRoutes.add(routeItem);
-                    routesView = view.findViewById(R.id.routes_view);
-                    routesView.removeAllViewsInLayout();
-                    displayRoutes(view, getContext(),"");
-                });
-            }
-
-            @Override
-            public void onError() {
-                getActivity().runOnUiThread(() -> {
-                    TextView emptyRoutes = new TextView(getContext());
-                    emptyRoutes.setText("There are no routes for this day");
-                    transitFriendButton.setEnabled(false);
-                    routesView = view.findViewById(R.id.routes_view);
-                    routesView.removeAllViewsInLayout();
-                    routesView.addView(emptyRoutes);
-                });
-            }
-        };
-    }
+//    public FetchRoutesCallback createFetchRoutesCallback(View view) {
+//        return new FetchRoutesCallback() {
+//            @Override
+//            public void onResponse(RouteItem routeItem) {
+//                getActivity().runOnUiThread(() -> {
+//                    dayRoutes = new ArrayList<>();
+//                    dayRoutes.add(routeItem);
+//                    routesView = view.findViewById(R.id.routes_view);
+//                    routesView.removeAllViewsInLayout();
+//                    displayRoutes(view, getContext(),"");
+//                });
+//            }
+//
+//            @Override
+//            public void onError() {
+//                getActivity().runOnUiThread(() -> {
+//                    TextView emptyRoutes = new TextView(getContext());
+//                    emptyRoutes.setText("There are no routes for this day");
+//                    transitFriendButton.setEnabled(false);
+//                    routesView = view.findViewById(R.id.routes_view);
+//                    routesView.removeAllViewsInLayout();
+//                    routesView.addView(emptyRoutes);
+//                });
+//            }
+//        };
+//    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         currentDay = new Date();
-        dayTextFormatter = new SimpleDateFormat("E, dd MMM");
+        dayTextFormatter = new SimpleDateFormat("MMM dd");
         account = User.getCurrentAccount();
         apiCall = new APICaller();
     }
@@ -336,9 +492,9 @@ public class RoutesFragment extends Fragment {
                     }
                     RouteItem routeItem = new RouteItem(transitItemList, stepsList, destinationAddress);
                     System.out.println("DAYROUTES WITH FRIEND");
-                    dayRoutes.add(routeItem);
+                    // dayRoutes.add(routeItem);
                     getActivity().runOnUiThread(() -> {
-                        callback.execute();
+                        callback.execute(routeItem);
                     });
                 } catch (Exception e){
                     getActivity().runOnUiThread(() -> {
@@ -380,57 +536,56 @@ public class RoutesFragment extends Fragment {
         Button nextDayButton = view.findViewById(R.id.next_day_route);
         nextDayButton.setEnabled(true);
         currentDayText = view.findViewById(R.id.current_day_text_route);
-        currentDayText.setText(dayTextFormatter.format(currentDay));
-        transitFriendButton = view.findViewById(R.id.transit_friend_button);
+        currentDayText.setText("Week of "+ dayTextFormatter.format(currentDay));
 
-        transitFriendButton.setOnClickListener(v -> {
-            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(requireContext());
-            alertDialogBuilder.setTitle("Friend List");
-            friendNames = fetchFriendsList();
-            alertDialogBuilder.setItems(friendNames, (dialog, which) -> {
-                String selectedFriend = friendNames[which];
-                fetchFriendRoutes("", parseEmail(selectedFriend), () -> {
-                    routesView = view.findViewById(R.id.routes_view);
-                    routesView.removeAllViewsInLayout();
-                    displayRoutes(view, getContext(), "With " + selectedFriend);
+//        transitFriendButton.setOnClickListener(v -> {
+//            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(requireContext());
+//            alertDialogBuilder.setTitle("Friend List");
+//            friendNames = fetchFriendsList();
+//            alertDialogBuilder.setItems(friendNames, (dialog, which) -> {
+//                String selectedFriend = friendNames[which];
+//                fetchFriendRoutes("", parseEmail(selectedFriend), () -> {
+//                    routesView = view.findViewById(R.id.routes_view);
+//                    routesView.removeAllViewsInLayout();
+//                    displayRoutes(view, getContext(), "With " + selectedFriend);
+//
+//                });
+//            });
+//
+//            alertDialogBuilder.setPositiveButton("Find matching commuters", (dialog, which) -> {
+//                // Add logic to handle the button click
+//                // You can perform any actions you need when the button is clicked
+//                // For example, start the process of finding matching commuters
+//                System.out.println("MATCHING COMMUTERS");
+//            });
+//
+//            // Create and show the AlertDialog
+//            AlertDialog alertDialog = alertDialogBuilder.create();
+//            alertDialog.show();
+//
+//        });
 
-                });
-            });
-
-            alertDialogBuilder.setPositiveButton("Find matching commuters", (dialog, which) -> {
-                // Add logic to handle the button click
-                // You can perform any actions you need when the button is clicked
-                // For example, start the process of finding matching commuters
-                System.out.println("MATCHING COMMUTERS");
-            });
-
-            // Create and show the AlertDialog
-            AlertDialog alertDialog = alertDialogBuilder.create();
-            alertDialog.show();
-
-        });
-
-        FetchRoutesCallback fetchRoutesCallback = createFetchRoutesCallback(view);
+        FetchWeeklyRoutesCallback fetchWeeklyRoutesCallback = createFetchWeeklyRoutesCallback(view);
 
         previousDayButton.setOnClickListener(v -> {
-            getDay(-1, fetchRoutesCallback);
+            getDay(-1, fetchWeeklyRoutesCallback);
         });
 
         nextDayButton.setOnClickListener(v -> {
-            getDay(1, fetchRoutesCallback);
+            getDay(1, fetchWeeklyRoutesCallback);
         });
 
-        fetchRoutes(new Date(), fetchRoutesCallback);
+        fetchWeeklyRoutes(new Date(), fetchWeeklyRoutesCallback);
         return view;
     }
 
-    private void getDay(int gap, FetchRoutesCallback callback) {
+    private void getDay(int gap, FetchWeeklyRoutesCallback callback) {
         java.util.Calendar calendar =  java.util.Calendar.getInstance();
         calendar.setTime(currentDay);
-        calendar.add( java.util.Calendar.DAY_OF_YEAR, gap);
+        calendar.add(Calendar.WEEK_OF_YEAR, gap);
         Date newDay = calendar.getTime();
         updateDateDisplay(newDay);
-        fetchRoutes(newDay, callback);
+        fetchWeeklyRoutes(newDay, callback);
     }
 
     private void showFriendRouteError() {
@@ -440,15 +595,44 @@ public class RoutesFragment extends Fragment {
     }
 
     // NO CHATGPT
-    private void updateDateDisplay(Date day){
+//    private void updateDateDisplay(Date day){
+//        Date today = new Date();
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//        if (sdf.format(today).equals(sdf.format(day))) {
+//            previousDayButton.setEnabled(false);
+//        } else {
+//            previousDayButton.setEnabled(true);
+//        }
+//        currentDay = day;
+//        currentDayText.setText(dayTextFormatter.format(day));
+//    }
+    private void updateDateDisplay(Date day) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(day);
+
+        // Check if the input date is not already the start of the week (Sunday)
+        if (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
+            // If not, set the calendar to the start of the week (Sunday)
+            setToMinimumTime(calendar);
+        }
+
+        // Get the first day of the week
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+        setToMinimumTime(calendar);
+
         Date today = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
         if (sdf.format(today).equals(sdf.format(day))) {
             previousDayButton.setEnabled(false);
         } else {
             previousDayButton.setEnabled(true);
         }
+
         currentDay = day;
-        currentDayText.setText(dayTextFormatter.format(day));
+
+        // Format the date as "Week of MM dd"
+        SimpleDateFormat weekFormat = new SimpleDateFormat("MMM dd");
+        currentDayText.setText("Week of " + weekFormat.format(calendar.getTime()));
     }
 }

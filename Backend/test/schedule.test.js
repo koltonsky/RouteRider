@@ -5,7 +5,7 @@ const app = require('../server'); // Replace with the actual path to your Expres
 //const user = require('../path/to/your/user');
 */
 const supertest = require('supertest');
-const { app } = require('../server'); // Replace with the actual path to your Express app
+const { app, stopSSLServer } = require('../server'); // Replace with the actual path to your Express app
 const request = supertest(app);
 
 //jest.mock('mongodb');
@@ -47,7 +47,7 @@ const userEmail = 'koltonluu@gmail.com';
       await client.close();
     }
     //closeServer();
-    //stopSSLServer();
+    stopSSLServer();
   });
   
   beforeEach(() => {

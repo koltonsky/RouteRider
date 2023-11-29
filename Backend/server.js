@@ -695,6 +695,7 @@ function connectToDatabase() {
 //connectToDatabase();
 // Usage:
 
+/*
 connectToDatabase()
 
   .then(() => {
@@ -707,7 +708,7 @@ connectToDatabase()
   //  console.error('Error starting or stopping server:', error);
   //}
   );
-  
+  */
   
 //stopSSLServer();
 
@@ -1747,4 +1748,4 @@ function compareTimeStrings(timeStr1, timeStr2) {
   return formattedTimeStr1 === formattedTimeStr2;
 }
 
-module.exports = { app, sendNotification, findUserToken, stopSSLServer, checkLiveTransitTime };
+module.exports = { app, sendNotification, findUserToken, connectToDatabase, stopSSLServer, checkLiveTransitTime };

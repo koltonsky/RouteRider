@@ -1,7 +1,8 @@
 const { MongoClient } = require('mongodb');
 
+
 const supertest = require('supertest');
-const { app, stopSSLServer } = require('../server'); // Replace with the actual path to your Express app
+const { app, stopSSLServer, sslServer} = require('../server'); // Replace with the actual path to your Express app
 const request = supertest(app);
 
 const { findUserToken, checkLiveTransitTime } = require('../server');
@@ -728,4 +729,3 @@ describe('Create a transit route for a single user', () => {
         expect(response.body).toEqual({message: 'No matching date exists in user schedule'});
     });
 });
-

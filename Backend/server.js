@@ -604,31 +604,8 @@ const sslServer = https.createServer(
 */
 
 let sslServer;
-/*function startSSLServer() {
-  sslServer = https.createServer(
-    {
-      key: fs.readFileSync(path.join(__dirname, 'certification', 'test_key.key')),
-      cert: fs.readFileSync(path.join(__dirname, 'certification', 'certificate.pem')),
-    },
-    app
-  );
-
-  sslServer.listen(port, () => console.log('Secure server :) on port ' + port));
-}
-connectToDatabase();
-
-function stopSSLServer() {
-  console.log('Stopping SSL server...');
-  if (sslServer) {
-    sslServer.close(() => {
-      console.log('Secure server stopped.');
-    });
-  }
-}
-*/
 
 async function startSSLServer() {
-  //try {
     const [key, cert] = await Promise.all([
       readFile(path.join(__dirname, 'certification', 'test_key.key')),
       readFile(path.join(__dirname, 'certification', 'certificate.pem')),
@@ -639,7 +616,6 @@ async function startSSLServer() {
     await serverListen.call(sslServer, port);
 
     console.log('Secure server :) on port ' + port);
-  //} catch (error) {
   //  console.error('Error starting the server:', error);
   //  throw error; // Rethrow the error to propagate it to the caller
   //} 
@@ -648,46 +624,25 @@ async function startSSLServer() {
 
 async function stopSSLServer() {
   return new Promise(async (resolve) => {
-    //try {
       if (sslServer) {
         sslServer.close(() => {
           console.log('Secure server stopped.');
           resolve();
         });
-      }// else {
-      //  resolve();
-      //}
-    //} catch (error) {
-    //  console.error('Error stopping the server:', error);
-    //  resolve();
-    //}
+      }
   });
 }
 
-/*
-async function stopMongoConnection() {
-  // Add logic to stop or close the MongoDB connection
-  // For example, if you are using the 'client' object, you can do:
-  if (client) {
-    await client.close(true);
-    console.log('MongoDB connection closed.');
-  }
-}
-*/
-
 function connectToDatabase() {
   return new Promise(async (resolve, reject) => {
-    // {
+
       console.log('Connected to MongoDB');
 
       // Start the SSL server after successfully connecting to MongoDB
       await startSSLServer();
 
       resolve(); // Resolve the promise if startSSLServer completes successfully
-    } /*catch (error) {
-      console.error('Error connecting to MongoDB or starting SSL server:', error);
-      reject(error); // Reject the promise if there's an error
-    }}*/
+    }
     );
 }
 
@@ -1748,4 +1703,4 @@ function compareTimeStrings(timeStr1, timeStr2) {
   return formattedTimeStr1 === formattedTimeStr2;
 }
 
-module.exports = { app, sendNotification, findUserToken, connectToDatabase, stopSSLServer, checkLiveTransitTime };
+module.exports = { app, sendNotification, findUserToken, connectToDatabase, startSSLServer, sslServer, stopSSLServer, checkLiveTransitTime };

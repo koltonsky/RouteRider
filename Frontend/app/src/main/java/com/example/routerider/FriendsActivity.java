@@ -1,5 +1,7 @@
 package com.example.routerider;
 
+import static com.example.routerider.FriendsActivity.sendFriendRequest;
+
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -32,13 +34,9 @@ public class FriendsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_friends);
 
-        GoogleSignInAccount account = User.getCurrentAccount();
-
         Button addFriend = findViewById(R.id.add_friend_button);
         friendListDisplay = findViewById(R.id.friend_list);
         friendRequestDisplay = findViewById(R.id.friend_request_list);
-        APICaller apiCall = new APICaller();
-
         generateFriendList();
         generateFriendRequestList();
 
@@ -52,37 +50,7 @@ public class FriendsActivity extends AppCompatActivity {
                 EditText editText = dialogView.findViewById(R.id.add_friend_email);
                 String userInput = editText.getText().toString();
 
-                Map<String, Object> map = new HashMap<>();
-                map.put("email", userInput);
-                String jsonEmail = new Gson().toJson(map);
-
-                apiCall.APICall("api/userlist/" + account.getEmail() + "/friendRequest", jsonEmail, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
-                    @Override
-                    public void onResponse(final String responseBody) {
-                        System.out.println("BODY: " + responseBody);
-
-                        Map<String, Object> requestMap = new HashMap<>();
-                        requestMap.put("receiverEmail", userInput);
-                        requestMap.put("senderName", account.getDisplayName());
-                        String requestJson = new Gson().toJson(requestMap);
-                        apiCall.APICall("api/send-friend-notification", requestJson, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
-                            @Override
-                            public void onResponse(String responseBody) {
-                                System.out.println("BODY: " + responseBody);
-                            }
-
-                            @Override
-                            public void onError(String errorMessage) {
-                                System.out.println("Error: " + errorMessage);
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onError(String errorMessage) {
-                        System.out.println("Error " + errorMessage);
-                    }
-                });
+                sendFriendRequest(userInput);
 
 
 
@@ -91,6 +59,42 @@ public class FriendsActivity extends AppCompatActivity {
 
             AlertDialog dialog = builder.create();
             dialog.show();
+        });
+    }
+
+    public static void sendFriendRequest(String userInput) {
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("email", userInput);
+        String jsonEmail = new Gson().toJson(map);
+        APICaller apiCall = new APICaller();
+        GoogleSignInAccount account = User.getCurrentAccount();
+        apiCall.APICall("api/userlist/" + account.getEmail() + "/friendRequest", jsonEmail, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
+            @Override
+            public void onResponse(final String responseBody) {
+                System.out.println("BODY: " + responseBody);
+
+                Map<String, Object> requestMap = new HashMap<>();
+                requestMap.put("receiverEmail", userInput);
+                requestMap.put("senderName", account.getDisplayName());
+                String requestJson = new Gson().toJson(requestMap);
+                apiCall.APICall("api/send-friend-notification", requestJson, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
+                    @Override
+                    public void onResponse(String responseBody) {
+                        System.out.println("BODY: " + responseBody);
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+                        System.out.println("Error: " + errorMessage);
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                System.out.println("Error " + errorMessage);
+            }
         });
     }
 

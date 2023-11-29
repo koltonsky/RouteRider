@@ -1,5 +1,6 @@
 package com.example.routerider.fragments;
 
+import static com.example.routerider.FriendsActivity.sendFriendRequest;
 import static com.example.routerider.HomeActivity.fetchRoutes;
 import static com.example.routerider.HomeActivity.fetchWeeklyRoutes;
 import static com.example.routerider.HomeActivity.setToMinimumTime;
@@ -236,6 +237,66 @@ public class RoutesFragment extends Fragment {
         };
     }
 
+    private String[] fetchMatchingCommuters() {
+        List<String> friendArray  = new ArrayList<>();
+        apiCall.APICall("api/findMatchingUsers/" + account.getEmail(), "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
+            @Override
+            public void onResponse(final String responseBody) throws JSONException {
+                System.out.println("BODY: " + responseBody);
+                try {
+                    JSONObject json = new JSONObject(responseBody);
+
+                    JSONArray result = json.getJSONArray("matchingUsers");
+                    for (int i = 0; i<result.length(); i++){
+                        friendArray.add((String) result.get(i));
+                    }
+
+                    // Check if the "friendsWithNames" and "friendRequestsWithNames" keys exist in the JSON
+                    if (json.has("friendsWithNames") && json.has("friendRequestsWithNames")) {
+                        ProfileFragment.friendList = json.getJSONArray("friendsWithNames");
+                        ProfileFragment.friendRequestList = json.getJSONArray("friendRequestsWithNames");
+
+                        // Check if the arrays are empty
+                        if (ProfileFragment.friendList.length() > 0) {
+                            System.out.println(ProfileFragment.friendList);
+                        } else {
+                            System.out.println("Friend list is empty.");
+                        }
+
+                        if (ProfileFragment.friendRequestList.length() > 0) {
+                            System.out.println(ProfileFragment.friendRequestList);
+                        } else {
+                            System.out.println("Friend request list is empty.");
+                        }
+
+                    } else {
+                        System.out.println("The JSON object doesn't contain the expected keys.");
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                System.out.println("Error " + errorMessage);
+            }
+        });
+//        for (int i = 0; i < ProfileFragment.friendList.length(); i++) {
+//            try {
+//                JSONObject friend = ProfileFragment.friendList.getJSONObject(i);
+//
+//                String email = friend.getString("email");
+//                String name = friend.getString("name");
+//                friendArray.add(name + " (" + email + ")");
+//
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
+//        }
+        return friendArray.toArray(new String[friendArray.size()]);
+    }
+
     private void displayWeeklyRoutes(List<RouteItem> routes, View view, Context context) {
         LayoutInflater inflater = LayoutInflater.from(context);
         routesView = view.findViewById(R.id.routes_view);
@@ -341,10 +402,14 @@ public class RoutesFragment extends Fragment {
                 });
 
                 alertDialogBuilder.setPositiveButton("Find matching commuters", (dialog, which) -> {
-                    // Add logic to handle the button click
-                    // You can perform any actions you need when the button is clicked
-                    // For example, start the process of finding matching commuters
                     System.out.println("MATCHING COMMUTERS");
+                    AlertDialog.Builder otherAlertDialogBuilder = new AlertDialog.Builder(requireContext());
+                    otherAlertDialogBuilder.setTitle("Matching Commuters");
+                    String[] matchingCommuterNames = fetchMatchingCommuters();
+                    otherAlertDialogBuilder.setItems(matchingCommuterNames, (dialog2, which2) -> {
+                        String selectedFriend = matchingCommuterNames[which2];
+                        sendFriendRequest(selectedFriend);
+                    });
                 });
 
                 // Create and show the AlertDialog

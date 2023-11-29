@@ -260,14 +260,10 @@ async function findMatchingUsers(userEmail) {
         return []; // Return an empty array in case of an error
     }
 }
-*/
-async function findMatchingUsers(userEmail) {
+*/async function findMatchingUsers(userEmail) {
     //try {
         // Step 1: Get the first events for the user
         const userFirstEvents = await getFirstEventsOfEachDay(userEmail);
-
-        //console.log('User First Events:');
-        //console.log(userFirstEvents);
 
         // Step 2: Find other emails, excluding the user's email
         const otherEmails = await findOtherEmails(userEmail);
@@ -280,16 +276,17 @@ async function findMatchingUsers(userEmail) {
             // Get the first events of the day for the current email
             const firstEventsOfTheDay = await getFirstEventsOfEachDay(email);
 
-            //console.log(`First Events of the Day for ${email}:`);
-            //console.log(firstEventsOfTheDay);
-
             // Step 5: Compare the events and add email to the list if conditions match
             for (const userEvent of userFirstEvents.events) {
                 for (const otherEvent of firstEventsOfTheDay.events) {
+                    // Calculate the time difference in milliseconds
+                    const timeDifference = Math.abs(new Date(userEvent.event.startTime) - new Date(otherEvent.event.startTime));
+
+                    // Check if the time difference is within a 4-hour range (4 * 60 * 60 * 1000 milliseconds)
                     if (
                         userEvent.event.address.slice(0, 3) === 'UBC' &&
                         otherEvent.event.address.slice(0, 3) === 'UBC' &&
-                        userEvent.event.startTime === otherEvent.event.startTime
+                        timeDifference <= 4 * 60 * 60 * 1000
                     ) {
                         matchingUsers.add(email);
                         break; // Once a match is found, no need to check other events for this email
@@ -298,13 +295,10 @@ async function findMatchingUsers(userEmail) {
             }
         }
 
-        //console.log('Users with matching events:');
-        //console.log(matchingUsers);
-
         return matchingUsers;
     /*} catch (err) {
         console.error('Error:', err);
-        return []; // Return an empty array in case of an error
+        return new Set(); // Return an empty Set in case of an error
     }*/
 }
 

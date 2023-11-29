@@ -9,6 +9,7 @@
     "moment-timezone": "^0.5.43",
     "mongodb": "^6.2.0",
     "node-cron": "^3.0.2",
+    "nyc": "^15.1.0",
     "sinon": "^17.0.1"
   },
   "devDependencies": {
@@ -17,10 +18,15 @@
   },
   "scripts": {
     "test": "jest",
-    "test:coverage": "jest --coverage",
-    "test:backend": "jest Backend/test",
-    "test:user": "jest Backend/test/user.test.js",
-    "test:schedule": "jest Backend/test/schedule.test.js",
-    "test:match": "jest Backend/test/commuter_match.test.js"
+    "test:coverage": "jest --coverage --forceExit",
+    "test:backend": "jest Backend/test --forceExit",
+    "test:user": "jest Backend/test/user.test.js --forceExit",
+    "test:user-coverage": "jest Backend/test/user.test.js --forceExit --coverage",
+    "test:server-coverage": "jest Backend/test/server.test.js --forceExit --coverage",
+    "test:schedule": "jest Backend/test/schedule.test.js --forceExit",
+    "test:match": "jest Backend/test/commuter_match.test.js --forceExit",
+    "test:recommendation": "jest Backend/test/recommendation.test.js --forceExit",
+    "test:server": "jest Backend/test/server.test.js --forceExit",
+    "test:all": "jest Backend/test/user.test.js --forceExit && jest Backend/test/schedule.test.js --forceExit && jest Backend/test/commuter_match.test.js --forceExit && jest Backend/test/recommendation.test.js --forceExit && jest Backend/test/server.test.js --forceExit"
   }
 }

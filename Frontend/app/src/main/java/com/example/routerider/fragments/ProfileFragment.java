@@ -134,7 +134,7 @@ public class ProfileFragment extends Fragment {
                 Map<String, Object> newAddress = new HashMap<>();
                 newAddress.put("address", userInput);
 
-                apiCall.APICall("api/userlist/" + account.getEmail(), new Gson().toJson(newAddress), APICaller.HttpMethod.PUT, new APICaller.ApiCallback() {
+                apiCall.APICall("api/userlist/" + account.getEmail() + "/address", new Gson().toJson(newAddress), APICaller.HttpMethod.PUT, new APICaller.ApiCallback() {
                     @Override
                     public void onResponse(String responseBody) {
                         if (getActivity() != null) {

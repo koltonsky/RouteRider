@@ -38,21 +38,23 @@ const recommendation = async (addr1, addr2) => {
         client.geocode(geocodeRequest1),
         client.geocode(geocodeRequest2),
       ]);
+      /*
       console.log('response1');
       console.log(response1);
       console.log('response2');
       console.log(response2);
+      */
 
       if (response1.data.status === Status.OK) {
         coords1 = response1.data.results[0].geometry.location;
       } else {
-        console.error('Error for addr1: ', response1.data.error_message);
+        //console.error('Error for addr1: ', response1.data.error_message);
       }
 
       if (response2.data.status === Status.OK) {
         coords2 = response2.data.results[0].geometry.location;
       } else {
-        console.error('Error for addr2: ', response2.data.error_message);
+        //console.error('Error for addr2: ', response2.data.error_message);
       }
       const centerLat = (coords1.lat + coords2.lat) / 2;
       const centerLng = (coords1.lng + coords2.lng) / 2;
@@ -76,11 +78,11 @@ const recommendation = async (addr1, addr2) => {
         }
         resolve(suggestions);
       } else {
-        console.error('Error: ', response.data.error_message);
+        //console.error('Error: ', response.data.error_message);
         reject(response.data.error_message);
       }
     } catch (error) {
-      console.error('Network error: ', error);
+      //console.error('Network error: ', error);
       reject(error);
     }
   });

@@ -538,7 +538,7 @@ public class RoutesFragment extends Fragment {
                     String destinationAddress = "";
                     for (int i = 0; i < routes.length(); i++) {
                         JSONObject item = (JSONObject) routes.get(i);
-                        if (item.has("_id")) {
+                        if ( item.has("_id")) {
                             String id = item.getString("_id");
                             String type = item.getString("_type");
                             String leaveTime = item.getString("_leaveTime");

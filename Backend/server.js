@@ -347,8 +347,16 @@ app.post('/api/initReminders', async (req, res) => {
 // Find commute buddy
 app.get('/api/findMatchingUsers/:userEmail', async (req, res) => {
   const userEmail = req.params.userEmail;
-  const matchingUsers = await commuters.findMatchingUsers(userEmail);
-  res.status(200).json({ matchingUsers });
+
+  await commuters.findMatchingUsers(userEmail).then((result) => {
+    console.log("matching users result: ");
+    console.log(result);
+      return res.status(200).json({ matchingUsers: [...result] });
+    },
+    (error) => {
+      // console.log('initRouteWithFriends rejected error');
+      return res.status(400).json({ message: error });
+    });
 });
 
 // app.get('/api/initRouteWithFriends', async (req, res) => {

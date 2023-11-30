@@ -175,6 +175,7 @@ async function getFirstEventsOfEachDay(userEmail) {
 */
 
 async function findOtherEmails(userEmail) {
+    console.log("finding other emails");
     //try {
         // Find schedules excluding the user's schedule
         const schedulesExcludingUser = await client
@@ -261,12 +262,16 @@ async function findMatchingUsers(userEmail) {
     }
 }
 */async function findMatchingUsers(userEmail) {
+    console.log("finding matching users");
     //try {
         // Step 1: Get the first events for the user
         const userFirstEvents = await getFirstEventsOfEachDay(userEmail);
 
         // Step 2: Find other emails, excluding the user's email
         const otherEmails = await findOtherEmails(userEmail);
+    console.log("other emails");
+        console.log(otherEmails);
+
 
         // Step 3: Create an empty list to hold the set of users
         const matchingUsers = new Set();
@@ -288,14 +293,21 @@ async function findMatchingUsers(userEmail) {
                         otherEvent.event.address.slice(0, 3) === 'UBC' &&
                         timeDifference <= 4 * 60 * 60 * 1000
                     ) {
+                        console.log("found match: " + email);
                         matchingUsers.add(email);
                         break; // Once a match is found, no need to check other events for this email
                     }
                 }
             }
         }
-
-        return matchingUsers;
+    return new Promise((resolve, reject) => {
+        if (matchingUsers.size > 0) {
+            resolve(matchingUsers);
+        } else {
+            reject("No matching users found.");
+        }
+    }
+    );
     /*} catch (err) {
         console.error('Error:', err);
         return new Set(); // Return an empty Set in case of an error

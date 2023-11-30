@@ -163,7 +163,7 @@ describe('Send friend request notifications', () => {
     // ChatGPT usage: Yes
     test('matching email found in database, api call', async () => {
         const response = await request.post('/api/send-friend-notification').send({
-            senderName: senderName,
+            senderName,
             receiverEmail: "bad email"
         });
         

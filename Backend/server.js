@@ -455,7 +455,8 @@ const getTimeGapRecommendations = async (req, res) => {
     const addr2 = req.params.addr2;
     const result = await recommendation(addr1, addr2);
     return res.status(200).json({ suggestions: result });
-  } catch (error) {
+  } 
+  catch (error) {
     console.error('Error in /api/recommendation/timegap/:addr1/:addr2', error);
     return res.status(500).json({ error: 'An error occurred' });
   }
@@ -558,6 +559,7 @@ async function checkLiveTransitTime(
 
         req.on('error', (error) => {
           // console.error(`API request error: ${error.message}`);
+          resolve(false);
         });
 
         req.end();
@@ -1057,12 +1059,18 @@ async function initReminders(req, notificationCallback) {
 
   if (user == null) {
     errorString = 'No matching email exists in user database';
-    // console.log(errorString);
-    return { status: 400, message: errorString };
+    var returnObject = { 
+      status: 400, 
+      message: errorString 
+    };
+    return returnObject;
   } else if (schedule == null) {
     errorString = 'No schedule associated with email';
-    // console.log(errorString);
-    return { status: 400, message: errorString };
+    var returnObject = { 
+      status: 400, 
+      message: errorString 
+    };
+    return returnObject;
   }
   // console.log('initReminders(): returned schedule: ' + schedule);
   // console.log(schedule.events[0].eventName);
@@ -1193,7 +1201,11 @@ async function initReminders(req, notificationCallback) {
       }
     }
   }
-  return { status: 200, message: 'Reminders initialized' };
+  var returnObject = {
+    status: 200,
+    message: 'Reminders initialized',
+  }
+  return returnObject;
 }
 // const xdding = {
 //   body: {
@@ -1605,7 +1617,7 @@ async function checkAddressInBC(address) {
         }
         resolve(false); // Address is not within the specified radius of BC
       });
-    }).on('error', (err) => {
+    }).on('error', () => {
       // console.error('Error:', err);
       resolve(false);
     });

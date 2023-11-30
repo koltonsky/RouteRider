@@ -280,15 +280,85 @@ test('should return an empty set for a user with matching startTime but differen
 // Interface GET https://20.163.28.92:8081/api/findMatchingUsers/:userEmail
 
   describe('GET /api/findMatchingUsers/:userEmail', () => {
-          // Input: userEmail that doesn't exist
+
+    // Mock user data for testing
+    let userData;
+    let userEmail;
+  
+    // Set up the test data before running the tests
+    beforeAll(async () => {
+      userData = {
+        email: 'userendpoint@example.com',
+        // Add other schedule data properties as needed
+      };
+  
+      userEmail = userData.email;
+      const collection = client.db('ScheduleDB').collection('schedulelist');
+
+      await collection.insertOne(userData);
+  
+      // Assuming you have already connected to the MongoDB client
+      
+      // Add other schedules for testing
+      await collection.insertMany([
+        { email: 'user11@example.com', events: [{ startTime: '2023-11-21T08:00:00.000-08:00', address: 'UBC123' }] },
+        { email: 'user21@example.com', events: [{ startTime: '2023-11-21T08:00:00.000-08:00', address: 'UBC456' }] },
+        { email: 'user31@example.com', events: [{ startTime: '2023-11-22T10:00:00.000-08:00', address: 'SFU789' }] },
+      ]);
+    });
+  
+    // Clean up the test data after running all the tests
+    afterAll(async () => {
+      // Assuming you have already connected to the MongoDB client
+      const collection = client.db('ScheduleDB').collection('schedulelist');
+      await collection.deleteMany({ email: { $in: ['user11@example.com', 'user21@example.com', 'user31@example.com'] } });
+      await collection.deleteOne(userData);
+    });
+
+    // Input: userEmail exist
     // Expected status code: 200
     // Expected behavior: should return an empty set
     // Expected output: {}
     // ChatGPT usage: Yes
-    test('should return matching users', async () => {
+    test('should return matching set of matching users endpoint', async () => {
       console.log("ENDPOINT");
       // Mock data or use actual test data
-      const mockUserEmail = 'user1@example.com';
+      //const mockUserEmail = 'userabc@example.com';
+  
+      // Make a request to the endpoint
+      const response_end = await request
+        .get(`/api/findMatchingUsers/user11@example.com`);
+  
+      // Assert the response
+      expect(response_end.status).toBe(200);
+      //expect(response.body).toHaveProperty(matchingUsers);
+
+      expect(response_end.body).toEqual({"matchingUsers": ["user21@example.com"]});
+
+
+      
+      //expect(Array.isArray(response.body.matchingUsers)).toBe(false);
+
+      //expect(response.body.matchingUsers).toBe({});
+      //expect(response.body.matchingUsers).toStrictEqual({});
+
+
+      // Add more assertions based on your actual response structure
+  
+      // Cleanup or additional assertions as needed
+    });
+
+
+    
+    // Input: userEmail that doesn't exist
+    // Expected status code: 200
+    // Expected behavior: should return an empty set
+    // Expected output: {}
+    // ChatGPT usage: Yes
+    test('should return empty set of matching users', async () => {
+      console.log("ENDPOINT");
+      // Mock data or use actual test data
+      const mockUserEmail = 'userabc@example.com';
   
       // Make a request to the endpoint
       const response = await request
@@ -312,6 +382,8 @@ test('should return an empty set for a user with matching startTime but differen
   
       // Cleanup or additional assertions as needed
     });
+
+
   
     // Add more test cases as needed
   });

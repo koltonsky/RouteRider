@@ -4,10 +4,12 @@ package com.example.routerider;
 import static androidx.test.espresso.Espresso.onData;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.RootMatchers.withDecorView;
 import static androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static androidx.test.espresso.matcher.ViewMatchers.withClassName;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withParent;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
@@ -139,135 +141,135 @@ public class ManageCourseScheduleTest {
         }
 
 
-        ViewInteraction floatingButton = Espresso.onView(ViewMatchers.withId(R.id.floating_action_button));
-        floatingButton.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+        ViewInteraction floatingButton = Espresso.onView(withId(R.id.floating_action_button));
+        floatingButton.check(matches(isDisplayed()));
         floatingButton.perform(click());
 
 
-        ViewInteraction eventName = Espresso.onView(ViewMatchers.withId(R.id.event_name));
-        eventName.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+        ViewInteraction eventName = Espresso.onView(withId(R.id.event_name));
+        eventName.check(matches(isDisplayed()));
         eventName.perform(ViewActions.typeText("Test Event"), ViewActions.closeSoftKeyboard());
-        eventName.check(ViewAssertions.matches(ViewMatchers.withText("Test Event")));
+        eventName.check(matches(withText("Test Event")));
 
-        ViewInteraction eventAddress = Espresso.onView(ViewMatchers.withId(R.id.event_address));
-        eventAddress.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+        ViewInteraction eventAddress = Espresso.onView(withId(R.id.event_address));
+        eventAddress.check(matches(isDisplayed()));
         eventAddress.perform(ViewActions.typeText("Test Address"), ViewActions.closeSoftKeyboard());
-        eventAddress.check(ViewAssertions.matches(ViewMatchers.withText("Test Address")));
+        eventAddress.check(matches(withText("Test Address")));
 
-        ViewInteraction dateEditText = Espresso.onView(ViewMatchers.withId(R.id.date_edit_text));
+        ViewInteraction dateEditText = Espresso.onView(withId(R.id.date_edit_text));
         dateEditText.perform(click());
         // Close the DatePicker
-        onView(ViewMatchers.withText("OK")).perform(ViewActions.click());
+        onView(withText("OK")).perform(ViewActions.click());
 
-        Espresso.onView(ViewMatchers.withId(R.id.event_start_time))
+        Espresso.onView(withId(R.id.event_start_time))
                 .perform(ViewActions.click());
-        Espresso.onView(ViewMatchers.withClassName(Matchers.equalTo(TimePicker.class.getName())))
+        Espresso.onView(withClassName(Matchers.equalTo(TimePicker.class.getName())))
                 .perform(ViewActions.actionWithAssertions(PickerActions.setTime(23, 40)));
-        Espresso.onView(ViewMatchers.withText("OK"))
+        Espresso.onView(withText("OK"))
                 .perform(ViewActions.click());
-        Espresso.onView(ViewMatchers.withId(R.id.event_start_time))
-                .check(ViewAssertions.matches(ViewMatchers.withText("23:40")));
+        Espresso.onView(withId(R.id.event_start_time))
+                .check(matches(withText("23:40")));
 
-        Espresso.onView(ViewMatchers.withId(R.id.event_end_time))
+        Espresso.onView(withId(R.id.event_end_time))
                 .perform(ViewActions.click());
-        Espresso.onView(ViewMatchers.withClassName(Matchers.equalTo(TimePicker.class.getName())))
+        Espresso.onView(withClassName(Matchers.equalTo(TimePicker.class.getName())))
                 .perform(ViewActions.actionWithAssertions(PickerActions.setTime(23, 45)));
-        Espresso.onView(ViewMatchers.withText("OK"))
+        Espresso.onView(withText("OK"))
                 .perform(ViewActions.click());
-        Espresso.onView(ViewMatchers.withId(R.id.event_end_time))
-                .check(ViewAssertions.matches(ViewMatchers.withText("23:45")));
+        Espresso.onView(withId(R.id.event_end_time))
+                .check(matches(withText("23:45")));
 
-        onView(ViewMatchers.withText("OK")).perform(ViewActions.click());
+        onView(withText("OK")).perform(ViewActions.click());
 
 
         Thread.sleep(5000); // You may need to adjust the delay
 
-        ViewInteraction displayEventName = Espresso.onView(ViewMatchers.withId(R.id.event_name));
-        displayEventName.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-        displayEventName.check(ViewAssertions.matches(ViewMatchers.withText("Test Event")));
+        ViewInteraction displayEventName = Espresso.onView(withId(R.id.event_name));
+        displayEventName.check(matches(isDisplayed()));
+        displayEventName.check(matches(withText("Test Event")));
 
-        ViewInteraction displayEventLocation = Espresso.onView(ViewMatchers.withId(R.id.event_location));
-        displayEventLocation.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-        displayEventLocation.check(ViewAssertions.matches(ViewMatchers.withText("Test Address")));
+        ViewInteraction displayEventLocation = Espresso.onView(withId(R.id.event_location));
+        displayEventLocation.check(matches(isDisplayed()));
+        displayEventLocation.check(matches(withText("Test Address")));
 
-        ViewInteraction displayStartTime = Espresso.onView(ViewMatchers.withId(R.id.start_time));
-        displayStartTime.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-        displayStartTime.check(ViewAssertions.matches(ViewMatchers.withText("22:40")));
+        ViewInteraction displayStartTime = Espresso.onView(withId(R.id.start_time));
+        displayStartTime.check(matches(isDisplayed()));
+        displayStartTime.check(matches(withText("22:40")));
 
-        ViewInteraction displayEndTime = Espresso.onView(ViewMatchers.withId(R.id.end_time));
-        displayEndTime.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-        displayEndTime.check(ViewAssertions.matches(ViewMatchers.withText("22:45")));
+        ViewInteraction displayEndTime = Espresso.onView(withId(R.id.end_time));
+        displayEndTime.check(matches(isDisplayed()));
+        displayEndTime.check(matches(withText("22:45")));
     }
 
     // YES CHATGPT
     @Test
     public void b_editEventTest() throws InterruptedException {
-        ViewInteraction displayEventName = Espresso.onView(ViewMatchers.withId(R.id.event_name));
-        displayEventName.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-        displayEventName.check(ViewAssertions.matches(ViewMatchers.withText("Test Event")));
+        ViewInteraction displayEventName = Espresso.onView(withId(R.id.event_name));
+        displayEventName.check(matches(isDisplayed()));
+        displayEventName.check(matches(withText("Test Event")));
         displayEventName.perform(click());
 
-        ViewInteraction eventName = Espresso.onView(ViewMatchers.withId(R.id.event_name));
-        eventName.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+        ViewInteraction eventName = Espresso.onView(withId(R.id.event_name));
+        eventName.check(matches(isDisplayed()));
         eventName.perform(ViewActions.clearText());
         eventName.perform(ViewActions.typeText("Test Edit Event"), ViewActions.closeSoftKeyboard());
-        eventName.check(ViewAssertions.matches(ViewMatchers.withText("Test Edit Event")));
+        eventName.check(matches(withText("Test Edit Event")));
 
-        ViewInteraction eventAddress = Espresso.onView(ViewMatchers.withId(R.id.event_address));
-        eventAddress.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+        ViewInteraction eventAddress = Espresso.onView(withId(R.id.event_address));
+        eventAddress.check(matches(isDisplayed()));
         eventAddress.perform(ViewActions.clearText());
         eventAddress.perform(ViewActions.typeText("Test Edit Address"), ViewActions.closeSoftKeyboard());
-        eventAddress.check(ViewAssertions.matches(ViewMatchers.withText("Test Edit Address")));
+        eventAddress.check(matches(withText("Test Edit Address")));
 
-        Espresso.onView(ViewMatchers.withId(R.id.event_start_time))
+        Espresso.onView(withId(R.id.event_start_time))
                 .perform(ViewActions.click());
-        Espresso.onView(ViewMatchers.withClassName(Matchers.equalTo(TimePicker.class.getName())))
+        Espresso.onView(withClassName(Matchers.equalTo(TimePicker.class.getName())))
                 .perform(ViewActions.actionWithAssertions(PickerActions.setTime(23, 41)));
-        Espresso.onView(ViewMatchers.withText("OK"))
+        Espresso.onView(withText("OK"))
                 .perform(ViewActions.click());
-        Espresso.onView(ViewMatchers.withId(R.id.event_start_time))
-                .check(ViewAssertions.matches(ViewMatchers.withText("23:41")));
+        Espresso.onView(withId(R.id.event_start_time))
+                .check(matches(withText("23:41")));
 
-        Espresso.onView(ViewMatchers.withId(R.id.event_end_time))
+        Espresso.onView(withId(R.id.event_end_time))
                 .perform(ViewActions.click());
-        Espresso.onView(ViewMatchers.withClassName(Matchers.equalTo(TimePicker.class.getName())))
+        Espresso.onView(withClassName(Matchers.equalTo(TimePicker.class.getName())))
                 .perform(ViewActions.actionWithAssertions(PickerActions.setTime(23, 46)));
-        Espresso.onView(ViewMatchers.withText("OK"))
+        Espresso.onView(withText("OK"))
                 .perform(ViewActions.click());
-        Espresso.onView(ViewMatchers.withId(R.id.event_end_time))
-                .check(ViewAssertions.matches(ViewMatchers.withText("23:46")));
+        Espresso.onView(withId(R.id.event_end_time))
+                .check(matches(withText("23:46")));
 
-        onView(ViewMatchers.withText("OK")).perform(ViewActions.click());
+        onView(withText("OK")).perform(ViewActions.click());
 
         Thread.sleep(5000); // You may need to adjust the delay
 
-        displayEventName.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-        displayEventName.check(ViewAssertions.matches(ViewMatchers.withText("Test Edit Event")));
+        displayEventName.check(matches(isDisplayed()));
+        displayEventName.check(matches(withText("Test Edit Event")));
 
-        ViewInteraction displayEventLocation = Espresso.onView(ViewMatchers.withId(R.id.event_location));
-        displayEventLocation.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-        displayEventLocation.check(ViewAssertions.matches(ViewMatchers.withText("Test Edit Address")));
+        ViewInteraction displayEventLocation = Espresso.onView(withId(R.id.event_location));
+        displayEventLocation.check(matches(isDisplayed()));
+        displayEventLocation.check(matches(withText("Test Edit Address")));
 
-        ViewInteraction displayStartTime = Espresso.onView(ViewMatchers.withId(R.id.start_time));
-        displayStartTime.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-        displayStartTime.check(ViewAssertions.matches(ViewMatchers.withText("23:41")));
+        ViewInteraction displayStartTime = Espresso.onView(withId(R.id.start_time));
+        displayStartTime.check(matches(isDisplayed()));
+        displayStartTime.check(matches(withText("23:41")));
 
-        ViewInteraction displayEndTime = Espresso.onView(ViewMatchers.withId(R.id.end_time));
-        displayEndTime.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-        displayEndTime.check(ViewAssertions.matches(ViewMatchers.withText("23:46")));
+        ViewInteraction displayEndTime = Espresso.onView(withId(R.id.end_time));
+        displayEndTime.check(matches(isDisplayed()));
+        displayEndTime.check(matches(withText("23:46")));
     }
 
     // YES CHATGPT
     @Test
     public void c_deleteEventTest() throws InterruptedException {
-        ViewInteraction displayEventName = Espresso.onView(ViewMatchers.withId(R.id.event_name));
-        displayEventName.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-        displayEventName.check(ViewAssertions.matches(ViewMatchers.withText("Test Edit Event")));
+        ViewInteraction displayEventName = Espresso.onView(withId(R.id.event_name));
+        displayEventName.check(matches(isDisplayed()));
+        displayEventName.check(matches(withText("Test Edit Event")));
         displayEventName.perform(ViewActions.longClick());
 
-        ViewInteraction okButton = Espresso.onView(ViewMatchers.withId(android.R.id.button1));
-        okButton.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-        okButton.check(ViewAssertions.matches(ViewMatchers.withText("OK")));
+        ViewInteraction okButton = Espresso.onView(withId(android.R.id.button1));
+        okButton.check(matches(isDisplayed()));
+        okButton.check(matches(withText("OK")));
         okButton.perform(click());
 
 
@@ -280,84 +282,84 @@ public class ManageCourseScheduleTest {
 
         Thread.sleep(5000); // You may need to adjust the delay
 
-        displayEventName.check(ViewAssertions.doesNotExist());
+        displayEventName.check(doesNotExist());
     }
 
     // YES CHATGPT
     @Test
     public void d_changeEventDateTest() throws InterruptedException {
-        ViewInteraction floatingButton = Espresso.onView(ViewMatchers.withId(R.id.floating_action_button));
-        floatingButton.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+        ViewInteraction floatingButton = Espresso.onView(withId(R.id.floating_action_button));
+        floatingButton.check(matches(isDisplayed()));
         floatingButton.perform(click());
 
 
-        ViewInteraction eventName = Espresso.onView(ViewMatchers.withId(R.id.event_name));
-        eventName.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+        ViewInteraction eventName = Espresso.onView(withId(R.id.event_name));
+        eventName.check(matches(isDisplayed()));
         eventName.perform(ViewActions.typeText("Test Event"), ViewActions.closeSoftKeyboard());
-        eventName.check(ViewAssertions.matches(ViewMatchers.withText("Test Event")));
+        eventName.check(matches(withText("Test Event")));
 
-        ViewInteraction eventAddress = Espresso.onView(ViewMatchers.withId(R.id.event_address));
-        eventAddress.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+        ViewInteraction eventAddress = Espresso.onView(withId(R.id.event_address));
+        eventAddress.check(matches(isDisplayed()));
         eventAddress.perform(ViewActions.typeText("Test Address"), ViewActions.closeSoftKeyboard());
-        eventAddress.check(ViewAssertions.matches(ViewMatchers.withText("Test Address")));
+        eventAddress.check(matches(withText("Test Address")));
 
-        ViewInteraction dateEditText = Espresso.onView(ViewMatchers.withId(R.id.date_edit_text));
+        ViewInteraction dateEditText = Espresso.onView(withId(R.id.date_edit_text));
         dateEditText.perform(click());
         // Close the DatePicker
-        onView(ViewMatchers.withText("OK")).perform(ViewActions.click());
+        onView(withText("OK")).perform(ViewActions.click());
 
-        Espresso.onView(ViewMatchers.withId(R.id.event_start_time))
+        Espresso.onView(withId(R.id.event_start_time))
                 .perform(ViewActions.click());
-        Espresso.onView(ViewMatchers.withClassName(Matchers.equalTo(TimePicker.class.getName())))
+        Espresso.onView(withClassName(Matchers.equalTo(TimePicker.class.getName())))
                 .perform(ViewActions.actionWithAssertions(PickerActions.setTime(23, 50)));
-        Espresso.onView(ViewMatchers.withText("OK"))
+        Espresso.onView(withText("OK"))
                 .perform(ViewActions.click());
-        Espresso.onView(ViewMatchers.withId(R.id.event_start_time))
-                .check(ViewAssertions.matches(ViewMatchers.withText("23:50")));
+        Espresso.onView(withId(R.id.event_start_time))
+                .check(matches(withText("23:50")));
 
-        Espresso.onView(ViewMatchers.withId(R.id.event_end_time))
+        Espresso.onView(withId(R.id.event_end_time))
                 .perform(ViewActions.click());
-        Espresso.onView(ViewMatchers.withClassName(Matchers.equalTo(TimePicker.class.getName())))
+        Espresso.onView(withClassName(Matchers.equalTo(TimePicker.class.getName())))
                 .perform(ViewActions.actionWithAssertions(PickerActions.setTime(23, 52)));
-        Espresso.onView(ViewMatchers.withText("OK"))
+        Espresso.onView(withText("OK"))
                 .perform(ViewActions.click());
-        Espresso.onView(ViewMatchers.withId(R.id.event_end_time))
-                .check(ViewAssertions.matches(ViewMatchers.withText("23:52")));
+        Espresso.onView(withId(R.id.event_end_time))
+                .check(matches(withText("23:52")));
 
-        onView(ViewMatchers.withText("OK")).perform(ViewActions.click());
+        onView(withText("OK")).perform(ViewActions.click());
 
 
         Thread.sleep(5000); // You may need to adjust the delay
 
-        ViewInteraction displayEventName = Espresso.onView(ViewMatchers.withId(R.id.event_name));
-        displayEventName.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-        displayEventName.check(ViewAssertions.matches(ViewMatchers.withText("Test Event")));
+        ViewInteraction displayEventName = Espresso.onView(withId(R.id.event_name));
+        displayEventName.check(matches(isDisplayed()));
+        displayEventName.check(matches(withText("Test Event")));
 
-        ViewInteraction displayEventLocation = Espresso.onView(ViewMatchers.withId(R.id.event_location));
-        displayEventLocation.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-        displayEventLocation.check(ViewAssertions.matches(ViewMatchers.withText("Test Address")));
+        ViewInteraction displayEventLocation = Espresso.onView(withId(R.id.event_location));
+        displayEventLocation.check(matches(isDisplayed()));
+        displayEventLocation.check(matches(withText("Test Address")));
 
-        ViewInteraction displayStartTime = Espresso.onView(ViewMatchers.withId(R.id.start_time));
-        displayStartTime.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-        displayStartTime.check(ViewAssertions.matches(ViewMatchers.withText("22:50")));
+        ViewInteraction displayStartTime = Espresso.onView(withId(R.id.start_time));
+        displayStartTime.check(matches(isDisplayed()));
+        displayStartTime.check(matches(withText("22:50")));
 
-        ViewInteraction displayEndTime = Espresso.onView(ViewMatchers.withId(R.id.end_time));
-        displayEndTime.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-        displayEndTime.check(ViewAssertions.matches(ViewMatchers.withText("22:52")));
+        ViewInteraction displayEndTime = Espresso.onView(withId(R.id.end_time));
+        displayEndTime.check(matches(isDisplayed()));
+        displayEndTime.check(matches(withText("22:52")));
 
-        displayEventName.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-        displayEventName.check(ViewAssertions.matches(ViewMatchers.withText("Test Event")));
+        displayEventName.check(matches(isDisplayed()));
+        displayEventName.check(matches(withText("Test Event")));
         displayEventName.perform(click());
 
-        eventName.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+        eventName.check(matches(isDisplayed()));
         eventName.perform(ViewActions.clearText());
         eventName.perform(ViewActions.typeText("Test Edit Event"), ViewActions.closeSoftKeyboard());
-        eventName.check(ViewAssertions.matches(ViewMatchers.withText("Test Edit Event")));
+        eventName.check(matches(withText("Test Edit Event")));
 
-        eventAddress.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+        eventAddress.check(matches(isDisplayed()));
         eventAddress.perform(ViewActions.clearText());
         eventAddress.perform(ViewActions.typeText("Test Edit Address"), ViewActions.closeSoftKeyboard());
-        eventAddress.check(ViewAssertions.matches(ViewMatchers.withText("Test Edit Address")));
+        eventAddress.check(matches(withText("Test Edit Address")));
 
         dateEditText.perform(click());
         Calendar currentDate = Calendar.getInstance();
@@ -369,51 +371,51 @@ public class ManageCourseScheduleTest {
         int monthOfYear = currentDate.get(Calendar.MONTH) + 1;
         int dayOfMonth = currentDate.get(Calendar.DAY_OF_MONTH);
 
-        Espresso.onView(ViewMatchers.withClassName(Matchers.equalTo(DatePicker.class.getName())))
+        Espresso.onView(withClassName(Matchers.equalTo(DatePicker.class.getName())))
                 .perform(PickerActions.setDate(year, monthOfYear, dayOfMonth));
 
-        Espresso.onView(ViewMatchers.withText("OK"))
+        Espresso.onView(withText("OK"))
                 .perform(ViewActions.click());
 
 
-        Espresso.onView(ViewMatchers.withId(R.id.event_start_time))
+        Espresso.onView(withId(R.id.event_start_time))
                 .perform(ViewActions.click());
-        Espresso.onView(ViewMatchers.withClassName(Matchers.equalTo(TimePicker.class.getName())))
+        Espresso.onView(withClassName(Matchers.equalTo(TimePicker.class.getName())))
                 .perform(ViewActions.actionWithAssertions(PickerActions.setTime(23, 54)));
-        Espresso.onView(ViewMatchers.withText("OK"))
+        Espresso.onView(withText("OK"))
                 .perform(ViewActions.click());
-        Espresso.onView(ViewMatchers.withId(R.id.event_start_time))
-                .check(ViewAssertions.matches(ViewMatchers.withText("23:54")));
+        Espresso.onView(withId(R.id.event_start_time))
+                .check(matches(withText("23:54")));
 
-        Espresso.onView(ViewMatchers.withId(R.id.event_end_time))
+        Espresso.onView(withId(R.id.event_end_time))
                 .perform(ViewActions.click());
-        Espresso.onView(ViewMatchers.withClassName(Matchers.equalTo(TimePicker.class.getName())))
+        Espresso.onView(withClassName(Matchers.equalTo(TimePicker.class.getName())))
                 .perform(ViewActions.actionWithAssertions(PickerActions.setTime(23, 57)));
-        Espresso.onView(ViewMatchers.withText("OK"))
+        Espresso.onView(withText("OK"))
                 .perform(ViewActions.click());
-        Espresso.onView(ViewMatchers.withId(R.id.event_end_time))
-                .check(ViewAssertions.matches(ViewMatchers.withText("23:57")));
+        Espresso.onView(withId(R.id.event_end_time))
+                .check(matches(withText("23:57")));
 
-        onView(ViewMatchers.withText("OK")).perform(ViewActions.click());
+        onView(withText("OK")).perform(ViewActions.click());
 
-        displayEventName.check(ViewAssertions.doesNotExist());
+        displayEventName.check(doesNotExist());
 
-        ViewInteraction nextDay = Espresso.onView(ViewMatchers.withId(R.id.next_day));
-        nextDay.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+        ViewInteraction nextDay = Espresso.onView(withId(R.id.next_day));
+        nextDay.check(matches(isDisplayed()));
         nextDay.perform(click());
 
-        displayEventName.check(ViewAssertions.matches(ViewMatchers.withText("Test Edit Event")));
+        displayEventName.check(matches(withText("Test Edit Event")));
     }
 
     // YES CHATGPT
     @Test
     public void addEventFailureTest() {
-        ViewInteraction floatingButton = Espresso.onView(ViewMatchers.withId(R.id.floating_action_button));
-        floatingButton.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+        ViewInteraction floatingButton = Espresso.onView(withId(R.id.floating_action_button));
+        floatingButton.check(matches(isDisplayed()));
         floatingButton.perform(click());
 
-        onView(ViewMatchers.withText("OK")).perform(ViewActions.click());
-        onView(ViewMatchers.withText("Cancel")).perform(ViewActions.click());
+        onView(withText("OK")).perform(ViewActions.click());
+        onView(withText("Cancel")).perform(ViewActions.click());
 
         String expectedToastMessageOne = "Please fill out all fields";
 
@@ -421,44 +423,44 @@ public class ManageCourseScheduleTest {
                 .inRoot(withDecorView(not(decorView)))// Here we use decorView
                 .check(matches(isDisplayed()));
 
-        floatingButton.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+        floatingButton.check(matches(isDisplayed()));
         floatingButton.perform(click());
 
-        ViewInteraction eventName = Espresso.onView(ViewMatchers.withId(R.id.event_name));
-        eventName.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+        ViewInteraction eventName = Espresso.onView(withId(R.id.event_name));
+        eventName.check(matches(isDisplayed()));
         eventName.perform(ViewActions.typeText("Test Event"), ViewActions.closeSoftKeyboard());
-        eventName.check(ViewAssertions.matches(ViewMatchers.withText("Test Event")));
+        eventName.check(matches(withText("Test Event")));
 
-        ViewInteraction eventAddress = Espresso.onView(ViewMatchers.withId(R.id.event_address));
-        eventAddress.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+        ViewInteraction eventAddress = Espresso.onView(withId(R.id.event_address));
+        eventAddress.check(matches(isDisplayed()));
         eventAddress.perform(ViewActions.typeText("Test Address"), ViewActions.closeSoftKeyboard());
-        eventAddress.check(ViewAssertions.matches(ViewMatchers.withText("Test Address")));
+        eventAddress.check(matches(withText("Test Address")));
 
-        ViewInteraction dateEditText = Espresso.onView(ViewMatchers.withId(R.id.date_edit_text));
+        ViewInteraction dateEditText = Espresso.onView(withId(R.id.date_edit_text));
         dateEditText.perform(click());
         // Close the DatePicker
-        onView(ViewMatchers.withText("OK")).perform(ViewActions.click());
+        onView(withText("OK")).perform(ViewActions.click());
 
-        Espresso.onView(ViewMatchers.withId(R.id.event_start_time))
+        Espresso.onView(withId(R.id.event_start_time))
                 .perform(ViewActions.click());
-        Espresso.onView(ViewMatchers.withClassName(Matchers.equalTo(TimePicker.class.getName())))
+        Espresso.onView(withClassName(Matchers.equalTo(TimePicker.class.getName())))
                 .perform(ViewActions.actionWithAssertions(PickerActions.setTime(11, 0)));
-        Espresso.onView(ViewMatchers.withText("OK"))
+        Espresso.onView(withText("OK"))
                 .perform(ViewActions.click());
-        Espresso.onView(ViewMatchers.withId(R.id.event_start_time))
-                .check(ViewAssertions.matches(ViewMatchers.withText("11:00")));
+        Espresso.onView(withId(R.id.event_start_time))
+                .check(matches(withText("11:00")));
 
-        Espresso.onView(ViewMatchers.withId(R.id.event_end_time))
+        Espresso.onView(withId(R.id.event_end_time))
                 .perform(ViewActions.click());
-        Espresso.onView(ViewMatchers.withClassName(Matchers.equalTo(TimePicker.class.getName())))
+        Espresso.onView(withClassName(Matchers.equalTo(TimePicker.class.getName())))
                 .perform(ViewActions.actionWithAssertions(PickerActions.setTime(11, 30)));
-        Espresso.onView(ViewMatchers.withText("OK"))
+        Espresso.onView(withText("OK"))
                 .perform(ViewActions.click());
-        Espresso.onView(ViewMatchers.withId(R.id.event_end_time))
-                .check(ViewAssertions.matches(ViewMatchers.withText("11:30")));
+        Espresso.onView(withId(R.id.event_end_time))
+                .check(matches(withText("11:30")));
 
-        onView(ViewMatchers.withText("OK")).perform(ViewActions.click());
-        onView(ViewMatchers.withText("Cancel")).perform(ViewActions.click());
+        onView(withText("OK")).perform(ViewActions.click());
+        onView(withText("Cancel")).perform(ViewActions.click());
 
         String expectedToastMessage = "Please input proper time";
 

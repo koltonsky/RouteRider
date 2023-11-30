@@ -7,6 +7,7 @@ import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.RootMatchers.withDecorView;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isEnabled;
+import static androidx.test.espresso.matcher.ViewMatchers.withClassName;
 import static androidx.test.espresso.matcher.ViewMatchers.withContentDescription;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withParent;
@@ -112,42 +113,42 @@ public class FindMatchingCommutersTest {
 
     // NO CHATGPT
     public void mockEvent(String addr) throws InterruptedException {
-        ViewInteraction floatingButton = Espresso.onView(ViewMatchers.withId(R.id.floating_action_button));
-        floatingButton.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+        ViewInteraction floatingButton = Espresso.onView(withId(R.id.floating_action_button));
+        floatingButton.check(matches(isDisplayed()));
         floatingButton.perform(click());
 
 
-        ViewInteraction eventName = Espresso.onView(ViewMatchers.withId(R.id.event_name));
-        eventName.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+        ViewInteraction eventName = Espresso.onView(withId(R.id.event_name));
+        eventName.check(matches(isDisplayed()));
         eventName.perform(ViewActions.typeText("Route Event"), ViewActions.closeSoftKeyboard());
 
-        ViewInteraction eventAddress = Espresso.onView(ViewMatchers.withId(R.id.event_address));
-        eventAddress.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+        ViewInteraction eventAddress = Espresso.onView(withId(R.id.event_address));
+        eventAddress.check(matches(isDisplayed()));
         eventAddress.perform(ViewActions.typeText(addr), ViewActions.closeSoftKeyboard());
 
-        ViewInteraction dateEditText = Espresso.onView(ViewMatchers.withId(R.id.date_edit_text));
+        ViewInteraction dateEditText = Espresso.onView(withId(R.id.date_edit_text));
         dateEditText.perform(click());
 
         Calendar calendar = Calendar.getInstance();
         int eventHour = 10;
         // Close the DatePicker
-        onView(ViewMatchers.withText("OK")).perform(ViewActions.click());
+        onView(withText("OK")).perform(ViewActions.click());
 
-        Espresso.onView(ViewMatchers.withId(R.id.event_start_time))
+        Espresso.onView(withId(R.id.event_start_time))
                 .perform(ViewActions.click());
-        Espresso.onView(ViewMatchers.withClassName(equalTo(TimePicker.class.getName())))
+        Espresso.onView(withClassName(equalTo(TimePicker.class.getName())))
                 .perform(ViewActions.actionWithAssertions(PickerActions.setTime(eventHour,0)));
-        Espresso.onView(ViewMatchers.withText("OK"))
+        Espresso.onView(withText("OK"))
                 .perform(ViewActions.click());
 
-        Espresso.onView(ViewMatchers.withId(R.id.event_end_time))
+        Espresso.onView(withId(R.id.event_end_time))
                 .perform(ViewActions.click());
-        Espresso.onView(ViewMatchers.withClassName(equalTo(TimePicker.class.getName())))
+        Espresso.onView(withClassName(equalTo(TimePicker.class.getName())))
                 .perform(ViewActions.actionWithAssertions(PickerActions.setTime(eventHour,30)));
-        Espresso.onView(ViewMatchers.withText("OK"))
+        Espresso.onView(withText("OK"))
                 .perform(ViewActions.click());
 
-        onView(ViewMatchers.withText("OK")).perform(ViewActions.click());
+        onView(withText("OK")).perform(ViewActions.click());
 
         Thread.sleep(5000); // You may need to adjust the delay
     }
@@ -156,13 +157,13 @@ public class FindMatchingCommutersTest {
         // onView(withId(R.id.schedule_tab)).perform(click());
 
         // Check if "Route Event" exists
-        ViewInteraction displayEvent1Name = Espresso.onView(ViewMatchers.withText("Route Event"));
+        ViewInteraction displayEvent1Name = Espresso.onView(withText("Route Event"));
         if (isViewDisplayed(displayEvent1Name)) {
             displayEvent1Name.perform(ViewActions.longClick());
 
-            ViewInteraction okButton = Espresso.onView(ViewMatchers.withId(android.R.id.button1));
-            okButton.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-            okButton.check(ViewAssertions.matches(ViewMatchers.withText("OK")));
+            ViewInteraction okButton = Espresso.onView(withId(android.R.id.button1));
+            okButton.check(matches(isDisplayed()));
+            okButton.check(matches(withText("OK")));
             okButton.perform(click());
 
             Thread.sleep(5000); // You may need to adjust the delay
@@ -172,7 +173,7 @@ public class FindMatchingCommutersTest {
     // YES CHATGPT
     private boolean isViewDisplayed(ViewInteraction viewInteraction) {
         try {
-            viewInteraction.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+            viewInteraction.check(matches(isDisplayed()));
             return true;
         } catch (NoMatchingViewException e) {
             return false;
@@ -224,18 +225,18 @@ public class FindMatchingCommutersTest {
         Thread.sleep(2000); // You may need to adjust the delay
 
         onView(withId(R.id.friend_button)).perform(click());
-        onView(withText("Friend List")).check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+        onView(withText("Friend List")).check(matches(isDisplayed()));
         for (String friendName : RoutesFragment.friendNames) {
-            onView(ViewMatchers.withText(friendName)).check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+            onView(withText(friendName)).check(matches(isDisplayed()));
         }
         // ViewInteraction matchingCommutersButton = onView(withText("Find matching commuters"));
-        // matchingCommutersButton.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+        // matchingCommutersButton.check(matches(isDisplayed()));
 
-        onView(ViewMatchers.withText(RoutesFragment.friendNames[0])).perform(click());
+        onView(withText(RoutesFragment.friendNames[0])).perform(click());
 
         Thread.sleep(5000);
 
-        onView(ViewMatchers.withText("With " + RoutesFragment.friendNames[0])).check(matches(isDisplayed()));
+        onView(withText("With " + RoutesFragment.friendNames[0])).check(matches(isDisplayed()));
     }
 
     // NO CHATGPT
@@ -281,16 +282,16 @@ public class FindMatchingCommutersTest {
 
         transitFriendButton.perform(click());
         Thread.sleep(1000); // You may need to adjust the delay
-        onView(withText("Friend List")).check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+        onView(withText("Friend List")).check(matches(isDisplayed()));
         for (String friendName : RoutesFragment.friendNames) {
-            Espresso.onView(ViewMatchers.withText(friendName)).check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+            Espresso.onView(withText(friendName)).check(matches(isDisplayed()));
         }
         ViewInteraction matchingCommutersButton = onView(withText("Find matching commuters"));
-        matchingCommutersButton.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+        matchingCommutersButton.check(matches(isDisplayed()));
         matchingCommutersButton.perform(click());
         Thread.sleep(5000); // You may need to adjust the delay
 
-        onView(withText("Matching Commuters")).check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+        onView(withText("Matching Commuters")).check(matches(isDisplayed()));
 
         // check that a textview with the @ symbol is displayed, then click it
         onView(withText(containsString("@")))
@@ -358,12 +359,12 @@ public class FindMatchingCommutersTest {
 
         transitFriendButton.perform(click());
         Thread.sleep(1000); // You may need to adjust the delay
-        onView(withText("Friend List")).check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+        onView(withText("Friend List")).check(matches(isDisplayed()));
         for (String friendName : RoutesFragment.friendNames) {
-            Espresso.onView(ViewMatchers.withText(friendName)).check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+            Espresso.onView(withText(friendName)).check(matches(isDisplayed()));
         }
         ViewInteraction matchingCommutersButton = onView(withText("Find matching commuters"));
-        matchingCommutersButton.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+        matchingCommutersButton.check(matches(isDisplayed()));
         matchingCommutersButton.perform(click());
         Thread.sleep(500); // You may need to adjust the delay
 

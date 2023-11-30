@@ -579,6 +579,10 @@ public class RoutesFragment extends Fragment {
                             JSONArray steps = item.getJSONArray("steps");
                             for (int j = 0; j < steps.length(); j++) {
                                 String element = steps.getString(j);
+                                if (element.contains("Joyce") || element.contains("Commercial")) {
+                                    // Replace "Walk to" with "Meet at"
+                                    element = element.replace("Walk to", "Meet at");
+                                }
                                 stepsList.add(element);
                             }
                         }

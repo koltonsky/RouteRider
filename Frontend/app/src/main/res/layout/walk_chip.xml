@@ -17,12 +17,9 @@
     />
 
     <TextView
-        android:id="@+id/walk_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Walk"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
+        android:text=""
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/icon"

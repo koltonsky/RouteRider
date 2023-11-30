@@ -5,11 +5,12 @@ const app = require('../server'); // Replace with the actual path to your Expres
 //const user = require('../path/to/your/user');
 */
 const supertest = require('supertest');
-const { app, closeServer } = require('../server'); // Replace with the actual path to your Express app
+const { app, stopSSLServer } = require('../server'); // Replace with the actual path to your Express app
 const request = supertest(app);
 
 //jest.mock('mongodb');
 
+/*
 const user = {
     "email": "newuserlol3@example.com",
     "name": "John Doe",
@@ -24,6 +25,7 @@ const user = {
   };
 
 const userEmail = 'koltonluu@gmail.com';
+*/
 //const nonExistingEmail = 'nonexistinguser@example.com';
 
 
@@ -44,7 +46,8 @@ const userEmail = 'koltonluu@gmail.com';
     if (client) {
       await client.close();
     }
-    closeServer();
+    //closeServer();
+    stopSSLServer();
   });
   
   beforeEach(() => {
@@ -112,7 +115,7 @@ const userEmail = 'koltonluu@gmail.com';
 describe('GET /api/schedulelist/:email', () => {
     // Mock schedule data for testing
     const scheduleData = {
-      email: 'test@example.com',
+      email: 'testschedule@example.com',
       // ... other schedule properties
     };
   
@@ -251,7 +254,7 @@ describe('GET /api/schedulelist/:email', () => {
   describe('POST /api/schedulelist/:email', () => {
     // Mock user data for testing
     const scheduleData = {
-      email: 'test@example.com',
+      email: 'testschedule@example.com',
       events: [],
       // ... other user properties
     };
@@ -487,7 +490,7 @@ describe('DELETE /api/schedulelist/:email/:id', () => {
 
 // Interface PUT https://20.163.28.92:8081/api/schedulelist/:email
 describe('Update Schedule', () => {
-  const userEmail = 'example1@gmail.com';
+  //const userEmail = 'example1@gmail.com';
   const scheduleData1 = {
     email: 'example1@gmail.com',
     events: [

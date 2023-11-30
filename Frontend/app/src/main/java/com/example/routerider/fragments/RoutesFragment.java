@@ -204,7 +204,7 @@ public class RoutesFragment extends Fragment {
 
     public static String extractLocation(String direction) {
         // Define the pattern for the location information
-        Pattern pattern = Pattern.compile("Walk to (.+)|Bus towards (.+)|Subway towards (.+)|(.+)");
+        Pattern pattern = Pattern.compile("Meet at (.+)|Walk to (.+)|Bus towards (.+)|Subway towards (.+)|(.+)");
 
         // Match the pattern against the input direction
         Matcher matcher = pattern.matcher(direction);

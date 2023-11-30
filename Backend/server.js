@@ -1532,7 +1532,16 @@ function getLatLong(address) {
 // console.log("error");
 // console.log(error);
 // });
-// Function to check if the address is in BC, Canada
+
+
+/**
+ * Function to check if the address is in BC, Canada
+ * 
+ * @param {*} address 
+ * @returns 
+ * 
+ * ChatGPT usage: Yes
+ */
 async function checkAddressInBC(address) {
   const bcLatitude = 49.7010// Latitude for the center of BC
   const bcLongitude = -123.1552; // Longitude for the center of BC

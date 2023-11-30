@@ -282,12 +282,21 @@ public class RoutesFragment extends Fragment {
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
+                    getActivity().runOnUiThread(() -> {
+                        Toast errorToast = Toast.makeText(getContext(), "No matching commuters found.", Toast.LENGTH_SHORT);
+                        errorToast.show();
+                    });
+
                 }
             }
 
             @Override
             public void onError(String errorMessage) {
                 System.out.println("Error " + errorMessage);
+                getActivity().runOnUiThread(() -> {
+                    Toast errorToast = Toast.makeText(getContext(), "No matching commuters found.", Toast.LENGTH_SHORT);
+                    errorToast.show();
+                });
             }
         });
 //        for (int i = 0; i < ProfileFragment.friendList.length(); i++) {

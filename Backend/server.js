@@ -316,12 +316,12 @@ function sendNotification(message) {
     .messaging()
     .send(message)
     .then((response) => {
-      // console.log('Successfully sent message:' + response);
+       console.log('Successfully sent message:' + response);
       // res.status(200).json({message: 'Successfully sent friend request notification'});
       return 1;
     })
     .catch((error) => {
-      // console.error('Error sending message:', error);
+       console.error('Error sending message:', error);
       // res.status(400).json(error);
       return 0;
     });

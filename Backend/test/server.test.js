@@ -806,3 +806,182 @@ describe('Create a transit route for a single user', () => {
         expect(response.body).toEqual({message: 'Destination address must be in British Columbia, Canada'});
     });
 });
+
+
+
+// Interface GET https://20.163.28.92:8081/api/recommendation/routes/:email/:date1/:date2
+describe('Create a transit route for a single user over a week', () => {
+    const dummy_schedule = {
+        email: 'dummy@example.com',
+        events: [
+            {
+                address: 'UBC Nest Building, Room 360',
+                calendarID: 'koltonluu@gmail.com',
+                endTime: '2023-12-03T17:00:00.000-07:00',
+                eventName: 'Club Meeting',
+                geolocation: { latitude: 0, longitude: 0 },
+                id: '_64p36d1h6osjgchm6cp3gchk68r62oj3cgpj4d1m64tr_20231101T223000Z',
+                startTime: '2023-12-03T15:30:00.000-07:00',
+            },
+            {
+                address: 'UBC Nest Building, Room 360',
+                calendarID: 'koltonluu@gmail.com',
+                endTime: '2023-12-13T17:00:00.000-07:00',
+                eventName: 'Club Meeting',
+                geolocation: { latitude: 0, longitude: 0 },
+                id: '_64p36d1h6osjgchm6cp3gchk68r62oj3cgpj4d1m64tr_20231101T223000Z',
+                startTime: '2023-12-13T15:30:00.000-07:00',
+            },
+        ],
+    };
+    const dummy_schedule3 = {
+        email: 'dummy3@example.com',
+        events: [
+            {
+                address: 'fake address',
+                calendarID: 'koltonluu@gmail.com',
+                endTime: '2023-12-13T17:00:00.000-07:00',
+                eventName: 'Club Meeting',
+                geolocation: { latitude: 0, longitude: 0 },
+                id: '_64p36d1h6osjgchm6cp3gchk68r62oj3cgpj4d1m64tr_20231101T223000Z',
+                startTime: '2023-12-13T15:30:00.000-07:00',
+            },
+        ],
+    };
+    const dummy_schedule4 = {
+        email: 'dummy4@example.com',
+        events: [
+            {
+                address: 'fake address',
+                calendarID: 'koltonluu@gmail.com',
+                endTime: '2023-12-13T17:00:00.000-07:00',
+                eventName: 'Club Meeting',
+                geolocation: { latitude: 0, longitude: 0 },
+                id: '_64p36d1h6osjgchm6cp3gchk68r62oj3cgpj4d1m64tr_20231101T223000Z',
+                startTime: '2023-12-13T15:30:00.000-07:00',
+            },
+        ],
+    };
+
+    const dummy_user = {
+        email: 'dummy@example.com',
+        name: 'John Doe',
+        address: '5870 Rumble Street, Burnaby, BC',
+        friends: ['friend1@example.com', 'friend2@example.com'],
+    };
+
+    const dummy_user2 = {
+        email: 'dummy2@example.com', // fake email, wont work with google authentication
+        name: 'Leon Guo',
+        address: '7746 Berkley Street, Burnaby, BC',
+        friends: ['friend1@example.com', 'friend2@example.com'],
+    };
+
+    const dummy_user3 = {
+        email: 'dummy3@example.com', // fake email, wont work with google authentication
+        name: 'Leon Guo',
+        address: 'fake address',
+        friends: ['friend1@example.com', 'friend2@example.com'],
+    };
+
+    const dummy_user4 = {
+        email: 'dummy4@example.com', // fake email, wont work with google authentication
+        name: 'Leon Guo',
+        address: 'Burnaby, BC',
+        friends: ['friend1@example.com', 'friend2@example.com'],
+    };
+
+    // Set up the test data before running the tests
+    beforeAll(async () => {
+        await client.db('ScheduleDB').collection('schedulelist').insertOne(dummy_schedule)
+        await client.db('ScheduleDB').collection('schedulelist').insertOne(dummy_schedule3)
+        await client.db('ScheduleDB').collection('schedulelist').insertOne(dummy_schedule4)
+        await client.db('UserDB').collection('userlist').insertOne(dummy_user)
+        await client.db('UserDB').collection('userlist').insertOne(dummy_user2)
+        await client.db('UserDB').collection('userlist').insertOne(dummy_user3)
+        await client.db('UserDB').collection('userlist').insertOne(dummy_user4)
+    });
+    // Clean up the test data after running all the tests
+    afterAll(async () => {
+        await client.db('ScheduleDB').collection('schedulelist').deleteOne(dummy_schedule)
+        await client.db('ScheduleDB').collection('schedulelist').deleteOne(dummy_schedule3)
+        await client.db('ScheduleDB').collection('schedulelist').deleteOne(dummy_schedule4)
+        await client.db('UserDB').collection('userlist').deleteOne(dummy_user)
+        await client.db('UserDB').collection('userlist').deleteOne(dummy_user2)
+        await client.db('UserDB').collection('userlist').deleteOne(dummy_user3)
+        await client.db('UserDB').collection('userlist').deleteOne(dummy_user4)
+    });
+
+    // Input: a user email exists in UserDB and has an associated schedule in ScheduleDB, date parameter matches a date in the user's schedule
+    // Expected status code: 200
+    // Expected behavior: a commute route is returned in the form of an array
+    // ChatGPT usage: Yes
+    test('initialize route with all valid inputs', async () => {
+        const email = 'dummy@example.com';
+        const date1 = '2023-12-03';
+        const date2 = '2023-12-13';
+        const response = await request.get(`/api/recommendation/routes/${email}/${date1}/${date2}`);
+        //const response = await request.get(`/api/recommendation/routes/${email}/${date}`);
+        
+        expect(response.statusCode).toBe(200);
+        //expect(Array.isArray(response.body.routes)).toBe(true);
+    });
+
+    // Input: An email that doesn't exist in UserDB, any date
+    // Expected status code: 400
+    // Expected behavior: an error message is returned
+    // ChatGPT usage: Yes
+    test('user email does not exist in database', async () => {
+        const email = 'dummy17@example.com';
+        const date1 = '2023-12-13';
+        const date2 = '2023-12-13';
+        const response = await request.get(`/api/recommendation/routes/${email}/${date1}/${date2}`);
+        // console.log("!!!!!!!!" + response.body.message);
+        expect(response.statusCode).toBe(400);
+        expect(response.body).toEqual({message: 'An error occurred while processing the request.'});
+    });
+
+    // Input: An email that exists in UserDB but has no associated schedule in ScheduleDB, any date
+    // Expected status code: 400
+    // Expected behavior: an error message is returned
+    // ChatGPT usage: Yes
+    test('user schedule does not exist in database', async () => {
+        const email = 'dummy2@example.com';
+        const date1 = '2023-12-13';
+        const date2 = '2023-12-13';
+        const response = await request.get(`/api/recommendation/routes/${email}/${date1}/${date2}`);
+        // console.log("*******" + response.body.message);
+        expect(response.statusCode).toBe(400);
+        expect(response.body).toEqual({message: 'An error occurred while processing the request.'});
+    });
+
+    // Input: address of user does not exist in BC
+    // Expected status code: 400
+    // Expected behavior: an error message is returned
+    // ChatGPT usage: Yes
+    test('bad origin address', async () => {
+        const email = 'dummy3@example.com';
+        const date1 = '2023-12-13';
+        const date2 = '2023-12-13';
+        const response = await request.get(`/api/recommendation/routes/${email}/${date1}/${date2}`);
+        
+        expect(response.statusCode).toBe(400);
+        expect(response.body).toEqual({message: 'An error occurred while processing the request.'});
+    });
+
+    // Input: address of user's event does not exist in BC
+    // Expected status code: 400
+    // Expected behavior: an error message is returned
+    // ChatGPT usage: Yes
+    test('bad destination address', async () => {
+        const email = 'dummy4@example.com';
+        const date1 = '2023-12-13';
+        const date2 = '2023-12-13';
+        const response = await request.get(`/api/recommendation/routes/${email}/${date1}/${date2}`);
+        
+        expect(response.statusCode).toBe(400);
+        expect(response.body).toEqual({message: 'An error occurred while processing the request.'});
+    });
+});
+
+

@@ -107,7 +107,7 @@ describe('getFirstEventsOfEachDay', () => {
       // Add other schedules for testing
       await collection.insertMany([
         { email: 'users@example.com' },
-        { email: 'user1@example.com' },
+        { email: 'user1!@example.com' },
         { email: 'user2@example.com' },
         { email: 'user3@example.com' },
       ]);
@@ -117,7 +117,7 @@ describe('getFirstEventsOfEachDay', () => {
     afterAll(async () => {
       // Assuming you have already connected to the MongoDB client
       const collection = client.db('ScheduleDB').collection('schedulelist');
-      await collection.deleteMany({ email: { $in: ['users@example.com', 'user1@example.com', 'user2@example.com', 'user3@example.com'] } });
+      await collection.deleteMany({ email: { $in: ['users@example.com', 'user1!@example.com', 'user2@example.com', 'user3@example.com'] } });
     });
   
     // Input: userEmail
@@ -131,7 +131,7 @@ describe('getFirstEventsOfEachDay', () => {
       //expect(res).toHaveLength(3); // Assuming three other schedules in the test data
 
       // Add more specific assertions based on the test data
-      expect(res).toContain('user1@example.com');
+      expect(res).toContain('user1!@example.com');
       expect(res).toContain('user2@example.com');
       expect(res).toContain('user3@example.com');
     });
@@ -159,7 +159,7 @@ describe('getFirstEventsOfEachDay', () => {
       
       // Add other schedules for testing
       await collection.insertMany([
-        { email: 'user1@example.com', events: [{ startTime: '2023-11-21T08:00:00.000-08:00', address: 'UBC123' }] },
+        { email: 'user1!@example.com', events: [{ startTime: '2023-11-21T08:00:00.000-08:00', address: 'UBC123' }] },
         { email: 'user2@example.com', events: [{ startTime: '2023-11-21T08:00:00.000-08:00', address: 'UBC456' }] },
         { email: 'user3@example.com', events: [{ startTime: '2023-11-22T10:00:00.000-08:00', address: 'SFU789' }] },
       ]);
@@ -169,7 +169,7 @@ describe('getFirstEventsOfEachDay', () => {
     afterAll(async () => {
       // Assuming you have already connected to the MongoDB client
       const collection = client.db('ScheduleDB').collection('schedulelist');
-      await collection.deleteMany({ email: { $in: ['user1@example.com', 'user2@example.com', 'user3@example.com'] } });
+      await collection.deleteMany({ email: { $in: ['user1!@example.com', 'user2@example.com', 'user3@example.com'] } });
       await collection.deleteOne(userData);
     });
   
@@ -179,7 +179,7 @@ describe('getFirstEventsOfEachDay', () => {
     // Expected output: return a set with emails of users with matching events
     // ChatGPT usage: Yes
     test('should return a set with emails of users with matching events more than 0', async () => {
-      const res = await match.findMatchingUsers('user1@example.com');
+      const res = await match.findMatchingUsers('user1!@example.com');
   
       expect(res.size).toBe(1); // Assuming only one user has matching events in the test data
       expect(res.has('user2@example.com')).toBe(true);
@@ -326,14 +326,14 @@ test('should return an empty set for a user with matching startTime but differen
       //const mockUserEmail = 'userabc@example.com';
   
       // Make a request to the endpoint
-      const response_end = await request
+      const response_thing = await request
         .get(`/api/findMatchingUsers/user11@example.com`);
   
       // Assert the response
-      expect(response_end.status).toBe(200);
+      expect(response_thing.status).toBe(200);
       //expect(response.body).toHaveProperty(matchingUsers);
 
-      expect(response_end.body).toEqual({"matchingUsers": ["user21@example.com"]});
+      expect(response_thing.body).toEqual({"matchingUsers": ["user21@example.com"]});
 
 
       

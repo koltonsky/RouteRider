@@ -42,6 +42,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -52,7 +53,7 @@ import java.util.regex.Pattern;
 
 @FunctionalInterface
 interface FetchFriendRoutesCallback {
-    void execute(RouteItem routeItem);
+    void execute(RouteItem routeItem) throws ParseException;
 }
 
 public class RoutesFragment extends Fragment {
@@ -222,7 +223,11 @@ public class RoutesFragment extends Fragment {
                 getActivity().runOnUiThread(() -> {
                     routesView = view.findViewById(R.id.routes_view);
                     routesView.removeAllViewsInLayout();
-                    displayWeeklyRoutes(routes, view, getContext());
+                    try {
+                        displayWeeklyRoutes(routes, view, getContext());
+                    } catch (ParseException e) {
+                        throw new RuntimeException(e);
+                    }
                 });
             }
 
@@ -300,7 +305,7 @@ public class RoutesFragment extends Fragment {
         return friendArray.toArray(new String[friendArray.size()]);
     }
 
-    private void displayWeeklyRoutes(List<RouteItem> routes, View view, Context context) {
+    private void displayWeeklyRoutes(List<RouteItem> routes, View view, Context context) throws ParseException {
         LayoutInflater inflater = LayoutInflater.from(context);
         routesView = view.findViewById(R.id.routes_view);
 
@@ -308,21 +313,20 @@ public class RoutesFragment extends Fragment {
             TextView emptyRoutes = new TextView(context);
             emptyRoutes.setText("There are no routes for this week");
             routesView.addView(emptyRoutes);
-            transitFriendButton.setEnabled(false);
+            // transitFriendButton.setEnabled(false);
             return;
         }
 
-        transitFriendButton.setEnabled(true);
+        // transitFriendButton.setEnabled(true);
         for (RouteItem item: routes) {
             View singleRouteView  = inflater.inflate(R.layout.view_route, routesView, false);
             ImageButton expandButton = singleRouteView.findViewById(R.id.expand_button);
             LinearLayout hiddenView = singleRouteView.findViewById(R.id.hidden_view);
             CardView cardView = singleRouteView.findViewById(R.id.base_cardview);
-
-            TextView dateText = new TextView(context);
-            dateText.setText(item.getDate());
-            routesView.addView(dateText);
-
+            TextView dateText = singleRouteView.findViewById(R.id.route_date);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat dateTextFormat = new SimpleDateFormat("EEEE, MMMM dd");
+            dateText.setText(dateTextFormat.format(sdf.parse(item.getDate())));
             expandButton.setOnClickListener(v -> {
                 if (hiddenView.getVisibility() == View.VISIBLE) {
                     TransitionManager.beginDelayedTransition(cardView, new AutoTransition());
@@ -399,8 +403,8 @@ public class RoutesFragment extends Fragment {
                     fetchFriendRoutes(item.getDate(), parseEmail(selectedFriend), (RouteItem newRouteItem) -> {
                         routesView = view.findViewById(R.id.routes_view);
                         routesView.removeAllViewsInLayout();
-                        item.setFriend(parseEmail(selectedFriend), newRouteItem.getTransitItems(), newRouteItem.getSteps());
-                        // displayRoutes(view, getContext(), "With " + selectedFriend);
+                        item.setFriend(selectedFriend, newRouteItem.getTransitItems(), newRouteItem.getSteps());
+                        displayWeeklyRoutes(routes, view, context);
                     });
                 });
 
@@ -463,7 +467,22 @@ public class RoutesFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        currentDay = new Date();
+        // currentDay = new Date();
+        Calendar calendar = Calendar.getInstance();
+        Date currentDate = calendar.getTime();
+
+        // Set the day of the week to Sunday
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+
+        // Set the time to midnight
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        // Print the result
+        currentDay = calendar.getTime();
+
         dayTextFormatter = new SimpleDateFormat("MMM dd");
         account = User.getCurrentAccount();
         apiCall = new APICaller();
@@ -566,7 +585,11 @@ public class RoutesFragment extends Fragment {
                     System.out.println("DAYROUTES WITH FRIEND");
                     // dayRoutes.add(routeItem);
                     getActivity().runOnUiThread(() -> {
-                        callback.execute(routeItem);
+                        try {
+                            callback.execute(routeItem);
+                        } catch (ParseException e) {
+                            throw new RuntimeException(e);
+                        }
                     });
                 } catch (Exception e){
                     getActivity().runOnUiThread(() -> {
@@ -695,7 +718,7 @@ public class RoutesFragment extends Fragment {
         Date today = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-        if (sdf.format(today).equals(sdf.format(day))) {
+        if (today.after(day) || sdf.format(today).equals(sdf.format(day))) {
             previousDayButton.setEnabled(false);
         } else {
             previousDayButton.setEnabled(true);

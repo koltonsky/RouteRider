@@ -91,36 +91,41 @@ public class HomeActivity extends AppCompatActivity {
     }
 
 
-        public static String[] getWeekRange(Date inputDate) {
-            String[] weekRange = new String[2];
+    public static String[] getWeekRange(Date inputDate) {
+        String[] weekRange = new String[2];
 
-            // Create a calendar instance and set it to the input date
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(inputDate);
+        // Create a calendar instance and set it to the input date
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(inputDate);
 
-            // Check if the input date is earlier than the start of the week
-            if (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
-                // If so, set weekRange[0] to the current day
-                setToMinimumTime(calendar);
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                weekRange[0] = dateFormat.format(calendar.getTime());
-            } else {
-                // Otherwise, set the calendar to the start of the week (Sunday)
-                setToMinimumTime(calendar);
-                weekRange[0] = new SimpleDateFormat("yyyy-MM-dd").format(calendar.getTime());
-            }
-
-            // Set the calendar to the end of the week (Saturday)
-            calendar.add(Calendar.DAY_OF_WEEK, 6);
-            setToMaximumTime(calendar);
-
-            // Format the end date
-            weekRange[1] = new SimpleDateFormat("yyyy-MM-dd").format(calendar.getTime());
-
-            return weekRange;
+        // Check if the input date is earlier than today
+        Calendar todayCalendar = Calendar.getInstance();
+        if (calendar.before(todayCalendar)) {
+            // If so, set the input date to today
+            calendar.setTime(new Date());
         }
 
-        public static void setToMinimumTime(Calendar calendar) {
+        setToMinimumTime(calendar);
+
+        // Format the start date
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        weekRange[0] = dateFormat.format(calendar.getTime());
+
+        // Set the calendar to the end of the week (Saturday)
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+
+        calendar.add(Calendar.DAY_OF_WEEK, 6);
+        setToMaximumTime(calendar);
+
+        // Format the end date
+        weekRange[1] = dateFormat.format(calendar.getTime());
+
+        return weekRange;
+    }
+
+
+
+    public static void setToMinimumTime(Calendar calendar) {
             calendar.set(Calendar.HOUR_OF_DAY, 0);
             calendar.set(Calendar.MINUTE, 0);
             calendar.set(Calendar.SECOND, 0);

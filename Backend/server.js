@@ -405,27 +405,34 @@ const getRecommendedRoutes = async (req, res) => {
     }
   );
 };
-
 const getWeeklyRecommendedRoutes = async (req, res) => {
+  console.log('getting weekly routes');
   const email = req.params.email;
   const date1 = new Date(req.params.date1);
   const date2 = new Date(req.params.date2);
+  console.log('date1 parsed:' + date1);
+  console.log('date2 parsed:' + date2);
 
   const result = [];
-
   for (var d = date1; d <= date2; d.setDate(d.getDate() + 1)) {
-    var date = d.toISOString().split('T')[0];
-    await initRoute(email, date).then(
-      (routes) => {
-        result.push({ date, routes });
-      },
-      (error) => {
-        // console.log('initRoute rejected error ' + error);
-        return res.status(400).json({ message: error });
-      }
-    );
+    try {
+      console.log('d:' + d);
+      var date = d.toISOString().split('T')[0];
+      console.log('d parsed:' + date);
+      const routes = await initRoute(email, date);
+      console.log({ date, routes });
+      result.push({ date, routes });
+    } catch (error) {
+      console.error('Error in getWeeklyRecommendedRoutes:', error);
+    }
   }
-  return res.status(200).json({ weeklyRoutes: result });
+  if (result.length !== 0) {
+    res.status(200).json({ weeklyRoutes: result });
+  } else {
+    res
+      .status(400)
+      .json({ message: 'An error occurred while processing the request.' });
+  }
 };
 
 app.get('/api/recommendation/routes/:email/:date', getRecommendedRoutes);
@@ -732,10 +739,9 @@ function closeServer() {
 }
 */
 
-/*
 connectToDatabase();
-sslServer.listen(port, () => console.log('Secure server :) on port ' + port));
-*/
+// sslServer.listen(port, () => console.log('Secure server :) on port ' + port));
+
 // var dummy_schedule = {
 //   email: 'koltonluu@gmail.com',
 //   events: [
@@ -910,7 +916,7 @@ async function initRoute(userEmail, date) {
       }
     }
     if (timeOfFirstEvent == '' && errorString == '') {
-      errorString = 'No matching date exists in user schedule';
+      errorString = date + ': No matching date exists in user schedule';
     }
     // console.log('initRoute(): returned timeOfFirstEvent: ' + timeOfFirstEvent);
     // console.log('initRoute(): returned locationOfFirstEvent: ' + locationOfFirstEvent);
@@ -1204,7 +1210,8 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
   // var userEmail = req.body.userEmail;
   // var friendEmail = req.body.friendEmail;
   // var date = req.body.date;
-  // console.log(userEmail + " " + friendEmail + " " + date);
+  console.log('ROUTESWITHFRIENDS');
+  console.log(userEmail + ' ' + friendEmail + ' ' + date);
   var error = false;
   var errorMessage = '';
 
@@ -1321,6 +1328,8 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
       locationOfFirstEvent = locationOfFirstEvent_friend;
     }
 
+    console.log('made it here');
+
     planTransitTrip(
       meetingPoint,
       locationOfFirstEvent,
@@ -1351,18 +1360,18 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
 
         var departureTimeFromStation =
           trip.routes[0].legs[0].departure_time.text;
-        // console.log(
-        //   'initRouteWithFriends(): departureTimeFromStation: ' +
-        //     departureTimeFromStation
-        // );
+        console.log(
+          'initRouteWithFriends(): departureTimeFromStation: ' +
+            departureTimeFromStation
+        );
         var departureTimeFromStation_iso = combineDateAndTime(
           date,
           departureTimeFromStation
         );
-        // console.log(
-        //   'initRouteWithFriends(): departureTimeFromStation iso: ' +
-        //     departureTimeFromStation_iso
-        // );
+        console.log(
+          'initRouteWithFriends(): departureTimeFromStation iso: ' +
+            departureTimeFromStation_iso
+        );
         var azureTime = new Date(departureTimeFromStation_iso);
         var azureTimeToPST = azureTime.setHours(azureTime.getHours() + 7);
 
@@ -1372,12 +1381,12 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
           new Date(azureTimeToPST)
         )
           .then((trip) => {
-            // console.log(
-            //   'initRoute(): returned trip: ' +
-            //     trip +
-            //     ' ' +
-            //     trip.routes[0].legs[0].steps[0].travel_mode
-            // );
+            console.log(
+              'initRoute(): returned trip: ' +
+                trip +
+                ' ' +
+                trip.routes[0].legs[0].steps[0].travel_mode
+            );
             /* fields for object to be returned to frontend */
             var id = '';
             var leaveTime = '';
@@ -1421,14 +1430,14 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
               }
 
               more.steps.push(step.html_instructions);
-              // console.log(
-              //   'initRoute(): adding curStep to returnList ' +
-              //     id +
-              //     ' | ' +
-              //     leaveTime +
-              //     ' | ' +
-              //     type
-              // );
+              console.log(
+                'initRoute(): adding curStep to returnList ' +
+                  id +
+                  ' | ' +
+                  leaveTime +
+                  ' | ' +
+                  type
+              );
               curStep = {
                 _id: id,
                 _leaveTime: leaveTime,
@@ -1440,9 +1449,16 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
             returnList.push(curStep1);
             returnList.push(curStep2);
 
-            // returnList.forEach(element => {
-            //   console.log("initRouteWithFriends(): returnList: " + element._id + " " + element._leaveTime + " " + element._type);
-            // });
+            returnList.forEach((element) => {
+              console.log(
+                'initRouteWithFriends(): returnList: ' +
+                  element._id +
+                  ' ' +
+                  element._leaveTime +
+                  ' ' +
+                  element._type
+              );
+            });
             returnList.push(more);
             returnList[returnList.length - 1].steps.push(step1);
             returnList[returnList.length - 1].steps.push(step2);
@@ -1453,24 +1469,24 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
             returnList.push({ _destination: locationOfFirstEvent });
             resolve(returnList);
 
-            // returnList.forEach((element) => {
-            //   console.log(
-            //     'initRouteWithFriends(): returnList: ' +
-            //       element._id +
-            //       ' ' +
-            //       element._leaveTime +
-            //       ' ' +
-            //       element._type
-            //   );
-            // });
+            returnList.forEach((element) => {
+              console.log(
+                'initRouteWithFriends(): returnList: ' +
+                  element._id +
+                  ' ' +
+                  element._leaveTime +
+                  ' ' +
+                  element._type
+              );
+            });
           })
           .catch((error) => {
-            // console.log(error);
+            console.log(error);
             // reject(error);
           });
       })
       .catch((error) => {
-        // console.log(error);
+        console.log(error);
         reject(error);
       });
   });
@@ -1731,9 +1747,20 @@ function combineDateAndTime(dateString, timeString) {
 // ChatGPT usage: Yes
 function isoToCron(isoString, minutesBefore) {
   const date = new Date(isoString);
-  const cronString = `${date.getSeconds()} ${
-    date.getMinutes() - minutesBefore
-  } ${date.getHours()} ${date.getDate()} ${date.getMonth() + 1} *`;
+
+  // Subtract minutes
+  const updatedMinutes = date.getMinutes() - minutesBefore;
+
+  // Handle negative minutes
+  const minutes = updatedMinutes < 0 ? 60 + updatedMinutes : updatedMinutes;
+
+  // Adjust the hour if necessary
+  const hours = updatedMinutes < 0 ? date.getHours() - 1 : date.getHours();
+
+  const cronString = `${date.getSeconds()} ${minutes} ${hours} ${date.getDate()} ${
+    date.getMonth() + 1
+  } *`;
+
   return cronString;
 }
 

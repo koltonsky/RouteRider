@@ -36,14 +36,14 @@ public class CreateEventTask extends AsyncTask<Void, Void, Event> {
 
             String timeZone = "America/Denver"; // UTC-7 (Mountain Daylight Time)
 
-            DateTime startDateTime = new DateTime(eventDate + "T" + eventStartTime + ":00.000-07:00");
+            DateTime startDateTime = new DateTime(eventDate + "T" + eventStartTime + ":00.000-08:00");
             EventDateTime start = new EventDateTime()
                     .setDateTime(startDateTime)
                     .setTimeZone(timeZone);
             event.setStart(start);
 
             // Set the end time
-            DateTime endDateTime = new DateTime(eventDate + "T" + eventEndTime + ":00.000-07:00");
+            DateTime endDateTime = new DateTime(eventDate + "T" + eventEndTime + ":00.000-08:00");
             EventDateTime end = new EventDateTime()
                     .setDateTime(endDateTime)
                     .setTimeZone(timeZone);

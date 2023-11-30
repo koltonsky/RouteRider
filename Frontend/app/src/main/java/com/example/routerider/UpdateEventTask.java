@@ -25,6 +25,8 @@ public class UpdateEventTask extends AsyncTask<Void, Void, Event> {
             Event event = service.events().get(newEvent.getCalendarId(), newEvent.getId()).execute();
             event.setSummary(newEvent.getTitle());
 
+            event.setLocation(newEvent.getLocation());
+
             DateTime updatedStartDateTime = new DateTime(newEvent.getStartTime());
             DateTime updatedEndDateTime = new DateTime(newEvent.getEndTime());
 

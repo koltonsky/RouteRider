@@ -175,8 +175,8 @@ public class ScheduleFragment extends Fragment {
                     ScheduleItem newEvent = new ScheduleItem(
                             eventName,
                             eventAddress,
-                            eventDate + "T" + eventStartTime + ":00",
-                            eventDate + "T" + eventEndTime + ":00",
+                            eventDate + "T" + eventStartTime + ":00.000-08:00",
+                            eventDate + "T" + eventEndTime + ":00.000-08:00",
                             HelperFunc.generateRandomString(64),
                             "primary");
 
@@ -186,6 +186,7 @@ public class ScheduleFragment extends Fragment {
                         @Override
                         public void onResponse(String responseBody) {
                             System.out.println("BODY: " + responseBody);
+                            System.out.println("HIPPO TEST");
                             new CalendarAsyncTask(account).execute(calendarService);
                         }
 
@@ -580,7 +581,11 @@ public class ScheduleFragment extends Fragment {
                 context,
                 (view, year, month, dayOfMonth) -> {
                     // Handle the selected date
-                    String selectedDate = year + "-" + (month + 1) + "-" + dayOfMonth;
+                    String stringDay = String.valueOf(dayOfMonth);
+                    if(dayOfMonth < 10) {
+                        stringDay = "0" + stringDay;
+                    }
+                    String selectedDate = year + "-" + (month + 1) + "-" + stringDay;
                     date.setText(selectedDate);
                 },
                 currentYear,

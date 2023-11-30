@@ -176,9 +176,6 @@ public class ManageCourseScheduleTest {
 
         onView(withText("OK")).perform(click());
 
-
-        Thread.sleep(5000); // You may need to adjust the delay
-
         ViewInteraction displayEventName = onView(withId(R.id.event_name));
         displayEventName.check(matches(isDisplayed()));
         displayEventName.check(matches(withText("Test Event")));
@@ -189,11 +186,11 @@ public class ManageCourseScheduleTest {
 
         ViewInteraction displayStartTime = onView(withId(R.id.start_time));
         displayStartTime.check(matches(isDisplayed()));
-        displayStartTime.check(matches(withText("22:40")));
+        displayStartTime.check(matches(withText("23:40")));
 
         ViewInteraction displayEndTime = onView(withId(R.id.end_time));
         displayEndTime.check(matches(isDisplayed()));
-        displayEndTime.check(matches(withText("22:45")));
+        displayEndTime.check(matches(withText("23:45")));
     }
 
     // YES CHATGPT
@@ -267,15 +264,11 @@ public class ManageCourseScheduleTest {
         okButton.check(matches(withText("OK")));
         okButton.perform(click());
 
-
-
         String expectedToastMessage = "Successfully deleted event";
 
         onView(withText(expectedToastMessage))
                 .inRoot(withDecorView(not(decorView)))// Here we use decorView
                 .check(matches(isDisplayed()));
-
-        Thread.sleep(5000); // You may need to adjust the delay
 
         displayEventName.check(doesNotExist());
     }
@@ -336,11 +329,11 @@ public class ManageCourseScheduleTest {
 
         ViewInteraction displayStartTime = onView(withId(R.id.start_time));
         displayStartTime.check(matches(isDisplayed()));
-        displayStartTime.check(matches(withText("22:50")));
+        displayStartTime.check(matches(withText("23:50")));
 
         ViewInteraction displayEndTime = onView(withId(R.id.end_time));
         displayEndTime.check(matches(isDisplayed()));
-        displayEndTime.check(matches(withText("22:52")));
+        displayEndTime.check(matches(withText("23:52")));
 
         displayEventName.check(matches(isDisplayed()));
         displayEventName.check(matches(withText("Test Event")));

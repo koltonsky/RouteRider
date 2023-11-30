@@ -22,19 +22,22 @@
             android:id="@+id/schedule_tab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Schedule"/>
+            android:text="Schedule"
+            android:icon="@drawable/baseline_calendar_today_24"/>
 
         <com.google.android.material.tabs.TabItem
             android:id="@+id/route_tab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Routes"/>
+            android:text="Routes"
+            android:icon="@drawable/baseline_route_24"/>
 
         <com.google.android.material.tabs.TabItem
             android:id="@+id/profile_tab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Profile"/>
+            android:text="Profile"
+            android:icon="@drawable/baseline_person_24"/>
     </com.google.android.material.tabs.TabLayout>
 
 </RelativeLayout>

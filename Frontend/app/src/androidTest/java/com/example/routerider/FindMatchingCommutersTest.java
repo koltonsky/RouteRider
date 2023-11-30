@@ -2,7 +2,11 @@ package com.example.routerider;
 
 
 import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.action.ViewActions.actionWithAssertions;
 import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.action.ViewActions.closeSoftKeyboard;
+import static androidx.test.espresso.action.ViewActions.longClick;
+import static androidx.test.espresso.action.ViewActions.typeText;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.RootMatchers.withDecorView;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
@@ -11,33 +15,22 @@ import static androidx.test.espresso.matcher.ViewMatchers.withClassName;
 import static androidx.test.espresso.matcher.ViewMatchers.withContentDescription;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withParent;
-import static androidx.test.espresso.matcher.ViewMatchers.withParentIndex;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.not;
 
-import android.content.Intent;
 import android.util.Log;
 import android.view.View;
 import android.widget.TimePicker;
 
-import androidx.test.espresso.Espresso;
 import androidx.test.espresso.IdlingRegistry;
 import androidx.test.espresso.IdlingResource;
 import androidx.test.espresso.NoMatchingViewException;
-import androidx.test.espresso.ViewAssertion;
 import androidx.test.espresso.ViewInteraction;
-import androidx.test.espresso.action.ViewActions;
-import androidx.test.espresso.assertion.ViewAssertions;
 import androidx.test.espresso.contrib.PickerActions;
-import androidx.test.espresso.intent.Intents;
-import androidx.test.espresso.intent.matcher.IntentMatchers;
-import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
@@ -48,7 +41,6 @@ import androidx.test.uiautomator.UiObject2;
 
 import com.example.routerider.fragments.RoutesFragment;
 
-import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Rule;
@@ -113,42 +105,42 @@ public class FindMatchingCommutersTest {
 
     // NO CHATGPT
     public void mockEvent(String addr) throws InterruptedException {
-        ViewInteraction floatingButton = Espresso.onView(withId(R.id.floating_action_button));
+        ViewInteraction floatingButton = onView(withId(R.id.floating_action_button));
         floatingButton.check(matches(isDisplayed()));
         floatingButton.perform(click());
 
 
-        ViewInteraction eventName = Espresso.onView(withId(R.id.event_name));
+        ViewInteraction eventName = onView(withId(R.id.event_name));
         eventName.check(matches(isDisplayed()));
-        eventName.perform(ViewActions.typeText("Route Event"), ViewActions.closeSoftKeyboard());
+        eventName.perform(typeText("Route Event"), closeSoftKeyboard());
 
-        ViewInteraction eventAddress = Espresso.onView(withId(R.id.event_address));
+        ViewInteraction eventAddress = onView(withId(R.id.event_address));
         eventAddress.check(matches(isDisplayed()));
-        eventAddress.perform(ViewActions.typeText(addr), ViewActions.closeSoftKeyboard());
+        eventAddress.perform(typeText(addr), closeSoftKeyboard());
 
-        ViewInteraction dateEditText = Espresso.onView(withId(R.id.date_edit_text));
+        ViewInteraction dateEditText = onView(withId(R.id.date_edit_text));
         dateEditText.perform(click());
 
         Calendar calendar = Calendar.getInstance();
         int eventHour = 10;
         // Close the DatePicker
-        onView(withText("OK")).perform(ViewActions.click());
+        onView(withText("OK")).perform(click());
 
-        Espresso.onView(withId(R.id.event_start_time))
-                .perform(ViewActions.click());
-        Espresso.onView(withClassName(equalTo(TimePicker.class.getName())))
-                .perform(ViewActions.actionWithAssertions(PickerActions.setTime(eventHour,0)));
-        Espresso.onView(withText("OK"))
-                .perform(ViewActions.click());
+        onView(withId(R.id.event_start_time))
+                .perform(click());
+        onView(withClassName(equalTo(TimePicker.class.getName())))
+                .perform(actionWithAssertions(PickerActions.setTime(eventHour,0)));
+        onView(withText("OK"))
+                .perform(click());
 
-        Espresso.onView(withId(R.id.event_end_time))
-                .perform(ViewActions.click());
-        Espresso.onView(withClassName(equalTo(TimePicker.class.getName())))
-                .perform(ViewActions.actionWithAssertions(PickerActions.setTime(eventHour,30)));
-        Espresso.onView(withText("OK"))
-                .perform(ViewActions.click());
+        onView(withId(R.id.event_end_time))
+                .perform(click());
+        onView(withClassName(equalTo(TimePicker.class.getName())))
+                .perform(actionWithAssertions(PickerActions.setTime(eventHour,30)));
+        onView(withText("OK"))
+                .perform(click());
 
-        onView(withText("OK")).perform(ViewActions.click());
+        onView(withText("OK")).perform(click());
 
         Thread.sleep(5000); // You may need to adjust the delay
     }
@@ -157,11 +149,11 @@ public class FindMatchingCommutersTest {
         // onView(withId(R.id.schedule_tab)).perform(click());
 
         // Check if "Route Event" exists
-        ViewInteraction displayEvent1Name = Espresso.onView(withText("Route Event"));
+        ViewInteraction displayEvent1Name = onView(withText("Route Event"));
         if (isViewDisplayed(displayEvent1Name)) {
-            displayEvent1Name.perform(ViewActions.longClick());
+            displayEvent1Name.perform(longClick());
 
-            ViewInteraction okButton = Espresso.onView(withId(android.R.id.button1));
+            ViewInteraction okButton = onView(withId(android.R.id.button1));
             okButton.check(matches(isDisplayed()));
             okButton.check(matches(withText("OK")));
             okButton.perform(click());
@@ -212,11 +204,11 @@ public class FindMatchingCommutersTest {
         mockEvent("2424 Main Mall, Vancouver, BC V6T 1Z4");
         Thread.sleep(5000); // You may need to adjust the delay
 
-        ViewInteraction routeTab = Espresso.onView(allOf(withContentDescription("Routes"),
+        ViewInteraction routeTab = onView(allOf(withContentDescription("Routes"),
                         withParent(withParent(withId(R.id.tab_layout))),
                         isDisplayed()))
                 .check(matches(isDisplayed()));
-        routeTab.perform(ViewActions.click());
+        routeTab.perform(click());
 
         // Force refresh UI
         onView(withId(R.id.next_day_route)).perform(click());
@@ -271,11 +263,11 @@ public class FindMatchingCommutersTest {
         mockEvent("UBC MacLeod");
         Thread.sleep(5000); // You may need to adjust the delay
 
-        ViewInteraction routeTab = Espresso.onView(allOf(withContentDescription("Routes"),
+        ViewInteraction routeTab = onView(allOf(withContentDescription("Routes"),
                         withParent(withParent(withId(R.id.tab_layout))),
                         isDisplayed()))
                 .check(matches(isDisplayed()));
-        routeTab.perform(ViewActions.click());
+        routeTab.perform(click());
 
         ViewInteraction transitFriendButton = onView(withId(R.id.friend_button));
 
@@ -284,7 +276,7 @@ public class FindMatchingCommutersTest {
         Thread.sleep(1000); // You may need to adjust the delay
         onView(withText("Friend List")).check(matches(isDisplayed()));
         for (String friendName : RoutesFragment.friendNames) {
-            Espresso.onView(withText(friendName)).check(matches(isDisplayed()));
+            onView(withText(friendName)).check(matches(isDisplayed()));
         }
         ViewInteraction matchingCommutersButton = onView(withText("Find matching commuters"));
         matchingCommutersButton.check(matches(isDisplayed()));
@@ -347,11 +339,11 @@ public class FindMatchingCommutersTest {
         mockEvent("2500 Chem. de Polytechnique, Montreal, QC H3T 1J4");
         Thread.sleep(5000); // You may need to adjust the delay
 
-        ViewInteraction routeTab = Espresso.onView(allOf(withContentDescription("Routes"),
+        ViewInteraction routeTab = onView(allOf(withContentDescription("Routes"),
                         withParent(withParent(withId(R.id.tab_layout))),
                         isDisplayed()))
                 .check(matches(isDisplayed()));
-        routeTab.perform(ViewActions.click());
+        routeTab.perform(click());
 
         ViewInteraction transitFriendButton = onView(withId(R.id.friend_button));
 
@@ -361,7 +353,7 @@ public class FindMatchingCommutersTest {
         Thread.sleep(1000); // You may need to adjust the delay
         onView(withText("Friend List")).check(matches(isDisplayed()));
         for (String friendName : RoutesFragment.friendNames) {
-            Espresso.onView(withText(friendName)).check(matches(isDisplayed()));
+            onView(withText(friendName)).check(matches(isDisplayed()));
         }
         ViewInteraction matchingCommutersButton = onView(withText("Find matching commuters"));
         matchingCommutersButton.check(matches(isDisplayed()));

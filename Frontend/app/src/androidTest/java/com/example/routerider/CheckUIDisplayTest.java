@@ -101,7 +101,7 @@ public class CheckUIDisplayTest {
     @Test
     public void a_checkScheduleTab() {
         loginToGoogle();
-        ViewInteraction scheduleTab = Espresso.onView(allOf(withContentDescription("Schedule"),
+        ViewInteraction scheduleTab = onView(allOf(withContentDescription("Schedule"),
                 withParent(withParent(withId(R.id.tab_layout))),
                 isDisplayed()))
                 .check(matches(isDisplayed()));
@@ -118,7 +118,7 @@ public class CheckUIDisplayTest {
     @Test
     public void b_checkRouteTab() {
         loginToGoogle();
-        ViewInteraction routeTab = Espresso.onView(allOf(withContentDescription("Routes"),
+        ViewInteraction routeTab = onView(allOf(withContentDescription("Routes"),
                         withParent(withParent(withId(R.id.tab_layout))),
                         isDisplayed()))
                 .check(matches(isDisplayed()));
@@ -137,7 +137,7 @@ public class CheckUIDisplayTest {
     @Test
     public void c_checkProfileTab() {
         loginToGoogle();
-        ViewInteraction profileTab = Espresso.onView(allOf(withContentDescription("Profile"),
+        ViewInteraction profileTab = onView(allOf(withContentDescription("Profile"),
                         withParent(withParent(withId(R.id.tab_layout))),
                         isDisplayed()))
                 .check(matches(isDisplayed()));

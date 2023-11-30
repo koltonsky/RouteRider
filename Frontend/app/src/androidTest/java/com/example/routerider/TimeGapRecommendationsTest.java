@@ -2,42 +2,35 @@ package com.example.routerider;
 
 
 import static androidx.test.espresso.Espresso.onView;
-import static androidx.test.espresso.Espresso.pressBack;
+import static androidx.test.espresso.action.ViewActions.actionWithAssertions;
 import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.action.ViewActions.closeSoftKeyboard;
+import static androidx.test.espresso.action.ViewActions.longClick;
+import static androidx.test.espresso.action.ViewActions.typeText;
 import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.hasMinimumChildCount;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static androidx.test.espresso.matcher.ViewMatchers.withClassName;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withParent;
 import static androidx.test.espresso.matcher.ViewMatchers.withParentIndex;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
-//import static androidx.test.espresso.intent.Intents;
-//import static androidx.test.espresso.intent.matcher.IntentMatchers;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.not;
 
 import android.content.Intent;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.TimePicker;
 
-import androidx.test.espresso.Espresso;
 import androidx.test.espresso.IdlingRegistry;
 import androidx.test.espresso.IdlingResource;
 import androidx.test.espresso.NoMatchingViewException;
-import androidx.test.espresso.ViewAssertion;
 import androidx.test.espresso.ViewInteraction;
-import androidx.test.espresso.action.ViewActions;
-import androidx.test.espresso.assertion.ViewAssertions;
 import androidx.test.espresso.contrib.PickerActions;
 import androidx.test.espresso.intent.Intents;
 import androidx.test.espresso.intent.matcher.IntentMatchers;
-import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
@@ -47,7 +40,6 @@ import androidx.test.uiautomator.UiDevice;
 import androidx.test.uiautomator.UiObject2;
 
 import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Rule;
@@ -113,39 +105,39 @@ public class TimeGapRecommendationsTest {
     public void mockEvents(int gap, String addr1, String addr2) throws InterruptedException {
         int[][] eventTimes = computeEventTimes(gap);
 
-        ViewInteraction floatingButton = Espresso.onView(ViewMatchers.withId(R.id.floating_action_button));
-        floatingButton.check(matches(ViewMatchers.isDisplayed()));
+        ViewInteraction floatingButton = onView(withId(R.id.floating_action_button));
+        floatingButton.check(matches(isDisplayed()));
         floatingButton.perform(click());
 
 
-        ViewInteraction eventName = Espresso.onView(ViewMatchers.withId(R.id.event_name));
-        eventName.check(matches(ViewMatchers.isDisplayed()));
-        eventName.perform(ViewActions.typeText("Test Event 1"), ViewActions.closeSoftKeyboard());
+        ViewInteraction eventName = onView(withId(R.id.event_name));
+        eventName.check(matches(isDisplayed()));
+        eventName.perform(typeText("Test Event 1"), closeSoftKeyboard());
 
-        ViewInteraction eventAddress = Espresso.onView(ViewMatchers.withId(R.id.event_address));
-        eventAddress.check(matches(ViewMatchers.isDisplayed()));
-        eventAddress.perform(ViewActions.typeText(addr1), ViewActions.closeSoftKeyboard());
+        ViewInteraction eventAddress = onView(withId(R.id.event_address));
+        eventAddress.check(matches(isDisplayed()));
+        eventAddress.perform(typeText(addr1), closeSoftKeyboard());
 
-        ViewInteraction dateEditText = Espresso.onView(ViewMatchers.withId(R.id.date_edit_text));
+        ViewInteraction dateEditText = onView(withId(R.id.date_edit_text));
         dateEditText.perform(click());
         // Close the DatePicker
-        onView(ViewMatchers.withText("OK")).perform(ViewActions.click());
+        onView(withText("OK")).perform(click());
 
-        Espresso.onView(ViewMatchers.withId(R.id.event_start_time))
-                .perform(ViewActions.click());
-        Espresso.onView(ViewMatchers.withClassName(equalTo(TimePicker.class.getName())))
-                .perform(ViewActions.actionWithAssertions(PickerActions.setTime(eventTimes[0][0], eventTimes[0][1])));
-        Espresso.onView(ViewMatchers.withText("OK"))
-                .perform(ViewActions.click());
+        onView(withId(R.id.event_start_time))
+                .perform(click());
+        onView(withClassName(equalTo(TimePicker.class.getName())))
+                .perform(actionWithAssertions(PickerActions.setTime(eventTimes[0][0], eventTimes[0][1])));
+        onView(withText("OK"))
+                .perform(click());
 
-        Espresso.onView(ViewMatchers.withId(R.id.event_end_time))
-                .perform(ViewActions.click());
-        Espresso.onView(ViewMatchers.withClassName(equalTo(TimePicker.class.getName())))
-                .perform(ViewActions.actionWithAssertions(PickerActions.setTime(eventTimes[1][0], eventTimes[1][1])));
-        Espresso.onView(ViewMatchers.withText("OK"))
-                .perform(ViewActions.click());
+        onView(withId(R.id.event_end_time))
+                .perform(click());
+        onView(withClassName(equalTo(TimePicker.class.getName())))
+                .perform(actionWithAssertions(PickerActions.setTime(eventTimes[1][0], eventTimes[1][1])));
+        onView(withText("OK"))
+                .perform(click());
 
-        onView(ViewMatchers.withText("OK")).perform(ViewActions.click());
+        onView(withText("OK")).perform(click());
 
 
         Thread.sleep(5000); // You may need to adjust the delay
@@ -153,61 +145,61 @@ public class TimeGapRecommendationsTest {
         floatingButton.perform(click());
 
 
-        eventName.check(matches(ViewMatchers.isDisplayed()));
-        eventName.perform(ViewActions.typeText("Test Event 2"), ViewActions.closeSoftKeyboard());
+        eventName.check(matches(isDisplayed()));
+        eventName.perform(typeText("Test Event 2"), closeSoftKeyboard());
 
-        eventAddress.check(matches(ViewMatchers.isDisplayed()));
-        eventAddress.perform(ViewActions.typeText(addr2), ViewActions.closeSoftKeyboard());
+        eventAddress.check(matches(isDisplayed()));
+        eventAddress.perform(typeText(addr2), closeSoftKeyboard());
 
         dateEditText.perform(click());
         // Close the DatePicker
-        onView(ViewMatchers.withText("OK")).perform(ViewActions.click());
+        onView(withText("OK")).perform(click());
 
-        Espresso.onView(ViewMatchers.withId(R.id.event_start_time))
-                .perform(ViewActions.click());
-        Espresso.onView(ViewMatchers.withClassName(equalTo(TimePicker.class.getName())))
-                .perform(ViewActions.actionWithAssertions(PickerActions.setTime(eventTimes[2][0], eventTimes[2][1])));
-        Espresso.onView(ViewMatchers.withText("OK"))
-                .perform(ViewActions.click());
+        onView(withId(R.id.event_start_time))
+                .perform(click());
+        onView(withClassName(equalTo(TimePicker.class.getName())))
+                .perform(actionWithAssertions(PickerActions.setTime(eventTimes[2][0], eventTimes[2][1])));
+        onView(withText("OK"))
+                .perform(click());
 
-        Espresso.onView(ViewMatchers.withId(R.id.event_end_time))
-                .perform(ViewActions.click());
-        Espresso.onView(ViewMatchers.withClassName(equalTo(TimePicker.class.getName())))
-                .perform(ViewActions.actionWithAssertions(PickerActions.setTime(eventTimes[3][0], eventTimes[3][1])));
-        Espresso.onView(ViewMatchers.withText("OK"))
-                .perform(ViewActions.click());
+        onView(withId(R.id.event_end_time))
+                .perform(click());
+        onView(withClassName(equalTo(TimePicker.class.getName())))
+                .perform(actionWithAssertions(PickerActions.setTime(eventTimes[3][0], eventTimes[3][1])));
+        onView(withText("OK"))
+                .perform(click());
 
-        onView(ViewMatchers.withText("OK")).perform(ViewActions.click());
+        onView(withText("OK")).perform(click());
     }
     // PARTIAL CHATGPT
     public void clearEvents() throws InterruptedException {
         // Check if Test Event 1 exists
-        ViewInteraction displayEvent1Name = Espresso.onView(ViewMatchers.withText("Test Event 1"));
+        ViewInteraction displayEvent1Name = onView(withText("Test Event 1"));
         if (isViewDisplayed(displayEvent1Name)) {
-            displayEvent1Name.perform(ViewActions.longClick());
+            displayEvent1Name.perform(longClick());
 
-            ViewInteraction okButton = Espresso.onView(ViewMatchers.withId(android.R.id.button1));
-            okButton.check(matches(ViewMatchers.isDisplayed()));
-            okButton.check(matches(ViewMatchers.withText("OK")));
+            ViewInteraction okButton = onView(withId(android.R.id.button1));
+            okButton.check(matches(isDisplayed()));
+            okButton.check(matches(withText("OK")));
             okButton.perform(click());
 
             Thread.sleep(5000); // You may need to adjust the delay
         }
 
         // Check if Test Event 2 exists
-        ViewInteraction displayEvent2Name = Espresso.onView(ViewMatchers.withText("Test Event 2"));
+        ViewInteraction displayEvent2Name = onView(withText("Test Event 2"));
         if (isViewDisplayed(displayEvent2Name)) {
-            displayEvent2Name.perform(ViewActions.longClick());
-            ViewInteraction okButton = Espresso.onView(ViewMatchers.withId(android.R.id.button1));
-            okButton.check(matches(ViewMatchers.isDisplayed()));
-            okButton.check(matches(ViewMatchers.withText("OK")));
+            displayEvent2Name.perform(longClick());
+            ViewInteraction okButton = onView(withId(android.R.id.button1));
+            okButton.check(matches(isDisplayed()));
+            okButton.check(matches(withText("OK")));
             okButton.perform(click());
         }
     }
     // YES CHATGPT
     private boolean isViewDisplayed(ViewInteraction viewInteraction) {
         try {
-            viewInteraction.check(matches(ViewMatchers.isDisplayed()));
+            viewInteraction.check(matches(isDisplayed()));
             return true;
         } catch (NoMatchingViewException e) {
             return false;
@@ -310,9 +302,9 @@ public class TimeGapRecommendationsTest {
         mockEvents(30, "2424 Main Mall, Vancouver, BC V6T 1Z4", "6000 Student Union Blvd, Vancouver, BC V6T 1Z1");
         Thread.sleep(5000); // You may need to adjust the delay
 
-        ViewInteraction displayTimeGap = Espresso.onView(ViewMatchers.withId(R.id.time_gap_text));
-        displayTimeGap.check(matches(ViewMatchers.isDisplayed()));
-        displayTimeGap.check(matches(ViewMatchers.withText("Gap: 00:30")));
+        ViewInteraction displayTimeGap = onView(withId(R.id.time_gap_text));
+        displayTimeGap.check(matches(isDisplayed()));
+        displayTimeGap.check(matches(withText("Gap: 00:30")));
 
     }
 
@@ -349,7 +341,7 @@ public class TimeGapRecommendationsTest {
         mockEvents(10, "2424 Main Mall, Vancouver, BC V6T 1Z4", "6000 Student Union Blvd, Vancouver, BC V6T 1Z1");
         Thread.sleep(5000); // You may need to adjust the delay
 
-        ViewInteraction displayTimeGap = Espresso.onView(ViewMatchers.withId(R.id.time_gap_text));
+        ViewInteraction displayTimeGap = onView(withId(R.id.time_gap_text));
         displayTimeGap.check(doesNotExist());
     }
 
@@ -384,11 +376,11 @@ public class TimeGapRecommendationsTest {
         clearEvents();
         mockEvents(30, "2424 Main Mall, Vancouver, BC V6T 1Z4", "6000 Student Union Blvd, Vancouver, BC V6T 1Z1");
 
-        ViewInteraction displayTimeGap = Espresso.onView(withId(R.id.time_gap_text));
+        ViewInteraction displayTimeGap = onView(withId(R.id.time_gap_text));
         displayTimeGap.check(matches(isDisplayed()));
         displayTimeGap.check(matches(withText("Gap: 00:30")));
 
-        ViewInteraction displayViewRecommendations = Espresso.onView(withId(R.id.view_recommendations_button));
+        ViewInteraction displayViewRecommendations = onView(withId(R.id.view_recommendations_button));
         displayViewRecommendations.check(matches(isDisplayed()));
         displayViewRecommendations.check(matches(withText("Show Recommendations")));
 
@@ -437,11 +429,11 @@ public class TimeGapRecommendationsTest {
         clearEvents();
         mockEvents(30, "2424 Main Mall, Vancouver, BC V6T 1Z4", "6000 Student Union Blvd, Vancouver, BC V6T 1Z1");
 
-        ViewInteraction displayTimeGap = Espresso.onView(withId(R.id.time_gap_text));
+        ViewInteraction displayTimeGap = onView(withId(R.id.time_gap_text));
         displayTimeGap.check(matches(isDisplayed()));
         displayTimeGap.check(matches(withText("Gap: 00:30")));
 
-        ViewInteraction displayViewRecommendations = Espresso.onView(withId(R.id.view_recommendations_button));
+        ViewInteraction displayViewRecommendations = onView(withId(R.id.view_recommendations_button));
         displayViewRecommendations.check(matches(isDisplayed()));
         displayViewRecommendations.check(matches(withText("Show Recommendations")));
 
@@ -454,7 +446,7 @@ public class TimeGapRecommendationsTest {
         ViewInteraction googleMapsButton = onView(allOf(withParent(firstRecommendation), withId(R.id.maps_button)));
         Intents.init();
 
-        googleMapsButton.perform(ViewActions.click());
+        googleMapsButton.perform(click());
 
         // Verify that the correct intent was sent
         Intents.intended(IntentMatchers.hasAction(Intent.ACTION_VIEW));
@@ -496,11 +488,11 @@ public class TimeGapRecommendationsTest {
         Thread.sleep(5000); // You may need to adjust the delay
 
 
-        ViewInteraction displayTimeGap = Espresso.onView(withId(R.id.time_gap_text));
+        ViewInteraction displayTimeGap = onView(withId(R.id.time_gap_text));
         displayTimeGap.check(matches(isDisplayed()));
         displayTimeGap.check(matches(withText("Gap: 00:30")));
 
-        ViewInteraction displayViewRecommendations = Espresso.onView(withId(R.id.view_recommendations_button));
+        ViewInteraction displayViewRecommendations = onView(withId(R.id.view_recommendations_button));
         displayViewRecommendations.check(matches(isDisplayed()));
         displayViewRecommendations.check(matches(withText("Show Recommendations")));
 

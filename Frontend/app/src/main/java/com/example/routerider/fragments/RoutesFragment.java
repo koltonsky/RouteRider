@@ -1,8 +1,6 @@
 package com.example.routerider.fragments;
 
-import static androidx.test.internal.runner.junit4.statement.UiThreadStatement.runOnUiThread;
 import static com.example.routerider.FriendsActivity.sendFriendRequest;
-import static com.example.routerider.HomeActivity.fetchRoutes;
 import static com.example.routerider.HomeActivity.fetchWeeklyRoutes;
 import static com.example.routerider.HomeActivity.setToMinimumTime;
 
@@ -11,7 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Looper;
 import android.transition.AutoTransition;
 import android.transition.TransitionManager;
 import android.util.TypedValue;
@@ -28,21 +25,19 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
+
 import com.example.routerider.APICaller;
-import com.example.routerider.FetchRoutesCallback;
 import com.example.routerider.FetchWeeklyRoutesCallback;
-import com.example.routerider.FriendRequestErrorCallback;
-import com.example.routerider.FriendsActivity;
 import com.example.routerider.R;
 import com.example.routerider.RouteItem;
 import com.example.routerider.TransitItem;
 import com.example.routerider.User;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Executable;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -50,11 +45,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import okhttp3.Route;
 
 @FunctionalInterface
 interface FetchFriendRoutesCallback {
@@ -406,7 +398,6 @@ public class RoutesFragment extends Fragment {
                     JSONObject json = new JSONObject(responseBody);
                     JSONArray routes = json.getJSONArray("routes");
                     System.out.println(routes);
-                    List <RouteItem> dayRoutes = new ArrayList<>();
                     List<TransitItem> transitItemList = new ArrayList<>();
                     List<String> stepsList = new ArrayList<>();
                     String destinationAddress = "";

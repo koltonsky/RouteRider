@@ -104,19 +104,19 @@ public class RoutesFragment extends Fragment {
                         displayWeeklyRoutes(routes, view, getContext());
                     } catch (ParseException e) {
                         e.printStackTrace();
-                        handleWeeklyFetchError(view);
+                        handleFetchError(view);
                     }
                 });
             }
 
             @Override
             public void onError() {
-               handleWeeklyFetchError(view);
+               handleFetchError(view);
             }
         };
     }
 
-    private void handleWeeklyFetchError(View view) {
+    private void handleFetchError(View view) {
         getActivity().runOnUiThread(() -> {
             TextView emptyRoutes = new TextView(getContext());
             emptyRoutes.setText("There are no routes for this week.");
@@ -435,8 +435,7 @@ public class RoutesFragment extends Fragment {
                         try {
                             callback.execute(routeItem);
                         } catch (ParseException e) {
-                            throw new RuntimeException(e);
-                        }
+                            handleFetchError(getView());                        }
                     });
                 } catch (Exception e){
                     getActivity().runOnUiThread(() -> {

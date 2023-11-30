@@ -16,11 +16,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 
-import androidx.test.espresso.Espresso;
 import androidx.test.espresso.IdlingRegistry;
 import androidx.test.espresso.IdlingResource;
 import androidx.test.espresso.ViewInteraction;
-import androidx.test.espresso.action.ViewActions;
 import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -105,7 +103,7 @@ public class CheckUIDisplayTest {
                 withParent(withParent(withId(R.id.tab_layout))),
                 isDisplayed()))
                 .check(matches(isDisplayed()));
-        scheduleTab.perform(ViewActions.click());
+        scheduleTab.perform(click());
 
         onView(allOf(withId(R.id.schedule_title), withText("Schedule"))).check(matches(isDisplayed()));
         onView(allOf(withId(R.id.previous_day), withText("Back"))).check(matches(isDisplayed()));
@@ -122,7 +120,7 @@ public class CheckUIDisplayTest {
                         withParent(withParent(withId(R.id.tab_layout))),
                         isDisplayed()))
                 .check(matches(isDisplayed()));
-        routeTab.perform(ViewActions.click());
+        routeTab.perform(click());
 
         onView(allOf(withId(R.id.route_title), withText("Routes"))).check(matches(isDisplayed()));
         onView(allOf(withId(R.id.previous_day_route), withText("Back"))).check(matches(isDisplayed()));
@@ -141,7 +139,7 @@ public class CheckUIDisplayTest {
                         withParent(withParent(withId(R.id.tab_layout))),
                         isDisplayed()))
                 .check(matches(isDisplayed()));
-        profileTab.perform(ViewActions.click());
+        profileTab.perform(click());
 
         onView(allOf(withId(R.id.logout_button), withText("LOGOUT"),
                 withParent(withParent(isAssignableFrom(FrameLayout.class))),

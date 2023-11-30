@@ -103,23 +103,28 @@ public class RoutesFragment extends Fragment {
                     try {
                         displayWeeklyRoutes(routes, view, getContext());
                     } catch (ParseException e) {
-                        throw new RuntimeException(e);
+                        e.printStackTrace();
+                        handleWeeklyFetchError(view);
                     }
                 });
             }
 
             @Override
             public void onError() {
-                getActivity().runOnUiThread(() -> {
-                    TextView emptyRoutes = new TextView(getContext());
-                    emptyRoutes.setText("There are no routes for this week.");
-                    emptyRoutes.setGravity(Gravity.CENTER);
-                    routesView = view.findViewById(R.id.routes_view);
-                    routesView.removeAllViewsInLayout();
-                    routesView.addView(emptyRoutes);
-                });
+               handleWeeklyFetchError(view);
             }
         };
+    }
+
+    private void handleWeeklyFetchError(View view) {
+        getActivity().runOnUiThread(() -> {
+            TextView emptyRoutes = new TextView(getContext());
+            emptyRoutes.setText("There are no routes for this week.");
+            emptyRoutes.setGravity(Gravity.CENTER);
+            routesView = view.findViewById(R.id.routes_view);
+            routesView.removeAllViewsInLayout();
+            routesView.addView(emptyRoutes);
+        });
     }
     // NO CHATGPT
     private void fetchMatchingCommuters(FetchMatchingCommutersCallback callback) {
@@ -307,7 +312,6 @@ public class RoutesFragment extends Fragment {
         super.onCreate(savedInstanceState);
         // currentDay = new Date();
         Calendar calendar = Calendar.getInstance();
-        Date currentDate = calendar.getTime();
 
         // Set the day of the week to Sunday
         calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
@@ -493,7 +497,7 @@ public class RoutesFragment extends Fragment {
 
     // YES CHATGPT
     private void getDay(int gap, FetchWeeklyRoutesCallback callback) {
-        java.util.Calendar calendar =  java.util.Calendar.getInstance();
+        Calendar calendar =  Calendar.getInstance();
         calendar.setTime(currentDay);
         calendar.add(Calendar.WEEK_OF_YEAR, gap);
         Date newDay = calendar.getTime();

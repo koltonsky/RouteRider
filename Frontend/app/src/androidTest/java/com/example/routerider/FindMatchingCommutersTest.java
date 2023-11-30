@@ -121,7 +121,6 @@ public class FindMatchingCommutersTest {
         ViewInteraction dateEditText = onView(withId(R.id.date_edit_text));
         dateEditText.perform(click());
 
-        Calendar calendar = Calendar.getInstance();
         int eventHour = 10;
         // Close the DatePicker
         onView(withText("OK")).perform(click());

@@ -777,7 +777,7 @@ describe('Create a transit route for a single user', () => {
         const response = await request.get(`/api/recommendation/routes/${email}/${date}`);
         
         expect(response.statusCode).toBe(400);
-        expect(response.body).toEqual({message: 'No matching date exists in user schedule'});
+        expect(response.body).toEqual({message: '2023-12-33: No matching date exists in user schedule'});
     });
 
     // Input: address of user does not exist in BC

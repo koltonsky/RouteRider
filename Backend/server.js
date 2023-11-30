@@ -739,7 +739,7 @@ function closeServer() {
 }
 */
 
-connectToDatabase();
+//connectToDatabase();
 // sslServer.listen(port, () => console.log('Secure server :) on port ' + port));
 
 // var dummy_schedule = {

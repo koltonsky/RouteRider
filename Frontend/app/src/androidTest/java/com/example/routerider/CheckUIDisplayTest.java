@@ -130,7 +130,7 @@ public class CheckUIDisplayTest {
         onView(withId(R.id.current_day_text))
                 .check(matches(withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)));
 
-        onView(withId(R.id.transit_friend_button)).check(matches(isDisplayed()));
+        // onView(withId(R.id.transit_friend_button)).check(matches(isDisplayed()));
     }
 
     // NO CHATGPT

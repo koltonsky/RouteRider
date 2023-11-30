@@ -476,6 +476,7 @@ public class ScheduleFragment extends Fragment {
                 viewRecommendationsButton.setOnClickListener(v -> {
                     if (hiddenView.getVisibility() == View.VISIBLE) {
                         TransitionManager.beginDelayedTransition(cardView, new AutoTransition());
+                        hiddenView.removeAllViewsInLayout();
                         hiddenView.setVisibility(View.GONE);
                         viewRecommendationsButton.setText("Show Recommendations");
                     } else {

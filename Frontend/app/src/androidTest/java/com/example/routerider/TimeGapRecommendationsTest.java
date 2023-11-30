@@ -213,6 +213,7 @@ public class TimeGapRecommendationsTest {
             return false;
         }
     }
+
     // YES CHATGPT
     private static int[][] computeEventTimes(int gap) {
         try {

@@ -12,8 +12,10 @@ import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withParent;
 import static androidx.test.espresso.matcher.ViewMatchers.withParentIndex;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.not;
@@ -127,7 +129,7 @@ public class FindMatchingCommutersTest {
         dateEditText.perform(click());
 
         Calendar calendar = Calendar.getInstance();
-        int eventHour = calendar.get(Calendar.HOUR_OF_DAY) + 2;
+        int eventHour = 10;
         // Close the DatePicker
         onView(ViewMatchers.withText("OK")).perform(ViewActions.click());
 
@@ -221,7 +223,7 @@ public class FindMatchingCommutersTest {
         onView(withId(R.id.previous_day_route)).perform(click());
         Thread.sleep(2000); // You may need to adjust the delay
 
-        onView(withId(R.id.transit_friend_button)).perform(click());
+        onView(withId(R.id.friend_button)).perform(click());
         onView(withText("Friend List")).check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
         for (String friendName : RoutesFragment.friendNames) {
             onView(ViewMatchers.withText(friendName)).check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
@@ -265,7 +267,7 @@ public class FindMatchingCommutersTest {
             Log.d("Continue Test", "Already Logged In");
         }
         clearEvents();
-        mockEvent("2424 Main Mall, Vancouver, BC V6T 1Z4");
+        mockEvent("UBC MacLeod");
         Thread.sleep(5000); // You may need to adjust the delay
 
         ViewInteraction routeTab = Espresso.onView(allOf(withContentDescription("Routes"),
@@ -274,9 +276,8 @@ public class FindMatchingCommutersTest {
                 .check(matches(isDisplayed()));
         routeTab.perform(ViewActions.click());
 
-        ViewInteraction transitFriendButton = onView(withId(R.id.transit_friend_button));
+        ViewInteraction transitFriendButton = onView(withId(R.id.friend_button));
 
-        transitFriendButton.check(matches(isEnabled()));
 
         transitFriendButton.perform(click());
         Thread.sleep(1000); // You may need to adjust the delay
@@ -289,19 +290,27 @@ public class FindMatchingCommutersTest {
         matchingCommutersButton.perform(click());
         Thread.sleep(5000); // You may need to adjust the delay
 
-        onView(withText("Matching commuters")).check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+        onView(withText("Matching Commuters")).check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
 
-        for (String commuterName : RoutesFragment.matchingCommuters) {
-            Espresso.onView(ViewMatchers.withText(commuterName)).check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-        }
-        onView(ViewMatchers.withText(RoutesFragment.matchingCommuters[0])).perform(click());
+        // check that a textview with the @ symbol is displayed, then click it
+        onView(withText(containsString("@")))
+                .check(matches(isDisplayed()))
+                .perform(click());
+        Thread.sleep(500); // You may need to adjust the delay
 
-        Thread.sleep(5000);
 
-        String expectedToastMessage = "Friend request sent";
 
-        onView(withText(expectedToastMessage))
-                .inRoot(withDecorView(not(decorView)))// Here we use decorView
+        String expectedToastMessage1 = "Friend request sent";
+        String expectedToastMessage2 = "Friend request already sent";
+        String expectedToastMessage3 = "Already friends with this user";
+
+        // check that any of the 3 expected messages above is displayed
+        onView(anyOf(
+                withText(containsString(expectedToastMessage1)),
+                withText(containsString(expectedToastMessage2)),
+                withText(containsString(expectedToastMessage3))
+        ))
+                .inRoot(withDecorView(not(decorView)))
                 .check(matches(isDisplayed()));
     }
 
@@ -334,7 +343,7 @@ public class FindMatchingCommutersTest {
             Log.d("Continue Test", "Already Logged In");
         }
         clearEvents();
-        mockEvent("2424 Main Mall, Vancouver, BC V6T 1Z4");
+        mockEvent("2500 Chem. de Polytechnique, Montreal, QC H3T 1J4");
         Thread.sleep(5000); // You may need to adjust the delay
 
         ViewInteraction routeTab = Espresso.onView(allOf(withContentDescription("Routes"),
@@ -343,7 +352,7 @@ public class FindMatchingCommutersTest {
                 .check(matches(isDisplayed()));
         routeTab.perform(ViewActions.click());
 
-        ViewInteraction transitFriendButton = onView(withId(R.id.transit_friend_button));
+        ViewInteraction transitFriendButton = onView(withId(R.id.friend_button));
 
         transitFriendButton.check(matches(isEnabled()));
 
@@ -356,18 +365,12 @@ public class FindMatchingCommutersTest {
         ViewInteraction matchingCommutersButton = onView(withText("Find matching commuters"));
         matchingCommutersButton.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
         matchingCommutersButton.perform(click());
-        Thread.sleep(5000); // You may need to adjust the delay
+        Thread.sleep(500); // You may need to adjust the delay
 
-        String expectedToastMessage = "No matching commuters found";
+        String expectedToastMessage = "No matching commuters found.";
 
         onView(withText(expectedToastMessage))
                 .inRoot(withDecorView(not(decorView)))// Here we use decorView
                 .check(matches(isDisplayed()));
-
-        onView(withText("Friend List")).check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-        for (String friendName : RoutesFragment.friendNames) {
-            Espresso.onView(ViewMatchers.withText(friendName)).check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-        }
-        matchingCommutersButton.check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
     }
 }

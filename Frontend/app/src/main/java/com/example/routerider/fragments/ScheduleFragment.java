@@ -391,8 +391,8 @@ public class ScheduleFragment extends Fragment {
                         ScheduleItem newEvent = new ScheduleItem(
                                 updateEventName,
                                 eventAddress,
-                                eventDate + "T" + eventStartTime + ":00.000-07:00",
-                                eventDate + "T" + eventEndTime + ":00.000-07:00",
+                                eventDate + "T" + eventStartTime + ":00.000-08:00",
+                                eventDate + "T" + eventEndTime + ":00.000-08:00",
                                 item.getId(),
                                 item.getCalendarId());
 

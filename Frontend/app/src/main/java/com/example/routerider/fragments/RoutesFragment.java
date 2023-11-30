@@ -41,6 +41,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.lang.reflect.Executable;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -48,12 +50,17 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @FunctionalInterface
 interface FetchFriendRoutesCallback {
     void execute(RouteItem routeItem) throws ParseException;
+}
+@FunctionalInterface
+interface FetchMatchingCommutersCallback {
+    void execute(String[] matchingCommuters);
 }
 
 public class RoutesFragment extends Fragment {
@@ -69,7 +76,7 @@ public class RoutesFragment extends Fragment {
     private APICaller apiCall;
 
     public static String[] friendNames;
-    public static String[] matchingCommuters;
+    // public static String[] matchingCommuters;
 
 
 
@@ -245,8 +252,8 @@ public class RoutesFragment extends Fragment {
         };
     }
 
-    private String[] fetchMatchingCommuters() {
-        List<String> friendArray  = new ArrayList<>();
+    private void fetchMatchingCommuters(FetchMatchingCommutersCallback callback) {
+        List<String> friendArrayList  = new ArrayList<>();
         apiCall.APICall("api/findMatchingUsers/" + account.getEmail(), "", APICaller.HttpMethod.GET, new APICaller.ApiCallback() {
             @Override
             public void onResponse(final String responseBody) throws JSONException {
@@ -256,30 +263,9 @@ public class RoutesFragment extends Fragment {
 
                     JSONArray result = json.getJSONArray("matchingUsers");
                     for (int i = 0; i<result.length(); i++){
-                        friendArray.add((String) result.get(i));
+                        friendArrayList.add((String) result.get(i));
                     }
 
-                    // Check if the "friendsWithNames" and "friendRequestsWithNames" keys exist in the JSON
-                    if (json.has("friendsWithNames") && json.has("friendRequestsWithNames")) {
-                        ProfileFragment.friendList = json.getJSONArray("friendsWithNames");
-                        ProfileFragment.friendRequestList = json.getJSONArray("friendRequestsWithNames");
-
-                        // Check if the arrays are empty
-                        if (ProfileFragment.friendList.length() > 0) {
-                            System.out.println(ProfileFragment.friendList);
-                        } else {
-                            System.out.println("Friend list is empty.");
-                        }
-
-                        if (ProfileFragment.friendRequestList.length() > 0) {
-                            System.out.println(ProfileFragment.friendRequestList);
-                        } else {
-                            System.out.println("Friend request list is empty.");
-                        }
-
-                    } else {
-                        System.out.println("The JSON object doesn't contain the expected keys.");
-                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
                     getActivity().runOnUiThread(() -> {
@@ -288,6 +274,10 @@ public class RoutesFragment extends Fragment {
                     });
 
                 }
+                System.out.println("matchingusers result");
+                System.out.println(friendArrayList.toArray(new String[friendArrayList.size()]));
+                // matchingCommuters =  friendArrayList.toArray(new String[friendArrayList.size()]);
+                callback.execute(friendArrayList.toArray(new String[friendArrayList.size()]));
             }
 
             @Override
@@ -311,7 +301,6 @@ public class RoutesFragment extends Fragment {
 //                e.printStackTrace();
 //            }
 //        }
-        return friendArray.toArray(new String[friendArray.size()]);
     }
 
     private void displayWeeklyRoutes(List<RouteItem> routes, View view, Context context) throws ParseException {
@@ -421,15 +410,22 @@ public class RoutesFragment extends Fragment {
                     System.out.println("MATCHING COMMUTERS");
                     AlertDialog.Builder otherAlertDialogBuilder = new AlertDialog.Builder(requireContext());
                     otherAlertDialogBuilder.setTitle("Matching Commuters");
-                    String[] matchingCommuterNames = fetchMatchingCommuters();
-                    otherAlertDialogBuilder.setItems(matchingCommuterNames, (dialog2, which2) -> {
-                        String selectedFriend = matchingCommuterNames[which2];
-                        sendFriendRequest(selectedFriend, (String message) -> {
-                            getActivity().runOnUiThread(() -> {
-                                Toast.makeText(this.getContext(), message, Toast.LENGTH_SHORT).show();
+                    fetchMatchingCommuters((String[] matchingCommuters) -> {
+                        System.out.println(matchingCommuters);
+                        otherAlertDialogBuilder.setItems(matchingCommuters, (dialog2, which2) -> {
+                            String selectedFriend = matchingCommuters[which2];
+                            sendFriendRequest(selectedFriend, (String message) -> {
+                                getActivity().runOnUiThread(() -> {
+                                    Toast.makeText(this.getContext(), message, Toast.LENGTH_SHORT).show();
+                                });
                             });
                         });
+                        getActivity().runOnUiThread(()->{
+                            AlertDialog otherAlertDialog = otherAlertDialogBuilder.create();
+                            otherAlertDialog.show();
+                        });
                     });
+
                 });
 
                 // Create and show the AlertDialog

@@ -450,16 +450,23 @@ app.get(
 );
 
 const getTimeGapRecommendations = async (req, res) => {
-  try {
-    const addr1 = req.params.addr1;
-    const addr2 = req.params.addr2;
-    const result = await recommendation(addr1, addr2);
+  // try {
+  //   const addr1 = req.params.addr1;
+  //   const addr2 = req.params.addr2;
+  //   const result = await recommendation(addr1, addr2);
+  //   return res.status(200).json({ suggestions: result });
+  // } catch (error) {
+  //   console.error('Error in /api/recommendation/timegap/:addr1/:addr2', error);
+  //   return res.status(500).json({ error: 'An error occurred' });
+  // }
+  const addr1 = req.params.addr1;
+  const addr2 = req.params.addr2;
+  recommendation(addr1, addr2).then((result) => {
     return res.status(200).json({ suggestions: result });
-  } 
-  catch (error) {
+  }, (error) => {
     console.error('Error in /api/recommendation/timegap/:addr1/:addr2', error);
     return res.status(500).json({ error: 'An error occurred' });
-  }
+  });
 };
 
 app.get('/api/recommendation/timegap/:addr1/:addr2', getTimeGapRecommendations);
@@ -555,11 +562,6 @@ async function checkLiveTransitTime(
               resolve(false);
             }
           });
-        });
-
-        req.on('error', (error) => {
-          // console.error(`API request error: ${error.message}`);
-          resolve(false);
         });
 
         req.end();
@@ -1057,16 +1059,17 @@ async function initReminders(req, notificationCallback) {
     .collection('userlist')
     .findOne({ email: req.body.email });
 
+  var returnObject = {};
   if (user == null) {
     errorString = 'No matching email exists in user database';
-    var returnObject = { 
+    returnObject = { 
       status: 400, 
       message: errorString 
     };
     return returnObject;
   } else if (schedule == null) {
     errorString = 'No schedule associated with email';
-    var returnObject = { 
+    returnObject = { 
       status: 400, 
       message: errorString 
     };

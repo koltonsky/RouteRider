@@ -1014,7 +1014,7 @@ async function initRoute(userEmail, date) {
         resolve(returnList);
       })
       .catch((error) => {
-        // reject(error);
+        reject(error);
       });
   });
 }
@@ -1375,7 +1375,8 @@ async function initRouteWithFriends(userEmail, friendEmail, date) {
         var azureTime = new Date(departureTimeFromStation_iso);
         var azureTimeToPST = azureTime.setHours(azureTime.getHours() + 8);
         
-        planTransitTrip(locationOfOrigin_user, 
+        planTransitTrip(
+          locationOfOrigin_user, 
           meetingPoint, 
           new Date(azureTimeToPST)
         )
@@ -1532,11 +1533,77 @@ function getLatLong(address) {
         resolve(coords);
       })
       .catch((error) => {
-        // console.log(error);
-        // reject(error);
+        // console.log(error + "ertwetrwe");
+        reject(error);
       });
   });
 }
+
+// planTransitTrip('bellingham', 'UBC', new Date()).then(() => {
+//   console.log('done');
+// }).catch((error) => {
+//   console.log("error haha");
+//   console.log(error);
+// });
+// getLatLong('erthbwerhjk, vancouver, BC, canada').then((coords) => {
+// console.log('done');
+// console.log(coords);
+// }).catch((error) => {
+// console.log("error");
+// console.log(error);
+// });
+
+
+/**
+ * Function to check if the address is in BC, Canada
+ * 
+ * @param {*} address 
+ * @returns 
+ * 
+ * ChatGPT usage: Yes
+ */
+async function checkAddressInBC(address) {
+  const bcLatitude = 49.7010// Latitude for the center of BC
+  const bcLongitude = -123.1552; // Longitude for the center of BC
+  const radius = 0.8; // Radius in kilometers (adjust as needed)
+
+  const apiKey = 'AIzaSyBVsUyKxBvRjE0XdooMuoDrpAfu1KO_2mM';
+  const encodedAddress = encodeURIComponent(address);
+  const apiUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodedAddress}&key=${apiKey}`;
+
+  return new Promise((resolve, reject) => {
+    https.get(apiUrl, (res) => {
+      let data = '';
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+      res.on('end', () => {
+        const response = JSON.parse(data);
+        if (response.status === 'OK') {
+          for (const result of response.results) {
+            const lat = result.geometry.location.lat;
+            const lng = result.geometry.location.lng;
+            // console.log('Latitude: ', lat);
+            // console.log('Longitude: ', lng);
+            
+            // Calculate the distance between the address and BC center
+            const distance = calcDist(lat, lng, bcLatitude, bcLongitude);
+            // console.log('Distance: ', distance);
+
+            if (distance <= radius) {
+              resolve(true); // Address is within the specified radius of BC
+            }
+          }
+        }
+        resolve(false); // Address is not within the specified radius of BC
+      });
+    }).on('error', (err) => {
+      // console.error('Error:', err);
+      resolve(false);
+    });
+  });
+}
+
 
 /**
  * Generates a commute route using Google's Directions API
@@ -1550,59 +1617,74 @@ function getLatLong(address) {
  */
 async function planTransitTrip(origin, destination, arriveTime) {
   return new Promise((resolve, reject) => {
-    const apiUrl = 'https://maps.googleapis.com/maps/api/directions/json';
-    const apiKey = 'AIzaSyBVsUyKxBvRjE0XdooMuoDrpAfu1KO_2mM';
-
-    const params = new URLSearchParams({
-      origin,
-      destination,
-      mode: 'transit',
-      arrival_time: Math.floor(arriveTime.getTime() / 1000),
-      key: apiKey,
-    });
-
-    const url = `${apiUrl}?${params.toString()}`;
-
-    const request = https.get(url, (response) => {
-      let data = '';
-      // console.log('planTransitTrip(): request sent');
-
-      response.on('data', (chunk) => {
-        data += chunk;
-      });
-
-      response.on('end', () => {
-        // console.log('planTransitTrip() return');
-        // console.log('--------------------------------------------------------');
-        var routes = JSON.parse(data).routes;
-        if (routes.length > 0) {
-          // Process each route
-          routes.forEach((route, index) => {
-            // Access route information such as summary, distance, duration, steps, etc.
-            // console.log(`Route ${index + 1}:`);
-            // console.log(`Summary: ${route.summary}`);
-            // console.log(`Distance: ${route.legs[0].distance.text}`);
-            // console.log(`Duration: ${route.legs[0].duration.text}`);
-            // console.log('Steps:');
-            route.legs[0].steps.forEach((step, stepIndex) => {
-              // console.log(`Step ${stepIndex + 1}: ${step.html_instructions}`);
-            });
-            // console.log('-----------------------');
-          });
-        } else {
-          // console.log('No routes found.');
-          reject('No routes found.');
+    // Check if the origin is in BC, Canada
+    checkAddressInBC(origin).then((result) => {
+      if (!result) {
+        reject('Origin address must be in British Columbia, Canada');
+      }
+      checkAddressInBC(destination).then((result) => {
+        if (!result) {
+          reject('Destination address must be in British Columbia, Canada');
         }
-        // console.log('--------------------------------------------------------');
-        // console.log(data);
-        // console.log(JSON.parse(data));
-        // console.log('--------------------------------------------------------');
-        resolve(JSON.parse(data));
+        const apiUrl = 'https://maps.googleapis.com/maps/api/directions/json';
+        const apiKey = 'AIzaSyBVsUyKxBvRjE0XdooMuoDrpAfu1KO_2mM';
+    
+        const params = new URLSearchParams({
+          origin,
+          destination,
+          mode: 'transit',
+          arrival_time: Math.floor(arriveTime.getTime() / 1000),
+          key: apiKey,
+        });
+    
+        const url = `${apiUrl}?${params.toString()}`;
+    
+        const request = https.get(url, (response) => {
+          let data = '';
+          // console.log('planTransitTrip(): request sent');
+    
+          response.on('data', (chunk) => {
+            data += chunk;
+          });
+    
+          response.on('end', () => {
+            // console.log('planTransitTrip() return');
+            // console.log('--------------------------------------------------------');
+            var routes = JSON.parse(data).routes;
+            if (routes.length <= 0) {
+              // console.log('No routes found.');
+              reject('No routes found. Please check if you used a valid address.');
+            }
+            // if (routes.length > 0) {
+            //   // Process each route
+            //   routes.forEach((route, index) => {
+            //     // Access route information such as summary, distance, duration, steps, etc.
+            //     console.log(`Route ${index + 1}:`);
+            //     console.log(`Summary: ${route.summary}`);
+            //     console.log(`Distance: ${route.legs[0].distance.text}`);
+            //     console.log(`Duration: ${route.legs[0].duration.text}`);
+            //     console.log('Steps:');
+            //     route.legs[0].steps.forEach((step, stepIndex) => {
+            //       console.log(`Step ${stepIndex + 1}: ${step.html_instructions}`);
+            //     });
+            //     console.log('-----------------------');
+            //   });
+            // } 
+            // console.log('--------------------------------------------------------');
+            // console.log(data);
+            // console.log(JSON.parse(data));
+            // console.log('--------------------------------------------------------');
+            resolve(JSON.parse(data));
+          });
+        });
+        request.on('error', (err) => {
+          // console.log('Error: ' + err.message);
+          reject('Translink server error: ' + err.message);
+        });
       });
-    });
-    request.on('error', (err) => {
-      // console.log('Error: ' + err.message);
-      // reject('Error: ' + err.message);
+    }).catch((error) => {
+      // console.log("Google server error: " + error);
+      reject("Google server error: " + error);
     });
   });
 }

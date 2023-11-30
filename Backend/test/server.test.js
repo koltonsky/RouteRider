@@ -650,6 +650,35 @@ describe('Create a transit route for a single user', () => {
             },
         ],
     };
+    const dummy_schedule3 = {
+        email: 'dummy3@example.com',
+        events: [
+            {
+                address: 'fake address',
+                calendarID: 'koltonluu@gmail.com',
+                endTime: '2023-12-13T17:00:00.000-07:00',
+                eventName: 'Club Meeting',
+                geolocation: { latitude: 0, longitude: 0 },
+                id: '_64p36d1h6osjgchm6cp3gchk68r62oj3cgpj4d1m64tr_20231101T223000Z',
+                startTime: '2023-12-13T15:30:00.000-07:00',
+            },
+        ],
+    };
+    const dummy_schedule4 = {
+        email: 'dummy4@example.com',
+        events: [
+            {
+                address: 'fake address',
+                calendarID: 'koltonluu@gmail.com',
+                endTime: '2023-12-13T17:00:00.000-07:00',
+                eventName: 'Club Meeting',
+                geolocation: { latitude: 0, longitude: 0 },
+                id: '_64p36d1h6osjgchm6cp3gchk68r62oj3cgpj4d1m64tr_20231101T223000Z',
+                startTime: '2023-12-13T15:30:00.000-07:00',
+            },
+        ],
+    };
+
     const dummy_user = {
         email: 'dummy@example.com',
         name: 'John Doe',
@@ -664,17 +693,39 @@ describe('Create a transit route for a single user', () => {
         friends: ['friend1@example.com', 'friend2@example.com'],
     };
 
+    const dummy_user3 = {
+        email: 'dummy3@example.com', // fake email, wont work with google authentication
+        name: 'Leon Guo',
+        address: 'fake address',
+        friends: ['friend1@example.com', 'friend2@example.com'],
+    };
+
+    const dummy_user4 = {
+        email: 'dummy4@example.com', // fake email, wont work with google authentication
+        name: 'Leon Guo',
+        address: 'Burnaby, BC',
+        friends: ['friend1@example.com', 'friend2@example.com'],
+    };
+
     // Set up the test data before running the tests
     beforeAll(async () => {
         await client.db('ScheduleDB').collection('schedulelist').insertOne(dummy_schedule)
+        await client.db('ScheduleDB').collection('schedulelist').insertOne(dummy_schedule3)
+        await client.db('ScheduleDB').collection('schedulelist').insertOne(dummy_schedule4)
         await client.db('UserDB').collection('userlist').insertOne(dummy_user)
         await client.db('UserDB').collection('userlist').insertOne(dummy_user2)
+        await client.db('UserDB').collection('userlist').insertOne(dummy_user3)
+        await client.db('UserDB').collection('userlist').insertOne(dummy_user4)
     });
     // Clean up the test data after running all the tests
     afterAll(async () => {
         await client.db('ScheduleDB').collection('schedulelist').deleteOne(dummy_schedule)
+        await client.db('ScheduleDB').collection('schedulelist').deleteOne(dummy_schedule3)
+        await client.db('ScheduleDB').collection('schedulelist').deleteOne(dummy_schedule4)
         await client.db('UserDB').collection('userlist').deleteOne(dummy_user)
         await client.db('UserDB').collection('userlist').deleteOne(dummy_user2)
+        await client.db('UserDB').collection('userlist').deleteOne(dummy_user3)
+        await client.db('UserDB').collection('userlist').deleteOne(dummy_user4)
     });
 
     // Input: a user email exists in UserDB and has an associated schedule in ScheduleDB, date parameter matches a date in the user's schedule
@@ -727,5 +778,31 @@ describe('Create a transit route for a single user', () => {
         
         expect(response.statusCode).toBe(400);
         expect(response.body).toEqual({message: 'No matching date exists in user schedule'});
+    });
+
+    // Input: address of user does not exist in BC
+    // Expected status code: 400
+    // Expected behavior: an error message is returned
+    // ChatGPT usage: Yes
+    test('bad origin address', async () => {
+        const email = 'dummy3@example.com';
+        const date = '2023-12-13';
+        const response = await request.get(`/api/recommendation/routes/${email}/${date}`);
+        
+        expect(response.statusCode).toBe(400);
+        expect(response.body).toEqual({message: 'Origin address must be in British Columbia, Canada'});
+    });
+
+    // Input: address of user's event does not exist in BC
+    // Expected status code: 400
+    // Expected behavior: an error message is returned
+    // ChatGPT usage: Yes
+    test('bad destination address', async () => {
+        const email = 'dummy4@example.com';
+        const date = '2023-12-13';
+        const response = await request.get(`/api/recommendation/routes/${email}/${date}`);
+        
+        expect(response.statusCode).toBe(400);
+        expect(response.body).toEqual({message: 'Destination address must be in British Columbia, Canada'});
     });
 });

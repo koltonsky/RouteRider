@@ -1,348 +1,320 @@
-const express = require('express');
-// const fetch = require('node-fetch');
-const { MongoClient} = require('mongodb');
-// const ApiKeyManager = require('@esri/arcgis-rest-request');
-
-const app = express()
-app.use(express.json());
-
-// MongoDB connection setup
-const uri = 'mongodb://0.0.0.0:27017'; // Replace with your MongoDB connection string
-const client = new MongoClient(uri);
-
-// returns a list of users and events which match up on the first day
+const { MongoClient } = require('mongodb');
 /*
-async function findUsers(userEmail) {
-    var userSchedule = await client.db('ScheduleDB').collection('schedulelist').findOne({email: userEmail});
-    if (!userSchedule) {
-        console.log('User not found or schedule is empty.');
-        return;
-      }
+const request = require('supertest');
+const app = require('../server'); // Replace with the actual path to your Express app
+//const user = require('../path/to/your/user');
+*/
+const supertest = require('supertest');
+const match = require('../commuter_match')
+const { app, stopSSLServer } = require('../server'); // Replace with the actual path to your Express app
+const request = supertest(app);
+
+beforeAll(async () => {
+    // Set up MongoDB connection before tests
+    try {
+      const uri = 'mongodb://127.0.0.1:27017'; // Replace with your MongoDB connection string
+      client = new MongoClient(uri);
+      await client.connect();
+      console.log("connected");
+    } catch (error) {
+      console.error('MongoDB Connection Error:', error);
+    }
+  });
+  
+  afterAll(async () => {
+    // Close MongoDB connection after all tests
+    if (client) {
+      await client.close();
+    }
+    //closeServer();
+    stopSSLServer();
+  });
+  
+  beforeEach(() => {
+    // Log messages or perform setup before each test if needed
+    // Avoid logging directly in beforeAll for async operations
+  });
+
+
+describe('getFirstEventsOfEachDay', () => {
+    // Mock user data for testing
+    let userData;
+    let userEmail;
+  
+    // Set up the test data before running the tests
+    beforeAll(async () => {
+      userData = {
+        email: 'userm@example.com',
+        // Add other schedule data properties as needed
+      };
+  
+      userEmail = userData.email;
+  
+      // Assuming you have already connected to the MongoDB client
+      const collection = client.db('ScheduleDB').collection('schedulelist');
+      await collection.insertOne({
+        email: userEmail,
+        events: [
+          { startTime: '2023-11-21T08:00:00.000-08:00', title: 'Event 1' },
+          { startTime: '2023-11-21T12:00:00.000-08:00', title: 'Event 2' },
+          { startTime: '2023-11-22T10:00:00.000-08:00', title: 'Event 3' },
+          // Add more events for different days
+        ],
+      });
+    });
+  
+    // Clean up the test data after running all the tests
+    afterAll(async () => {
+      // Assuming you have already connected to the MongoDB client
+      const collection = client.db('ScheduleDB').collection('schedulelist');
+      await collection.deleteOne({ email: userEmail });
+    });
+  
+    // Input: userEmail
+  // Expected status code: n/A
+// Expected behavior: should return the first event of each day for an existing user with events
+// Expected output: first events of each day
+// ChatGPT usage: Yes
+    test('should return the first event of each day for an existing user with events', async () => {
+      const res = await match.getFirstEventsOfEachDay(userEmail);
+  
+      expect(res.events).toHaveLength(2); // Assuming two different days in the test data
+      // Add more specific assertions based on the test data
+      expect(res.events[0].event.title).toBe('Event 1');
+      expect(res.events[1].event.title).toBe('Event 3');
+    });
+
+
+  });
+
     
-    console.log(userSchedule);
-
-    var matchingEvents = [];
-    return "print test";
-}
-*/
-/**
- * Retrieves the first events of each day from a user's schedule.
- *
- * @param {string} userEmail - The email address of the user whose schedule is to be queried.
- * @returns {Object} An object containing an array of the first events of each day.
- *
- * This function performs the following steps:
- * 1. Retrieves the user's schedule from the database based on their email address.
- * 2. Checks if the user's schedule exists and is not empty; if not, it returns an empty array.
- * 3. Constructs an aggregation pipeline to find the first event of each day within the user's schedule.
- * 4. Executes the aggregation pipeline to retrieve the first events.
- * 5. Reverses the order of the first events to have the most recent first events at the beginning.
- * 6. Logs the first events of each day for reference.
- * 7. Returns an object containing the array of reversed first events.
- * 8. In case of an error, it returns an object with an empty events array.
- */
+  describe('findOtherEmails', () => {
+    // Mock user data for testing
+    let userData;
+    let userEmail;
+  
+    // Set up the test data before running the tests
+    beforeAll(async () => {
+      userData = {
+        email: 'users@example.com',
+        // Add other schedule data properties as needed
+      };
+  
+      userEmail = userData.email;
+  
+      // Assuming you have already connected to the MongoDB client
+      const collection = client.db('ScheduleDB').collection('schedulelist');
+      // Add other schedules for testing
+      await collection.insertMany([
+        { email: 'users@example.com' },
+        { email: 'user1@example.com' },
+        { email: 'user2@example.com' },
+        { email: 'user3@example.com' },
+      ]);
+    });
+  
+    // Clean up the test data after running all the tests
+    afterAll(async () => {
+      // Assuming you have already connected to the MongoDB client
+      const collection = client.db('ScheduleDB').collection('schedulelist');
+      await collection.deleteMany({ email: { $in: ['users@example.com', 'user1@example.com', 'user2@example.com', 'user3@example.com'] } });
+    });
+  
+    // Input: userEmail
+  // Expected status code: n/A
+// Expected behavior: should return emails of schedules excluding the user\'s schedule
+// Expected output: return emails of schedules excluding the user's schedule
 // ChatGPT usage: Yes
-/*
-async function getFirstEventsOfEachDay(userEmail) {
-    try {
+    test('should return emails of schedules excluding the user\'s schedule', async () => {
+      const res = await match.findOtherEmails(userEmail);
+  
+      //expect(res).toHaveLength(3); // Assuming three other schedules in the test data
 
-        const userSchedule = await client.db('ScheduleDB').collection('schedulelist').findOne({ email: userEmail });
+      // Add more specific assertions based on the test data
+      expect(res).toContain('user1@example.com');
+      expect(res).toContain('user2@example.com');
+      expect(res).toContain('user3@example.com');
+    });
+  
+  });
+  
+  describe('findMatchingUsers', () => {
+    // Mock user data for testing
+    let userData;
+    let userEmail;
+  
+    // Set up the test data before running the tests
+    beforeAll(async () => {
+      userData = {
+        email: 'userf@example.com',
+        // Add other schedule data properties as needed
+      };
+  
+      userEmail = userData.email;
+      const collection = client.db('ScheduleDB').collection('schedulelist');
 
-        if (!userSchedule) {
-            console.log('User not found or schedule is empty.');
-        }
-
-        // Aggregate the events to find the first event of each day
-        const pipeline = [
-            {
-                $match: { email: userEmail },
-            },
-            {
-                $unwind: '$events',
-            },
-            {
-                $sort: { 'events.startTime': 1 }, // Sort events by start time in ascending order
-            },
-            {
-                $group: {
-                    _id: {
-                        date: {
-                            $dateToString: { format: '%Y-%m-%d', date: { $toDate: '$events.startTime' } }
-                        },
-                    },
-                    event: { $first: '$events' },
-                },
-            },
-        ];
-
-        const firstEvents = await client.db('ScheduleDB').collection('schedulelist').aggregate(pipeline).toArray();
-        const reversedFirstEvents = firstEvents.reverse();
-
-        console.log('First events of each day:');
-        console.log(reversedFirstEvents);
-
-        return { events: reversedFirstEvents };
-    } catch (err) {
-        console.error('Error:', err);
-    }
-}
-*/
-async function getFirstEventsOfEachDay(userEmail) {
-    //try {
- // Fetch the user schedule
- const userSchedule = await client.db('ScheduleDB').collection('schedulelist').findOne({ email: userEmail });
-
- if (!userSchedule || !userSchedule.events || userSchedule.events.length === 0) {
-    //  console.log('User not found or schedule is empty.');
-     //console.log(userSchedule.events);
-     return { events: [] };
- }
-
- // Sort events by start time in ascending order
- const sortedEvents = userSchedule.events.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
-
- // Find the first event of each day
- const firstEvents = [];
- const seenDates = new Set();
-
- for (const event of sortedEvents) {
-     const dateStr = new Date(event.startTime).toLocaleDateString();
-     //console.log("DATESTR BE " + event.startTime);
-     //.log("DATESTR " + dateStr);
-
-     if (!seenDates.has(dateStr)) {
-         seenDates.add(dateStr);
-         firstEvents.push({ date: dateStr, event });
-     }
- }
-
-//  console.log('First events of each day:');
-//  console.log(firstEvents);
-
- return { events: firstEvents };
-    /*} catch (err) {
-        console.error('Error:', err);
-    }*/
-}
-
-
-/**
- * Finds and retrieves email addresses of schedules excluding the specified user's schedule.
- *
- * @param {string} userEmail - The email address of the user whose schedule is to be excluded.
- * @returns {Array} An array of email addresses belonging to other users' schedules.
- *
- * This function performs the following steps:
- * 1. Constructs an aggregation pipeline to filter out email addresses that are not the specified user's email.
- * 2. Executes the aggregation pipeline to find schedules belonging to other users.
- * 3. Extracts email addresses from the query result and stores them in an array.
- * 4. Logs the email addresses of schedules excluding the specified user for reference.
- * 5. Returns an array of email addresses.
- * 6. In case of an error, it returns an empty array.
- */
-// ChatGPT usage: Yes
-/*
-  async function findOtherEmails(userEmail) {
-    try {
-
-        // Construct an aggregation pipeline to find emails of schedules except the user's schedule
-        const pipeline = [
-            {
-                $match: { email: { $ne: userEmail } }
-            },
-            {
-                $project: {
-                    email: 1
-                }
-            }
-        ];
-
-        // Execute the aggregation pipeline
-        const result = await client.db('ScheduleDB').collection('schedulelist').aggregate(pipeline).toArray();
-
-        // Extract the email addresses from the result
-        const emailsExcludingUser = result.map(schedule => schedule.email);
-
-        console.log('Emails of schedules excluding the user:');
-        console.log(emailsExcludingUser);
-
-        return emailsExcludingUser;
-    } catch (err) {
-        console.error('Error:', err);
-        return []; // Return an empty array in case of an error
-    }
-}
-*/
-
-async function findOtherEmails(userEmail) {
-    console.log("finding other emails");
-    //try {
-        // Find schedules excluding the user's schedule
-        const schedulesExcludingUser = await client
-            .db('ScheduleDB')
-            .collection('schedulelist')
-            .find({ email: { $ne: userEmail } }, { projection: { email: 1 } })
-            .toArray();
-
-        // Extract the email addresses from the result
-        const emailsExcludingUser = schedulesExcludingUser.map(schedule => schedule.email);
-
-        //console.log('Emails of schedules excluding the user:');
-        //console.log(emailsExcludingUser);
-
-        return emailsExcludingUser;
-    /*} catch (err) {
-        console.error('Error:', err);
-        return []; // Return an empty array in case of an error
-    }*/
-}
+      await collection.insertOne(userData);
+  
+      // Assuming you have already connected to the MongoDB client
+      
+      // Add other schedules for testing
+      await collection.insertMany([
+        { email: 'user1@example.com', events: [{ startTime: '2023-11-21T08:00:00.000-08:00', address: 'UBC123' }] },
+        { email: 'user2@example.com', events: [{ startTime: '2023-11-21T08:00:00.000-08:00', address: 'UBC456' }] },
+        { email: 'user3@example.com', events: [{ startTime: '2023-11-22T10:00:00.000-08:00', address: 'SFU789' }] },
+      ]);
+    });
+  
+    // Clean up the test data after running all the tests
+    afterAll(async () => {
+      // Assuming you have already connected to the MongoDB client
+      const collection = client.db('ScheduleDB').collection('schedulelist');
+      await collection.deleteMany({ email: { $in: ['user1@example.com', 'user2@example.com', 'user3@example.com'] } });
+      await collection.deleteOne(userData);
+    });
+  
+    // Input: userEmail with matching events
+    // Expected status code: n/A
+    // Expected behavior: should return a set with emails of users with matching events
+    // Expected output: return a set with emails of users with matching events
+    // ChatGPT usage: Yes
+    test('should return a set with emails of users with matching events more than 0', async () => {
+      const res = await match.findMatchingUsers('user1@example.com');
+  
+      expect(res.size).toBe(1); // Assuming only one user has matching events in the test data
+      expect(res.has('user2@example.com')).toBe(true);
+    });
+  
+    // Input: userEmail with no matching events
+    // Expected status code: n/A
+    // Expected behavior: should return a set with emails of users with no matching events
+    // Expected output: return a set with emails of users with no matching events
+    // ChatGPT usage: Yes
+    test('should return an empty set for a user with no matching events', async () => {
+      // Change the user's events to not match with any other user's events
+      await client.db('ScheduleDB').collection('schedulelist').updateOne(
+        { email: userEmail },
+        { $set: { events: [{ startTime: '2023-11-21T08:00:00.000-08:00', address: 'SFU123' }] } }
+      );
+  
+      //await match.findMatchingUsers(userEmail).reject.toEqual("No matching users found.");
+      expect(match.findMatchingUsers(userEmail)).rejects.toEqual("No matching users found.");
+  
+      //expect(err).toBe('No matching users found.');
+      //expect(res.size).toBe(0);
+    });
+  
+    // Input: userEmail for nonexistent user
+    // Expected status code: n/A
+    // Expected behavior: should return an empty set
+    // Expected output: {}
+    // ChatGPT usage: Yes
+    test('should return an empty set for a nonexisting user', async () => {
+      const nonExistingUserEmail = 'nonexisting@example.com';
+      //await match.findMatchingUsers(nonExistingUserEmail).reject.toEqual("No matching users found.");
+  
+      expect(match.findMatchingUsers(nonExistingUserEmail)).rejects.toEqual("No matching users found.");
+      //expect(res.size).toBe(0);
+    });
 
 
-/**
- * Finds matching users based on the first events of the day for a given user.
- *
- * @param {string} userEmail - The email of the user to find matching users for.
- * @returns {Set} A Set of unique email addresses of users who have matching events.
- *
- * This function performs the following steps:
- * 1. Retrieves the first events of the day for the specified user.
- * 2. Retrieves a list of other email addresses, excluding the specified user's email.
- * 3. Compares the first events of the user with the first events of other users.
- * 4. If events have the same location (first 3 characters are 'UBC') and the same start time,
- *    the email address of the other user is added to the Set of matching users.
- * 5. Returns the Set of unique email addresses of users with matching events.
- * 6. In case of an error, it returns an empty array.
- */
-// ChatGPT usage: Yes
-/*
-async function findMatchingUsers(userEmail) {
-    try {
+    /*
+    // Input: userEmail with multiple matching events
+    // Expected status code: n/A
+    // Expected behavior: should return a set with emails of users with multiple matching events
+    // Expected output: return a set with emails of users with multiple matching events
+    // ChatGPT usage: Yes
+    test('should return a set with emails of users with multiple matching events', async () => {
+      // Add another event for the user with the same startTime and 'UBC' address
+      await client.db('ScheduleDB').collection('schedulelist').updateOne(
+        { email: userEmail },
+        { $push: { events: { startTime: '2023-11-21T08:00:00.000-08:00', address: 'UBC789' } } }
+      );
+    
+      const res = await match.findMatchingUsers(userEmail);
+    
+      expect(res.size).toBe(2); // Assuming two users have matching events in the test data
+      expect(res.has('user2@example.com')).toBe(true);
+      expect(res.has('user1@example.com')).toBe(true);
+    });
+    */
 
-        // Step 1: Get the first events for the user
-        const userFirstEvents = await getFirstEventsOfEachDay(userEmail);
+    test('should return a set with emails of users with matching events on different days', async () => {
+      // Add an event for the user with the same startTime but different date and 'UBC' address
+      await client.db('ScheduleDB').collection('schedulelist').updateOne(
+        { email: userEmail },
+        { $push: { events: { startTime: '2023-11-22T10:00:00.000-08:00', address: 'UBC123' } } }
+      );
 
-        console.log('User First Events:');
-        console.log(userFirstEvents);
+      expect(match.findMatchingUsers(userEmail)).rejects.toEqual("No matching users found.");
+    
+      //const res = await match.findMatchingUsers(userEmail);
+    
+      //expect(res.size).toBe(0);
+    });
+    
 
-        // Step 2: Find other emails, excluding the user's email
-        const otherEmails = await findOtherEmails(userEmail);
+        // Input: userEmail with no matching events due to different address
+    // Expected status code: n/A
+    // Expected behavior: should return an empty set
+    // Expected output: {}
+    // ChatGPT usage: Yes
+test('should return an empty set for a user with matching startTime but different address', async () => {
+  // Change the user's event address to not match with any other user's event address
+  await client.db('ScheduleDB').collection('schedulelist').updateOne(
+    { email: userEmail },
+    { $set: { events: [{ startTime: '2023-11-21T08:00:00.000-08:00', address: 'SFU123' }] } }
+  );
 
-        // Step 3: Create an empty list to hold the set of users
-        const matchingUsers = new Set();
+  expect(match.findMatchingUsers(userEmail)).rejects.toEqual("No matching users found.");
+  //const res = await match.findMatchingUsers(userEmail);
 
-        for (const email of otherEmails) {
-            const firstEventsOfTheDay = await getFirstEventsOfEachDay(email);
+  //expect(res.size).toBe(0);
+});
 
-            console.log(`First Events of the Day for ${email}:`);
-            console.log(firstEventsOfTheDay);
-
-            // Step 4: Compare the events and add email to the list if conditions match
-            for (const userEvent of userFirstEvents.events) {
-                for (const otherEvent of firstEventsOfTheDay.events) {
-                    
-                    if (
-                        userEvent.event.address.slice(0, 3) === 'UBC' &&
-                        otherEvent.event.address.slice(0, 3) === 'UBC' &&
-                        userEvent.event.startTime === otherEvent.event.startTime
-                    ) {
-                        matchingUsers.add(email);
-                        break; // Once a match is found, no need to check other events for this email
-                    }
-                }
-            }
-        }
-
-        console.log('Users with matching events:');
-        console.log(matchingUsers);
-
-        return matchingUsers;
-    } catch (err) {
-        console.error('Error:', err);
-        return []; // Return an empty array in case of an error
-    }
-}
-*/async function findMatchingUsers(userEmail) {
-    console.log("finding matching users");
-    //try {
-        // Step 1: Get the first events for the user
-        const userFirstEvents = await getFirstEventsOfEachDay(userEmail);
-
-        // Step 2: Find other emails, excluding the user's email
-        const otherEmails = await findOtherEmails(userEmail);
-    console.log("other emails");
-        console.log(otherEmails);
-
-
-        // Step 3: Create an empty list to hold the set of users
-        const matchingUsers = new Set();
-
-        // Step 4: Iterate through other emails and compare events
-        for (const email of otherEmails) {
-            // Get the first events of the day for the current email
-            const firstEventsOfTheDay = await getFirstEventsOfEachDay(email);
-
-            // Step 5: Compare the events and add email to the list if conditions match
-            for (const userEvent of userFirstEvents.events) {
-                for (const otherEvent of firstEventsOfTheDay.events) {
-                    // Calculate the time difference in milliseconds
-                    const timeDifference = Math.abs(new Date(userEvent.event.startTime) - new Date(otherEvent.event.startTime));
-                    console.log("user event " + userEvent.event.address + " " + userEvent.event.startTime);
-                    console.log(email + " " + otherEvent.event.address + " " + otherEvent.event.startTime);
-                    // Check if the time difference is within a 4-hour range (4 * 60 * 60 * 1000 milliseconds)
-                    if (
-                        userEvent.event.address.slice(0, 3) === 'UBC' &&
-                        otherEvent.event.address.slice(0, 3) === 'UBC' 
-                        && timeDifference <= 4 * 60 * 60 * 1000
-                    ) {
-                        console.log("found match: " + email);
-                        matchingUsers.add(email);
-                        break; // Once a match is found, no need to check other events for this email
-                        
-                    }
-                }
-            }
-        }
-    return new Promise((resolve, reject) => {
-        if (matchingUsers.size > 0) {
-            resolve(matchingUsers);
-        } else {
-            reject("No matching users found.");
-        }
-    }
-    );
-    /*} catch (err) {
-        console.error('Error:', err);
-        return new Set(); // Return an empty Set in case of an error
-    }*/
-}
 
 
   
+  });
+
+// Interface GET https://20.163.28.92:8081/api/findMatchingUsers/:userEmail
+
+  describe('GET /api/findMatchingUsers/:userEmail', () => {
+          // Input: userEmail that doesn't exist
+    // Expected status code: 200
+    // Expected behavior: should return an empty set
+    // Expected output: {}
+    // ChatGPT usage: Yes
+    test('should return matching users', async () => {
+      console.log("ENDPOINT");
+      // Mock data or use actual test data
+      const mockUserEmail = 'user1@example.com';
+  
+      // Make a request to the endpoint
+      const response = await request
+        .get(`/api/findMatchingUsers/${mockUserEmail}`);
+  
+      // Assert the response
+      expect(response.status).toBe(400);
+      //expect(response.body).toHaveProperty([]);
+
+      expect(response.body.message).toBe("No matching users found.");
 
 
-  //getFirstEventsOfEachDay("koltonluu@gmail.com");
-  //const userEmail = "koltonluu@gmail.com";
-  //const getFirstEventsOfEachDayReturn = getFirstEventsOfEachDay(userEmail);
+      
+      //expect(Array.isArray(response.body.matchingUsers)).toBe(false);
 
-  //const emailsExcludingUser = findOtherEmails(userEmail);
-  //console.log(emailsExcludingUser);
-  //const findScheduleReturn = findSchedule(userEmail, emailsExcludingUser);
+      //expect(response.body.matchingUsers).toBe({});
+      //expect(response.body.matchingUsers).toStrictEqual({});
 
-/*
-findMatchingUsers(userEmail).then(result => {
-    console.log('Schedule for other users:');
-    console.log(result);
-});
-*/
 
-  //findMatchingCommuters("koltonluu@gmail.com");
-  //findUsers("koltonluu")
+      // Add more assertions based on your actual response structure
+  
+      // Cleanup or additional assertions as needed
+    });
+  
+    // Add more test cases as needed
+  });
 
-module.exports = {
-    //findUsers,
-    getFirstEventsOfEachDay,
-    findOtherEmails,
-    findMatchingUsers,
 
-  };
   

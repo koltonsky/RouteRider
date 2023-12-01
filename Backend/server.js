@@ -86,6 +86,7 @@ const privateKeyPart26 =
 const privateKey = `${privateKeyPart1}\n${privateKeyPart2}\n${privateKeyPart3}\n${privateKeyPart4}\n${privateKeyPart5}\n${privateKeyPart6}\n${privateKeyPart7}\n${privateKeyPart8}\n${privateKeyPart9}\n${privateKeyPart10}\n${privateKeyPart11}\n${privateKeyPart12}\n${privateKeyPart13}\n${privateKeyPart14}\n${privateKeyPart15}\n${privateKeyPart16}\n${privateKeyPart17}\n${privateKeyPart18}\n${privateKeyPart19}\n${privateKeyPart20}\n${privateKeyPart21}\n${privateKeyPart22}\n${privateKeyPart23}\n${privateKeyPart24}\n${privateKeyPart25}\n${privateKeyPart26}`;
 
 // Create the serviceAccount object
+
 const serviceAccount = {
   type: serviceAccountType,
   project_id: 'routerider-402800',
@@ -102,15 +103,16 @@ const serviceAccount = {
   universe_domain: 'googleapis.com',
 };
 
+
 //console.log(privateKey);
 // Use the serviceAccount object in your code
 
 //const serviceAccount = require('./serviceAccountKey.json');
 
 const cron = require('node-cron');
-const { get } = require('http');
-const { error } = require('console');
-const e = require('express');
+// const { get } = require('http');
+// const { error } = require('console');
+// const e = require('express');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -272,7 +274,7 @@ function findUserToken(receiverEmail, senderName, notificationCallback) {
           };
           // console.log(message.token);
 
-          ret = await notificationCallback(message);
+          var ret = await notificationCallback(message);
           if (ret) {
             // console.log('Successfully sent friend request notification');
             // res.status(200).json({
@@ -450,16 +452,23 @@ app.get(
 );
 
 const getTimeGapRecommendations = async (req, res) => {
-  try {
-    const addr1 = req.params.addr1;
-    const addr2 = req.params.addr2;
-    const result = await recommendation(addr1, addr2);
+  // try {
+  //   const addr1 = req.params.addr1;
+  //   const addr2 = req.params.addr2;
+  //   const result = await recommendation(addr1, addr2);
+  //   return res.status(200).json({ suggestions: result });
+  // } catch (error) {
+  //   console.error('Error in /api/recommendation/timegap/:addr1/:addr2', error);
+  //   return res.status(500).json({ error: 'An error occurred' });
+  // }
+  const addr1 = req.params.addr1;
+  const addr2 = req.params.addr2;
+  recommendation(addr1, addr2).then((result) => {
     return res.status(200).json({ suggestions: result });
-  } 
-  catch (error) {
+  }, (error) => {
     console.error('Error in /api/recommendation/timegap/:addr1/:addr2', error);
     return res.status(500).json({ error: 'An error occurred' });
-  }
+  });
 };
 
 app.get('/api/recommendation/timegap/:addr1/:addr2', getTimeGapRecommendations);
@@ -555,11 +564,6 @@ async function checkLiveTransitTime(
               resolve(false);
             }
           });
-        });
-
-        req.on('error', (error) => {
-          // console.error(`API request error: ${error.message}`);
-          resolve(false);
         });
 
         req.end();
@@ -692,7 +696,7 @@ async function startSSLServer() {
 }
 
 async function stopSSLServer() {
-  return new Promise(async (resolve) => {
+  return new Promise((resolve) => {
     if (sslServer) {
       sslServer.close(() => {
         console.log('Secure server stopped.');
@@ -703,11 +707,11 @@ async function stopSSLServer() {
 }
 
 function connectToDatabase() {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     console.log('Connected to MongoDB');
 
     // Start the SSL server after successfully connecting to MongoDB
-    await startSSLServer();
+    startSSLServer();
 
     resolve(); // Resolve the promise if startSSLServer completes successfully
   });
@@ -1057,16 +1061,17 @@ async function initReminders(req, notificationCallback) {
     .collection('userlist')
     .findOne({ email: req.body.email });
 
+  var returnObject = {};
   if (user == null) {
     errorString = 'No matching email exists in user database';
-    var returnObject = { 
+    returnObject = { 
       status: 400, 
       message: errorString 
     };
     return returnObject;
   } else if (schedule == null) {
     errorString = 'No schedule associated with email';
-    var returnObject = { 
+    returnObject = { 
       status: 400, 
       message: errorString 
     };
@@ -1201,7 +1206,7 @@ async function initReminders(req, notificationCallback) {
       }
     }
   }
-  var returnObject = {
+  returnObject = {
     status: 200,
     message: 'Reminders initialized',
   }
@@ -1583,7 +1588,7 @@ function getLatLong(address) {
  * ChatGPT usage: Yes
  */
 async function checkAddressInBC(address) {
-  const bcLatitude = 49.7010// Latitude for the center of BC
+  const bcLatitude = 49.701// Latitude for the center of BC
   const bcLongitude = -123.1552; // Longitude for the center of BC
   const radius = 0.8; // Radius in kilometers (adjust as needed)
 
@@ -1772,7 +1777,7 @@ function getMeetingPoint(address1, address2) {
 function calcWalkingTimes(commuteInfo) {
   var returnList = commuteInfo;
   for (var i = 0; i < returnList.length - 1; i++) {
-    if (i == 0 && returnList[i]._type == 'Walk') {
+    if (i === 0 && returnList[i]._type == 'Walk') {
       returnList[i]._leaveTime =
         returnList[returnList.length - 1].departure_time;
       returnList[i]._leaveTimeNum = timeToTimestamp(

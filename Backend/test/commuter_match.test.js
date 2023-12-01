@@ -9,9 +9,12 @@ const match = require('../commuter_match')
 const { app, stopSSLServer } = require('../server'); // Replace with the actual path to your Express app
 const request = supertest(app);
 
+var client;
+
 beforeAll(async () => {
     // Set up MongoDB connection before tests
     try {
+      /*global client*/
       const uri = 'mongodb://127.0.0.1:27017'; // Replace with your MongoDB connection string
       client = new MongoClient(uri);
       await client.connect();
@@ -283,7 +286,7 @@ test('should return an empty set for a user with matching startTime but differen
 
     // Mock user data for testing
     let userData;
-    let userEmail;
+    //let userEmail;
   
     // Set up the test data before running the tests
     beforeAll(async () => {
@@ -292,7 +295,7 @@ test('should return an empty set for a user with matching startTime but differen
         // Add other schedule data properties as needed
       };
   
-      userEmail = userData.email;
+      //userEmail = userData.email;
       const collection = client.db('ScheduleDB').collection('schedulelist');
 
       await collection.insertOne(userData);
@@ -326,14 +329,14 @@ test('should return an empty set for a user with matching startTime but differen
       //const mockUserEmail = 'userabc@example.com';
   
       // Make a request to the endpoint
-      const response_thing = await request
+      const response_thing123 = await request
         .get(`/api/findMatchingUsers/user11@example.com`);
   
       // Assert the response
-      expect(response_thing.status).toBe(200);
+      expect(response_thing123.status).toBe(200);
       //expect(response.body).toHaveProperty(matchingUsers);
 
-      expect(response_thing.body).toEqual({"matchingUsers": ["user21@example.com"]});
+      expect(response_thing123.body).toEqual({"matchingUsers": ["user21@example.com"]});
 
 
       

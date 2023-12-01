@@ -1,6 +1,20 @@
 const fs = require('fs').promises;
-const https = require('https');
-const { stopSSLServer, connectToDatabase, sslServer } = require('../server');
+//const https = require('https');
+const { stopSSLServer, connectToDatabase } = require('../server');
+
+//let client;
+
+afterAll(async () => {
+  // Close MongoDB connection after all tests
+  /*
+  if (client) {
+    await client.close();
+  }
+  */
+  //closeServer();
+  stopSSLServer();
+});
+
 
 describe('Server Tests', () => {
     let originalReadFile;
@@ -27,7 +41,7 @@ describe('Server Tests', () => {
       fs.readFile.mockResolvedValueOnce(Buffer.from('certificate_content'));
   
       // Call the function
-      await connectToDatabase().then(() => {
+      connectToDatabase().then(() => {
         return stopSSLServer();
       });
   

@@ -21,6 +21,9 @@ const supertest = require('supertest');
 const { app, stopSSLServer} = require('../server'); // Replace with the actual path to your Express app
 const request = supertest(app);
 
+var client;
+
+/*
 const user = {
     "email": "newuserlol3@example.com",
     "name": "John Doe",
@@ -33,10 +36,11 @@ const user = {
       "friend3@example.com"
     ]
   };
+  */
 
-const userEmail = 'koltonluu@gmail.com';
-const nonExistingEmail = 'nonexistinguser@example.com';
-let server;
+//const userEmail = 'koltonluu@gmail.com';
+//const nonExistingEmail = 'nonexistinguser@example.com';
+//let server;
 
 
   beforeAll(async () => {

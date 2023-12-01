@@ -83,7 +83,7 @@ const updateSchedule = async (req, res) => {
       res.status(404).json({ message: 'Schedule not found' });
     } else {
       // Update the schedule document in the collection
-      const updateResult = await collection.updateOne(
+      await collection.updateOne(
         { email },
         { $set: updatedScheduleData }
       );
@@ -337,7 +337,7 @@ const addEvent = async (req, res) => {
     schedule.events.push(newEvent);
     schedule.events.sort(compareEvents);
 
-    const updateResult = await collection.updateOne(
+    await collection.updateOne(
       { _id: schedule._id },
       { $set: { events: schedule.events } }
     );
@@ -813,7 +813,8 @@ const deleteEventByID = async (req, res) => {
     // Remove the event at the specified index
     schedule.events.splice(eventIndex, 1);
 
-    const updateResult = await collection.updateOne(
+    //const updateResult = 
+    await collection.updateOne(
       { _id: schedule._id },
       { $set: { events: schedule.events } }
     );

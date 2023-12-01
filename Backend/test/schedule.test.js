@@ -28,10 +28,13 @@ const userEmail = 'koltonluu@gmail.com';
 */
 //const nonExistingEmail = 'nonexistinguser@example.com';
 
+var client;
+
 
   beforeAll(async () => {
     // Set up MongoDB connection before tests
     try {
+      /*global client*/
       const uri = 'mongodb://127.0.0.1:27017'; // Replace with your MongoDB connection string
       client = new MongoClient(uri);
       await client.connect();
@@ -64,7 +67,7 @@ const userEmail = 'koltonluu@gmail.com';
         email: 'user@example.com',
         // Add other schedule data properties as needed
       };
-      const collection = client.db('UserDB').collection('userlist');
+      //const collection = client.db('UserDB').collection('userlist');
       //await collection.insertOne({ email: userEmail });
 
     });

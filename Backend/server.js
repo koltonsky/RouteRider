@@ -86,7 +86,7 @@ const privateKeyPart26 =
 const privateKey = `${privateKeyPart1}\n${privateKeyPart2}\n${privateKeyPart3}\n${privateKeyPart4}\n${privateKeyPart5}\n${privateKeyPart6}\n${privateKeyPart7}\n${privateKeyPart8}\n${privateKeyPart9}\n${privateKeyPart10}\n${privateKeyPart11}\n${privateKeyPart12}\n${privateKeyPart13}\n${privateKeyPart14}\n${privateKeyPart15}\n${privateKeyPart16}\n${privateKeyPart17}\n${privateKeyPart18}\n${privateKeyPart19}\n${privateKeyPart20}\n${privateKeyPart21}\n${privateKeyPart22}\n${privateKeyPart23}\n${privateKeyPart24}\n${privateKeyPart25}\n${privateKeyPart26}`;
 
 // Create the serviceAccount object
-/*
+
 const serviceAccount = {
   type: serviceAccountType,
   project_id: 'routerider-402800',
@@ -102,8 +102,8 @@ const serviceAccount = {
     'https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-stvy2%40routerider-402800.iam.gserviceaccount.com',
   universe_domain: 'googleapis.com',
 };
-*/
 
+/*
 const serviceAccount =
 {
   "type": "service_account",
@@ -118,7 +118,7 @@ const serviceAccount =
   "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-stvy2%40routerider-402800.iam.gserviceaccount.com",
   "universe_domain": "googleapis.com"
 }
-
+*/
 
 //console.log(privateKey);
 // Use the serviceAccount object in your code

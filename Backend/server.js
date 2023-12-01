@@ -1587,7 +1587,7 @@ function getLatLong(address) {
  * ChatGPT usage: Yes
  */
 async function checkAddressInBC(address) {
-  const bcLatitude = 49.7010// Latitude for the center of BC
+  const bcLatitude = 49.7010;// Latitude for the center of BC
   const bcLongitude = -123.1552; // Longitude for the center of BC
   const radius = 0.8; // Radius in kilometers (adjust as needed)
 

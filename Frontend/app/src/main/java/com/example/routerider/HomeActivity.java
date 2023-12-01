@@ -34,6 +34,8 @@ public class HomeActivity extends AppCompatActivity {
     public static List<RouteItem> dayRoutes;
     public static List<RouteItem> weeklyRoutes;
 
+
+
     // YES CHATGPT
     public static void fetchRoutes(Date day, FetchRoutesCallback callback) {
         GoogleSignInAccount account = User.getCurrentAccount();
@@ -206,8 +208,11 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        //FirebaseMessaging.getInstance().subscribeToTopic("RouteRider");
+
         // fetchRoutes(new Date());
         PushNotificationService pushNotificationService = new PushNotificationService();
+        //pushNotificationService.initializeFirebase(getApplicationContext());
 
         // Retrieve the FCM token
         FirebaseMessaging.getInstance().getToken()

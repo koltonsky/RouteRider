@@ -1,6 +1,10 @@
 package com.example.routerider;
 
+import android.content.Context;
+
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.gson.Gson;
 
@@ -30,15 +34,32 @@ public class PushNotificationService extends FirebaseMessagingService {
             apiCall.APICall("api/store_token", jsonToken, APICaller.HttpMethod.POST, new APICaller.ApiCallback() {
                 @Override
                 public void onResponse(String responseBody) {
+                    System.out.println("TOKEN: " + token);
                     System.out.println("BODY: " + responseBody);
                 }
 
                 @Override
                 public void onError(String errorMessage) {
+                    System.out.println("FAILED TO STORE TOKEN###############");
                     System.out.println("Error: " + errorMessage);
                 }
             });
         }
 
     }
+
+//    public void initializeFirebase(Context context) {
+//        try {
+//            FirebaseOptions options = new FirebaseOptions.Builder()
+//                    .setApiKey("AIzaSyBIVi5LJmGkIXiae_NYHWCP9fFOq_enDOM")
+//                    .setProjectId("routerider-402800")
+//                    .setApplicationId("1:95945786031:android:48424a0bc6f1a6de454a5a")
+//                    // Add other optional configurations if needed
+//                    .build();
+//
+//            FirebaseApp.initializeApp(context, options);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 }

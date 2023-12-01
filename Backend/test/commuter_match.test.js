@@ -286,7 +286,7 @@ test('should return an empty set for a user with matching startTime but differen
 
     // Mock user data for testing
     let userData;
-    let userEmail;
+    //let userEmail;
   
     // Set up the test data before running the tests
     beforeAll(async () => {
@@ -295,7 +295,7 @@ test('should return an empty set for a user with matching startTime but differen
         // Add other schedule data properties as needed
       };
   
-      userEmail = userData.email;
+      //userEmail = userData.email;
       const collection = client.db('ScheduleDB').collection('schedulelist');
 
       await collection.insertOne(userData);

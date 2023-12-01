@@ -14,6 +14,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+// Codacy video comment
 public class APICaller {
     String hostUrl = "https://20.163.28.92:8081/";
 

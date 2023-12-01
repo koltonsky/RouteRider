@@ -64,7 +64,7 @@ const userEmail = 'koltonluu@gmail.com';
         email: 'user@example.com',
         // Add other schedule data properties as needed
       };
-      const collection = client.db('UserDB').collection('userlist');
+      //const collection = client.db('UserDB').collection('userlist');
       //await collection.insertOne({ email: userEmail });
 
     });

@@ -396,7 +396,7 @@ const getFriendListWithNames = async (req, res) => {
         friend.friendRequests.push(userEmail);
   
         // Update the user's document in the collection
-        const updateResult = await userCollection.updateOne(
+        await userCollection.updateOne(
           { _id: friend._id },
           { $set: { friendRequests: friend.friendRequests } }
         );

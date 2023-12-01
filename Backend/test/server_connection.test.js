@@ -1,6 +1,6 @@
 const fs = require('fs').promises;
-const https = require('https');
-const { stopSSLServer, connectToDatabase, sslServer } = require('../server');
+//const https = require('https');
+const { stopSSLServer, connectToDatabase } = require('../server');
 
 describe('Server Tests', () => {
     let originalReadFile;

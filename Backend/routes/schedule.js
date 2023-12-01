@@ -83,7 +83,7 @@ const updateSchedule = async (req, res) => {
       res.status(404).json({ message: 'Schedule not found' });
     } else {
       // Update the schedule document in the collection
-      const updateResult = await collection.updateOne(
+      await collection.updateOne(
         { email },
         { $set: updatedScheduleData }
       );

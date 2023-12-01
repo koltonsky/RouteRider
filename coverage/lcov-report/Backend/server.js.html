@@ -1952,7 +1952,8 @@
 <a name='L1887'></a><a href='#L1887'>1887</a>
 <a name='L1888'></a><a href='#L1888'>1888</a>
 <a name='L1889'></a><a href='#L1889'>1889</a>
-<a name='L1890'></a><a href='#L1890'>1890</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">6x</span>
+<a name='L1890'></a><a href='#L1890'>1890</a>
+<a name='L1891'></a><a href='#L1891'>1891</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-yes">6x</span>
@@ -3151,6 +3152,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -5618,7 +5620,7 @@ function getMeetingPoint(address1, address2) {
 function calcWalkingTimes(commuteInfo) {
   var returnList = commuteInfo;
   for (var i = 0; i &lt; returnList.length - 1; i++) {
-    if (i == 0 &amp;&amp; returnList[i]._type == 'Walk') {
+    if (i === 0 &amp;&amp; returnList[i]._type == 'Walk') {
       returnList[i]._leaveTime =
         returnList[returnList.length - 1].departure_time;
       returnList[i]._leaveTimeNum = timeToTimestamp(

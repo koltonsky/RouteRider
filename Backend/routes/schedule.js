@@ -813,10 +813,11 @@ const deleteEventByID = async (req, res) => {
     // Remove the event at the specified index
     schedule.events.splice(eventIndex, 1);
 
-    // const updateResult = await collection.updateOne(
-    //   { _id: schedule._id },
-    //   { $set: { events: schedule.events } }
-    // );
+    //const updateResult = 
+    await collection.updateOne(
+      { _id: schedule._id },
+      { $set: { events: schedule.events } }
+    );
 
     //if (updateResult.modifiedCount > 0) {
       res.status(200).json({ message: 'Event deleted successfully' });

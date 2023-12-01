@@ -2,7 +2,7 @@ const fs = require('fs').promises;
 //const https = require('https');
 const { stopSSLServer, connectToDatabase } = require('../server');
 
-let client;
+//let client;
 
 describe('Server Tests', () => {
     let originalReadFile;

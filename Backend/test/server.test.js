@@ -2,7 +2,7 @@ const { MongoClient } = require('mongodb');
 
 
 const supertest = require('supertest');
-const { app, stopSSLServer, sslServer} = require('../server'); // Replace with the actual path to your Express app
+const { app, stopSSLServer} = require('../server'); // Replace with the actual path to your Express app
 const request = supertest(app);
 
 const { findUserToken, checkLiveTransitTime } = require('../server');

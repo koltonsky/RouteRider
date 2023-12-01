@@ -337,7 +337,7 @@ const addEvent = async (req, res) => {
     schedule.events.push(newEvent);
     schedule.events.sort(compareEvents);
 
-    const updateResult = await collection.updateOne(
+    await collection.updateOne(
       { _id: schedule._id },
       { $set: { events: schedule.events } }
     );

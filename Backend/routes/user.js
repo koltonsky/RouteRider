@@ -493,7 +493,7 @@ const getFriendListWithNames = async (req, res) => {
       const updatedFriendRequests = user.friendRequests.filter(request => request !== friendEmail);
   
       // Update the user's document in the collection to remove the friend request
-      const updateResult = await userCollection.updateOne(
+      await userCollection.updateOne(
         { _id: user._id },
         { $set: { friendRequests: updatedFriendRequests } }
       );

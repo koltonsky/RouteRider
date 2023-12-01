@@ -140,7 +140,7 @@ public class TimeGapRecommendationsTest {
         onView(withText("OK")).perform(click());
 
 
-        Thread.sleep(5000); // You may need to adjust the delay
+        Thread.sleep(1000); // You may need to adjust the delay
 
         floatingButton.perform(click());
 
@@ -183,7 +183,7 @@ public class TimeGapRecommendationsTest {
             okButton.check(matches(withText("OK")));
             okButton.perform(click());
 
-            Thread.sleep(5000); // You may need to adjust the delay
+            Thread.sleep(1000); // You may need to adjust the delay
         }
 
         // Check if Test Event 2 exists
@@ -271,7 +271,7 @@ public class TimeGapRecommendationsTest {
 
     // NO CHATGPT
     @Test
-    public void eventGapTest() throws InterruptedException {
+    public void a_eventGapTest() throws InterruptedException {
         try {
             UiDevice uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
             ViewInteraction loginToGoogle = onView(
@@ -293,14 +293,14 @@ public class TimeGapRecommendationsTest {
 
             // Wait for the app to process the login
             uiDevice.waitForIdle();
-            Thread.sleep(5000); // You may need to adjust the delay
+            Thread.sleep(1000); // You may need to adjust the delay
         } catch (Exception e) {
             Log.d("Continue Test", "Already Logged In");
         }
         clearEvents();
 
         mockEvents(30, "2424 Main Mall, Vancouver, BC V6T 1Z4", "6000 Student Union Blvd, Vancouver, BC V6T 1Z1");
-        Thread.sleep(5000); // You may need to adjust the delay
+        Thread.sleep(1000); // You may need to adjust the delay
 
         ViewInteraction displayTimeGap = onView(withId(R.id.time_gap_text));
         displayTimeGap.check(matches(isDisplayed()));
@@ -311,7 +311,7 @@ public class TimeGapRecommendationsTest {
 
     // NO CHATGPT
     @Test
-    public void noEventGapTest() throws InterruptedException {
+    public void b_noEventGapTest() throws InterruptedException {
         try {
             UiDevice uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
             ViewInteraction loginToGoogle = onView(
@@ -333,13 +333,13 @@ public class TimeGapRecommendationsTest {
 
             // Wait for the app to process the login
             uiDevice.waitForIdle();
-            Thread.sleep(5000); // You may need to adjust the delay
+            Thread.sleep(1000); // You may need to adjust the delay
         } catch (Exception e) {
             Log.d("Continue Test", "Already Logged In");
         }
         clearEvents();
         mockEvents(10, "2424 Main Mall, Vancouver, BC V6T 1Z4", "6000 Student Union Blvd, Vancouver, BC V6T 1Z1");
-        Thread.sleep(5000); // You may need to adjust the delay
+        Thread.sleep(1000); // You may need to adjust the delay
 
         ViewInteraction displayTimeGap = onView(withId(R.id.time_gap_text));
         displayTimeGap.check(doesNotExist());
@@ -347,7 +347,7 @@ public class TimeGapRecommendationsTest {
 
     // YES CHATGPT
     @Test
-    public void recommendationsTest() throws InterruptedException {
+    public void c_recommendationsTest() throws InterruptedException {
         try {
             UiDevice uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
             ViewInteraction loginToGoogle = onView(
@@ -369,7 +369,7 @@ public class TimeGapRecommendationsTest {
 
             // Wait for the app to process the login
             uiDevice.waitForIdle();
-            Thread.sleep(5000); // You may need to adjust the delay
+            Thread.sleep(1000); // You may need to adjust the delay
         } catch (Exception e) {
             Log.d("Continue Test", "Already Logged In");
         }
@@ -386,21 +386,21 @@ public class TimeGapRecommendationsTest {
 
         displayViewRecommendations.perform(click());
 
-        Thread.sleep(2000); // You may need to adjust the delay
+        Thread.sleep(1000); // You may need to adjust the delay
         displayViewRecommendations.check(matches(withText("Hide Recommendations")));
 
-        Thread.sleep(2000); // You may need to adjust the delay
+        Thread.sleep(1000); // You may need to adjust the delay
 
         onView(withId(R.id.hidden_timegap)).check(matches(hasMinimumChildCount(1)));
         displayViewRecommendations.perform(click());
-        Thread.sleep(2000); // You may need to adjust the delay
+        Thread.sleep(1000); // You may need to adjust the delay
         onView(withParent(withId(R.id.hidden_timegap))).check(doesNotExist());
     }
 
 
     // YES CHATGPT
     @Test
-    public void googleMapsTest() throws InterruptedException {
+    public void d_googleMapsTest() throws InterruptedException {
         try {
             UiDevice uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
             ViewInteraction loginToGoogle = onView(
@@ -422,7 +422,7 @@ public class TimeGapRecommendationsTest {
 
             // Wait for the app to process the login
             uiDevice.waitForIdle();
-            Thread.sleep(5000); // You may need to adjust the delay
+            Thread.sleep(1000); // You may need to adjust the delay
         } catch (Exception e) {
             Log.d("Continue Test", "Already Logged In");
         }
@@ -439,7 +439,7 @@ public class TimeGapRecommendationsTest {
 
         displayViewRecommendations.perform(click());
 
-        Thread.sleep(5000); // You may need to adjust the delay
+        Thread.sleep(1000); // You may need to adjust the delay
         displayViewRecommendations.check(matches(withText("Hide Recommendations")));
 
         Matcher<View> firstRecommendation = allOf(withParent(withId(R.id.hidden_timegap)), withParentIndex(0));
@@ -457,7 +457,7 @@ public class TimeGapRecommendationsTest {
 
     // NO CHATGPT
     @Test
-    public void noRecommendationsTest() throws InterruptedException {
+    public void e_noRecommendationsTest() throws InterruptedException {
         try {
             UiDevice uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
             ViewInteraction loginToGoogle = onView(
@@ -479,13 +479,13 @@ public class TimeGapRecommendationsTest {
 
             // Wait for the app to process the login
             uiDevice.waitForIdle();
-            Thread.sleep(5000); // You may need to adjust the delay
+            Thread.sleep(1000); // You may need to adjust the delay
         } catch (Exception e) {
             Log.d("Continue Test", "Already Logged In");
         }
         clearEvents();
-        mockEvents(30, "2424 Main Mall, Vancouver, BC V6T 1Z4", "367 George St, Sydney NSW 2000, Australia");
-        Thread.sleep(5000); // You may need to adjust the delay
+        mockEvents(30, "2424 Main Mall, Vancouver, BC V6T 1Z4", "367 George St, Sydney NSW 1000, Australia");
+        Thread.sleep(1000); // You may need to adjust the delay
 
 
         ViewInteraction displayTimeGap = onView(withId(R.id.time_gap_text));
@@ -498,7 +498,8 @@ public class TimeGapRecommendationsTest {
 
         displayViewRecommendations.perform(click());
 
-        Thread.sleep(5000); // You may need to adjust the delay
+        Thread.sleep(1000); // You may need to adjust the delay
         onView(withParent(withId(R.id.hidden_timegap))).check(doesNotExist());
+        clearEvents();
     }
 }

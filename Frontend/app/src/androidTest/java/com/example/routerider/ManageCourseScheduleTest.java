@@ -393,6 +393,10 @@ public class ManageCourseScheduleTest {
         nextDay.perform(click());
 
         displayEventName.check(matches(withText("Test Edit Event")));
+
+        // clear event
+        onView(withText("Test Edit Event")).perform(longClick());
+        onView(withText("OK")).perform(click());
     }
 
     // YES CHATGPT

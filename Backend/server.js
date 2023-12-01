@@ -103,22 +103,6 @@ const serviceAccount = {
   universe_domain: 'googleapis.com',
 };
 
-/*
-const serviceAccount =
-{
-  "type": "service_account",
-  "project_id": "routerider-402800",
-  "private_key_id": "e625bd132b16f0a7c4eef96be5499aac8fc14c3b",
-  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC3my3O65Jv/msv\n+oOBJ5KwpVcBy3ZURKfLFajRrs/uAi3ADmCkH8Ha+frLLQfO5IbVL8h3yVHki455\nfOn3KMg1P+mm7YZE+nFkgur9yT7xXmLlZHZrBuMVqQ/v2wL/Ep7Z3S21QLMTTxhm\nCizgfTwSLlVFbh/gwlCBuoUyMjr8jpsmGJTancmAq4BVVe6DoENMNl7ycgeDuKdB\nkbx43oPYZMzCCQripMXSY7tM+geHh7bP5N5duHaXEh/nXLNtLB6o+tHXnnzAVZgM\nmenbUu9/3D6UneKj25ULvoUaJyk4WP0dYyBxhGpBVHLvN20rbnO7hyQpxU5pMAvY\n8SUZ8RajAgMBAAECggEAUwrnLZsDmQ7X2RPzrZNB+A5YK3IkW1nQEH0D5Y6s8eff\nXGnEUQciDVIaGhIMYYmf6EVb5L3UAcwTDSSvx3+VCeyV18+/dmxVpBHIii+e/dlk\nXn9RRfgP9miIUkJa+RYpbb1pYnzYYcfY77HzeTd7V3fIToZP+b65XeuIOdtZLYfl\nzW9uxdjCwo5awyxjDGO4YPZB3/fx2W1mdrl4vQYNlcQ/KRvCF1CrfF6PFAeW+6Gi\nKeNKjwSQn+FAGgpSjScP3g5hsHaWkOkfNM8G/e4LYn9lP/8KCiGb8ME6Shk655rf\nalnFBDT/OijBy0pS+z1FMhI+qwVc3Kq6cIA9RvVDoQKBgQD+O7nRPCTKtp55YKWD\ntxySQ2/LXGxzURUZdbhN96Jmu5wnCao0QtTFjil7tCyq0N+AfGhILWNBOxeOqxpa\nIbkFfacBkuDH3LmorjnQqesONcTCGDh7TMy9w3n9giBHBQ0M+5V4PqHpEXxg/57p\nno17O7jjMeYei9HN3jG1RsHxAwKBgQC44c8wQXK7nIxcj5sUJWY9Fk/yR4e4XUrn\nsoBsfhfJmUFKs3GrKzv2vXVQbcGYQrKT7Kf1uB6pw1eLTcvb58QDjic2W6stONZS\nRCpw+aOrB6276Mcia0QlIhwpfvWLs9lg4mwpB72nMM2FW8n7S55xqaIJdXs8wAva\nWKxGNUPB4QKBgQDVjz5MMQWG81i0BSeEOXFavCNQ5NaFF/ttY6HqfLaDLd3CPTAo\nrmsleIIIVBWhd8wHlnnTB610wjrLsZd1VxahMifz/nmr6hJbS99tFQ9K5Iffs5De\nomjqjyYOehy7C9cmrL+mPparvfCJWrEW9gVLG6P31ZbE2hbnpFqFOGb6GQKBgHog\nF3ed1AcgGwvNhLgjGE0D3x2AqKNdZOx2WiTQijAOPzX0IQLblUmgzsypI7fLXyEd\ns7k5vW+QbNTFOAN0LmPW1AoxNXqyz8gZ5RspnDaO5PF6i4gt6R7KUGYMynBVBiPc\njWvxBBNbxnbwMhUAV5JnZnTvGNABYBMEfhAGgVKhAoGBAN+aMx9bP/ZTJs91GMRZ\nTMpBrY+JuEmk/IncI/xpqDOYBVf6nLlO6qmJ86a7KL+9OMVMA3g5eeIlM3nB75OA\nfD94dBxmHywCwv19EcmPjpo8vUiBEB8Rlvedgq8ZHNKFKDdC4gj7OSEXa0ou0fb6\nURhWBd47bGfO8Rd6Gp1fBcqA\n-----END PRIVATE KEY-----\n",
-  "client_email": "firebase-adminsdk-stvy2@routerider-402800.iam.gserviceaccount.com",
-  "client_id": "107472218462534326183",
-  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-  "token_uri": "https://oauth2.googleapis.com/token",
-  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-stvy2%40routerider-402800.iam.gserviceaccount.com",
-  "universe_domain": "googleapis.com"
-}
-*/
 
 //console.log(privateKey);
 // Use the serviceAccount object in your code

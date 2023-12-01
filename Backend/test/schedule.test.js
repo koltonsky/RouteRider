@@ -34,6 +34,7 @@ let client;
   beforeAll(async () => {
     // Set up MongoDB connection before tests
     try {
+      /*global client*/
       const uri = 'mongodb://127.0.0.1:27017'; // Replace with your MongoDB connection string
       client = new MongoClient(uri);
       await client.connect();

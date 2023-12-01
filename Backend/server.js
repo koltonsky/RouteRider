@@ -126,9 +126,9 @@ const serviceAccount =
 //const serviceAccount = require('./serviceAccountKey.json');
 
 const cron = require('node-cron');
-//const { get } = require('http');
-//const { error } = require('console');
-//const e = require('express');
+// const { get } = require('http');
+// const { error } = require('console');
+// const e = require('express');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -290,7 +290,7 @@ function findUserToken(receiverEmail, senderName, notificationCallback) {
           };
           // console.log(message.token);
 
-          ret = await notificationCallback(message);
+          var ret = await notificationCallback(message);
           if (ret) {
             // console.log('Successfully sent friend request notification');
             // res.status(200).json({
@@ -712,7 +712,7 @@ async function startSSLServer() {
 }
 
 async function stopSSLServer() {
-  return new Promise(async (resolve) => {
+  return new Promise((resolve) => {
     if (sslServer) {
       sslServer.close(() => {
         console.log('Secure server stopped.');
@@ -1222,7 +1222,6 @@ async function initReminders(req, notificationCallback) {
       }
     }
   }
-  // var returnObject = {
   returnObject = {
     status: 200,
     message: 'Reminders initialized',
@@ -1605,7 +1604,7 @@ function getLatLong(address) {
  * ChatGPT usage: Yes
  */
 async function checkAddressInBC(address) {
-  const bcLatitude = 49.7010;// Latitude for the center of BC
+  const bcLatitude = 49.701// Latitude for the center of BC
   const bcLongitude = -123.1552; // Longitude for the center of BC
   const radius = 0.8; // Radius in kilometers (adjust as needed)
 

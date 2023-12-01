@@ -1,10 +1,6 @@
 package com.example.routerider;
 
-import android.content.Context;
-
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.FirebaseOptions;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.gson.Gson;
 

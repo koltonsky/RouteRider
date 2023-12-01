@@ -15,6 +15,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.withClassName;
 import static androidx.test.espresso.matcher.ViewMatchers.withContentDescription;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withParent;
+import static androidx.test.espresso.matcher.ViewMatchers.withParentIndex;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.allOf;
@@ -119,7 +120,7 @@ public class FindMatchingCommutersTest {
         ViewInteraction dateEditText = onView(withId(R.id.date_edit_text));
         dateEditText.perform(click());
 
-        int eventHour = 10;
+        int eventHour = 20;
         // Close the DatePicker
         onView(withText("OK")).perform(click());
 
@@ -139,7 +140,7 @@ public class FindMatchingCommutersTest {
 
         onView(withText("OK")).perform(click());
 
-        Thread.sleep(5000); // You may need to adjust the delay
+        Thread.sleep(1000); // You may need to adjust the delay
     }
     // PARTIAL CHATGPT
     public void clearEvents() throws InterruptedException {
@@ -155,7 +156,7 @@ public class FindMatchingCommutersTest {
             okButton.check(matches(withText("OK")));
             okButton.perform(click());
 
-            Thread.sleep(5000); // You may need to adjust the delay
+            Thread.sleep(1000); // You may need to adjust the delay
         }
     }
 
@@ -164,14 +165,14 @@ public class FindMatchingCommutersTest {
         try {
             viewInteraction.check(matches(isDisplayed()));
             return true;
-        } catch (NoMatchingViewException e) {
+        } catch (Exception e) {
             return false;
         }
     }
 
     // NO CHATGPT
     @Test
-    public void friendTransitTest() throws InterruptedException {
+    public void a_friendTransitTest() throws InterruptedException {
         try {
             UiDevice uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
             ViewInteraction loginToGoogle = onView(
@@ -193,13 +194,13 @@ public class FindMatchingCommutersTest {
 
             // Wait for the app to process the login
             uiDevice.waitForIdle();
-            Thread.sleep(5000); // You may need to adjust the delay
+            Thread.sleep(1000); // You may need to adjust the delay
         } catch (Exception e) {
             Log.d("Continue Test", "Already Logged In");
         }
         clearEvents();
         mockEvent("2424 Main Mall, Vancouver, BC V6T 1Z4");
-        Thread.sleep(5000); // You may need to adjust the delay
+        Thread.sleep(1000); // You may need to adjust the delay
 
         ViewInteraction routeTab = onView(allOf(withContentDescription("Routes"),
                         withParent(withParent(withId(R.id.tab_layout))),
@@ -223,14 +224,14 @@ public class FindMatchingCommutersTest {
 
         onView(withText(RoutesFragment.friendNames[0])).perform(click());
 
-        Thread.sleep(5000);
+        Thread.sleep(1000);
 
         onView(withText("With " + RoutesFragment.friendNames[0])).check(matches(isDisplayed()));
     }
 
     // NO CHATGPT
     @Test
-    public void matchingCommuterTest() throws InterruptedException {
+    public void b_matchingCommuterTest() throws InterruptedException {
         try {
             UiDevice uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
             ViewInteraction loginToGoogle = onView(
@@ -252,13 +253,13 @@ public class FindMatchingCommutersTest {
 
             // Wait for the app to process the login
             uiDevice.waitForIdle();
-            Thread.sleep(5000); // You may need to adjust the delay
+            Thread.sleep(1000); // You may need to adjust the delay
         } catch (Exception e) {
             Log.d("Continue Test", "Already Logged In");
         }
         clearEvents();
         mockEvent("UBC MacLeod");
-        Thread.sleep(5000); // You may need to adjust the delay
+        Thread.sleep(1000); // You may need to adjust the delay
 
         ViewInteraction routeTab = onView(allOf(withContentDescription("Routes"),
                         withParent(withParent(withId(R.id.tab_layout))),
@@ -278,12 +279,12 @@ public class FindMatchingCommutersTest {
         ViewInteraction matchingCommutersButton = onView(withText("Find matching commuters"));
         matchingCommutersButton.check(matches(isDisplayed()));
         matchingCommutersButton.perform(click());
-        Thread.sleep(5000); // You may need to adjust the delay
+        Thread.sleep(1000); // You may need to adjust the delay
 
         onView(withText("Matching Commuters")).check(matches(isDisplayed()));
 
         // check that a textview with the @ symbol is displayed, then click it
-        onView(withText(containsString("@")))
+        onView(allOf(withText(containsString("@")),withParentIndex(0)))
                 .check(matches(isDisplayed()))
                 .perform(click());
         Thread.sleep(500); // You may need to adjust the delay
@@ -306,7 +307,7 @@ public class FindMatchingCommutersTest {
 
     // NO CHATGPT
     @Test
-    public void noMatchingCommuterTest() throws InterruptedException {
+    public void c_noMatchingCommuterTest() throws InterruptedException {
         try {
             UiDevice uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
             ViewInteraction loginToGoogle = onView(
@@ -328,13 +329,13 @@ public class FindMatchingCommutersTest {
 
             // Wait for the app to process the login
             uiDevice.waitForIdle();
-            Thread.sleep(5000); // You may need to adjust the delay
+            Thread.sleep(1000); // You may need to adjust the delay
         } catch (Exception e) {
             Log.d("Continue Test", "Already Logged In");
         }
         clearEvents();
-        mockEvent("2500 Chem. de Polytechnique, Montreal, QC H3T 1J4");
-        Thread.sleep(5000); // You may need to adjust the delay
+        mockEvent("4151 Hazelbridge Way, Richmond, BC V6X 4J7");
+        Thread.sleep(1000); // You may need to adjust the delay
 
         ViewInteraction routeTab = onView(allOf(withContentDescription("Routes"),
                         withParent(withParent(withId(R.id.tab_layout))),
@@ -362,5 +363,11 @@ public class FindMatchingCommutersTest {
         onView(withText(expectedToastMessage))
                 .inRoot(withDecorView(not(decorView)))// Here we use decorView
                 .check(matches(isDisplayed()));
+
+        onView(allOf(withContentDescription("Schedule"),
+                withParent(withParent(withId(R.id.tab_layout))),
+                isDisplayed())).perform(click());
+
+        clearEvents();
     }
 }

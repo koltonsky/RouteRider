@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1701396487042" clover="3.2.0">
-  <project timestamp="1701396487042" name="All files">
-    <metrics statements="804" coveredstatements="788" conditionals="199" coveredconditionals="187" methods="113" coveredmethods="102" elements="1116" coveredelements="1077" complexity="0" loc="804" ncloc="804" packages="2" files="5" classes="5"/>
+<coverage generated="1701397275572" clover="3.2.0">
+  <project timestamp="1701397275572" name="All files">
+    <metrics statements="804" coveredstatements="785" conditionals="199" coveredconditionals="186" methods="113" coveredmethods="101" elements="1116" coveredelements="1072" complexity="0" loc="804" ncloc="804" packages="2" files="5" classes="5"/>
     <package name="Backend">
-      <metrics statements="607" coveredstatements="591" conditionals="135" coveredconditionals="123" methods="93" coveredmethods="82"/>
+      <metrics statements="607" coveredstatements="588" conditionals="135" coveredconditionals="122" methods="93" coveredmethods="81"/>
       <file name="commuter_match.js" path="C:\cpen321\RouteRider\Backend\commuter_match.js">
         <metrics statements="42" coveredstatements="42" conditionals="14" coveredconditionals="14" methods="6" coveredmethods="6"/>
         <line num="1" count="6" type="stmt"/>
@@ -12,21 +12,21 @@
         <line num="7" count="6" type="stmt"/>
         <line num="10" count="6" type="stmt"/>
         <line num="11" count="6" type="stmt"/>
-        <line num="93" count="26" type="stmt"/>
-        <line num="95" count="26" type="cond" truecount="5" falsecount="0"/>
-        <line num="98" count="12" type="stmt"/>
-        <line num="102" count="14" type="stmt"/>
-        <line num="105" count="14" type="stmt"/>
-        <line num="106" count="14" type="stmt"/>
-        <line num="108" count="14" type="stmt"/>
-        <line num="109" count="16" type="stmt"/>
-        <line num="113" count="16" type="cond" truecount="2" falsecount="0"/>
-        <line num="114" count="15" type="stmt"/>
-        <line num="115" count="15" type="stmt"/>
-        <line num="122" count="14" type="stmt"/>
+        <line num="93" count="22" type="stmt"/>
+        <line num="95" count="22" type="cond" truecount="5" falsecount="0"/>
+        <line num="98" count="9" type="stmt"/>
+        <line num="102" count="13" type="stmt"/>
+        <line num="105" count="13" type="stmt"/>
+        <line num="106" count="13" type="stmt"/>
+        <line num="108" count="13" type="stmt"/>
+        <line num="109" count="15" type="stmt"/>
+        <line num="113" count="15" type="cond" truecount="2" falsecount="0"/>
+        <line num="114" count="14" type="stmt"/>
+        <line num="115" count="14" type="stmt"/>
+        <line num="122" count="13" type="stmt"/>
         <line num="178" count="8" type="stmt"/>
         <line num="181" count="8" type="stmt"/>
-        <line num="188" count="21" type="stmt"/>
+        <line num="188" count="17" type="stmt"/>
         <line num="193" count="8" type="stmt"/>
         <line num="265" count="7" type="stmt"/>
         <line num="268" count="7" type="stmt"/>
@@ -35,11 +35,11 @@
         <line num="273" count="7" type="stmt"/>
         <line num="277" count="7" type="stmt"/>
         <line num="280" count="7" type="stmt"/>
-        <line num="282" count="18" type="stmt"/>
-        <line num="285" count="18" type="stmt"/>
-        <line num="286" count="10" type="stmt"/>
-        <line num="288" count="5" type="stmt"/>
-        <line num="291" count="5" type="cond" truecount="2" falsecount="0"/>
+        <line num="282" count="14" type="stmt"/>
+        <line num="285" count="14" type="stmt"/>
+        <line num="286" count="9" type="stmt"/>
+        <line num="288" count="4" type="stmt"/>
+        <line num="291" count="4" type="cond" truecount="2" falsecount="0"/>
         <line num="296" count="2" type="stmt"/>
         <line num="297" count="2" type="stmt"/>
         <line num="298" count="2" type="stmt"/>
@@ -82,7 +82,7 @@
         <line num="133" count="6" type="stmt"/>
       </file>
       <file name="server.js" path="C:\cpen321\RouteRider\Backend\server.js">
-        <metrics statements="536" coveredstatements="520" conditionals="115" coveredconditionals="103" methods="82" coveredmethods="71"/>
+        <metrics statements="536" coveredstatements="517" conditionals="115" coveredconditionals="102" methods="82" coveredmethods="70"/>
         <line num="1" count="6" type="stmt"/>
         <line num="2" count="6" type="stmt"/>
         <line num="3" count="6" type="stmt"/>
@@ -262,10 +262,10 @@
         <line num="706" count="1" type="stmt"/>
         <line num="708" count="1" type="stmt"/>
         <line num="715" count="6" type="stmt"/>
-        <line num="716" count="6" type="cond" truecount="2" falsecount="0"/>
-        <line num="717" count="1" type="stmt"/>
-        <line num="718" count="1" type="stmt"/>
-        <line num="719" count="1" type="stmt"/>
+        <line num="716" count="6" type="cond" truecount="1" falsecount="1"/>
+        <line num="717" count="0" type="stmt"/>
+        <line num="718" count="0" type="stmt"/>
+        <line num="719" count="0" type="stmt"/>
         <line num="726" count="1" type="stmt"/>
         <line num="727" count="1" type="stmt"/>
         <line num="730" count="1" type="stmt"/>

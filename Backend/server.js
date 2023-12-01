@@ -723,11 +723,11 @@ async function stopSSLServer() {
 }
 
 function connectToDatabase() {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     console.log('Connected to MongoDB');
 
     // Start the SSL server after successfully connecting to MongoDB
-    await startSSLServer();
+    startSSLServer();
 
     resolve(); // Resolve the promise if startSSLServer completes successfully
   });

@@ -28,6 +28,8 @@ const userEmail = 'koltonluu@gmail.com';
 */
 //const nonExistingEmail = 'nonexistinguser@example.com';
 
+let client;
+
 
   beforeAll(async () => {
     // Set up MongoDB connection before tests

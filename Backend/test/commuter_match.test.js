@@ -9,6 +9,8 @@ const match = require('../commuter_match')
 const { app, stopSSLServer } = require('../server'); // Replace with the actual path to your Express app
 const request = supertest(app);
 
+let client;
+
 beforeAll(async () => {
     // Set up MongoDB connection before tests
     try {

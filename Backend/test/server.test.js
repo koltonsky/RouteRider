@@ -9,6 +9,8 @@ const { findUserToken, checkLiveTransitTime } = require('../server');
 const mockSendNotification = jest.fn(() => 1);
 const mockSendNotification2 = jest.fn(() => 0);
 
+let client;
+
 beforeAll(async () => {
     // Set up MongoDB connection before tests
     try {

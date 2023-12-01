@@ -1,7 +1,21 @@
 //const recommendation = require('../recommendation');
 const supertest = require('supertest');
-const { app } = require('../server'); // Replace with the actual path to your Express app
+const { app, stopSSLServer } = require('../server'); // Replace with the actual path to your Express app
 const request = supertest(app);
+
+let client;
+
+afterAll(async () => {
+  // Close MongoDB connection after all tests
+  /*
+  if (client) {
+    await client.close();
+  }
+  */
+  //closeServer();
+  stopSSLServer();
+});
+
 // Mocking the Google Maps API responses
 /*
 jest.mock('@googlemaps/google-maps-services-js', () => ({

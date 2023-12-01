@@ -12,12 +12,13 @@ const mockSendNotification2 = jest.fn(() => 0);
 beforeAll(async () => {
     // Set up MongoDB connection before tests
     try {
-      const uri = 'mongodb://0.0.0.0:27017'; // Replace with your MongoDB connection string
-      client = new MongoClient(uri);
-      await client.connect();
-      console.log("connected");
+        /*global client*/
+        const uri = 'mongodb://0.0.0.0:27017'; // Replace with your MongoDB connection string
+        client = new MongoClient(uri);
+        await client.connect();
+        console.log("connected");
     } catch (error) {
-      console.error('MongoDB Connection Error:', error);
+        console.error('MongoDB Connection Error:', error);
     }
 });
   

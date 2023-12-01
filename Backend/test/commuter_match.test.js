@@ -283,7 +283,7 @@ test('should return an empty set for a user with matching startTime but differen
 
     // Mock user data for testing
     let userData;
-    //let userEmail;
+    let userEmail;
   
     // Set up the test data before running the tests
     beforeAll(async () => {

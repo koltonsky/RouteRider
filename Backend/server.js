@@ -108,9 +108,9 @@ const serviceAccount = {
 //const serviceAccount = require('./serviceAccountKey.json');
 
 const cron = require('node-cron');
-const { get } = require('http');
-const { error } = require('console');
-const e = require('express');
+//const { get } = require('http');
+//const { error } = require('console');
+//const e = require('express');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -1204,7 +1204,8 @@ async function initReminders(req, notificationCallback) {
       }
     }
   }
-  var returnObject = {
+  // var returnObject = {
+  returnObject = {
     status: 200,
     message: 'Reminders initialized',
   }
@@ -1775,7 +1776,7 @@ function getMeetingPoint(address1, address2) {
 function calcWalkingTimes(commuteInfo) {
   var returnList = commuteInfo;
   for (var i = 0; i < returnList.length - 1; i++) {
-    if (i == 0 && returnList[i]._type == 'Walk') {
+    if (i === 0 && returnList[i]._type == 'Walk') {
       returnList[i]._leaveTime =
         returnList[returnList.length - 1].departure_time;
       returnList[i]._leaveTimeNum = timeToTimestamp(

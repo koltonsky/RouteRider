@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">96.89% </span>
+                <span class="strong">96.32% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>530/547</span>
+                <span class='fraction'>524/544</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">86.58% </span>
+                <span class="strong">85.36% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>71/82</span>
+                <span class='fraction'>70/82</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">97.03% </span>
+                <span class="strong">96.45% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>523/539</span>
+                <span class='fraction'>517/536</span>
             </div>
         
             
@@ -1952,7 +1952,8 @@
 <a name='L1887'></a><a href='#L1887'>1887</a>
 <a name='L1888'></a><a href='#L1888'>1888</a>
 <a name='L1889'></a><a href='#L1889'>1889</a>
-<a name='L1890'></a><a href='#L1890'>1890</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">6x</span>
+<a name='L1890'></a><a href='#L1890'>1890</a>
+<a name='L1891'></a><a href='#L1891'>1891</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-yes">6x</span>
@@ -2062,9 +2063,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">6x</span>
-<span class="cline-any cline-yes">6x</span>
-<span class="cline-any cline-yes">6x</span>
-<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -2303,13 +2304,13 @@
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -3158,6 +3159,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -3951,9 +3953,9 @@ const serviceAccount = {
 //const serviceAccount = require('./serviceAccountKey.json');
 &nbsp;
 const cron = require('node-cron');
-const { get } = require('http');
-const { error } = require('console');
-const e = require('express');
+//const { get } = require('http');
+//const { error } = require('console');
+//const e = require('express');
 &nbsp;
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -4191,10 +4193,10 @@ app.post('/api/initReminders', async (req, res) =&gt; {
 app.get('/api/findMatchingUsers/:userEmail', async (req, res) =&gt; {
   const userEmail = req.params.userEmail;
 &nbsp;
-  await commuters.findMatchingUsers(userEmail).then((result) =&gt; {
-    console.log("matching users result: ");
-    console.log(result);
-      return res.status(200).json({ matchingUsers: [...result] });
+  await commuters.findMatchingUsers(userEmail).then(<span class="fstat-no" title="function not covered" >(r</span>esult) =&gt; {
+<span class="cstat-no" title="statement not covered" >    console.log("matching users result: ");</span>
+<span class="cstat-no" title="statement not covered" >    console.log(result);</span>
+<span class="cstat-no" title="statement not covered" >      return res.status(200).json({ matchingUsers: [...result] });</span>
     },
     (error) =&gt; {
       // console.log('initRouteWithFriends rejected error');
@@ -5047,7 +5049,8 @@ async function initReminders(req, notificationCallback) {
       }
     }
   }
-  var returnObject = {
+  // var returnObject = {
+  returnObject = {
     status: 200,
     message: 'Reminders initialized',
   }
@@ -5618,7 +5621,7 @@ function getMeetingPoint(address1, address2) {
 function calcWalkingTimes(commuteInfo) {
   var returnList = commuteInfo;
   for (var i = 0; i &lt; returnList.length - 1; i++) {
-    if (i == 0 &amp;&amp; returnList[i]._type == 'Walk') {
+    if (i === 0 &amp;&amp; returnList[i]._type == 'Walk') {
       returnList[i]._leaveTime =
         returnList[returnList.length - 1].departure_time;
       returnList[i]._leaveTimeNum = timeToTimestamp(
@@ -5737,7 +5740,7 @@ module.exports = {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2023-12-01T01:02:49.493Z
+                at 2023-12-01T01:14:02.681Z
             </div>
         <script src="../prettify.js"></script>
         <script>
